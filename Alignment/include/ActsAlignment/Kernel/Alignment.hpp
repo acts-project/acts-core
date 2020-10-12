@@ -122,6 +122,9 @@ struct AlignmentResult {
   // The number of tracks used for alignment
   size_t numTracks = 0;
 
+  // The indexed alignable surfaces
+  std::unordered_map<const Acts::Surface*, size_t> idxedAlignSurfaces;
+
   Acts::Result<void> result{Acts::Result<void>::success()};
 };
 
@@ -187,7 +190,7 @@ struct Alignment {
     return alignState;
   }
 
-  /// @brief update the alignment parameters
+  /// @brief calculate the alignment parameters delta
   ///
   /// @tparam trajectory_container_t The trajectories container type
   /// @tparam start_parameters_t The initial parameters container type
@@ -198,36 +201,23 @@ struct Alignment {
   /// @param startParametersCollection The collection of starting parameters as
   /// input of fitting
   /// @param fitOptions The fit Options steering the fit
-  /// @param alignedDetElements The detector elements to be aligned
-  /// @param alignedTransformUpdater The updater for updating the aligned
-  /// transform of the detector element
   /// @param alignResult [in, out] The aligned result
   /// @param alignMask The alignment mask (same for all measurements now)
   template <typename trajectory_container_t,
             typename start_parameters_container_t, typename fit_options_t>
-  Acts::Result<void> updateAlignmentParameters(
+  void calculateAlignmentParameters(
       trajectory_container_t& trajectoryCollection,
       const start_parameters_container_t& startParametersCollection,
-      const fit_options_t& fitOptions,
-      const std::vector<Acts::DetectorElementBase*>& alignedDetElements,
-      const AlignedTransformUpdater& alignedTransformUpdater,
-      AlignmentResult& alignResult,
+      const fit_options_t& fitOptions, AlignmentResult& alignResult,
       const std::bitset<Acts::eAlignmentSize>& alignMask =
           std::bitset<Acts::eAlignmentSize>(std::string("111111"))) const {
     // The number of trajectories must be eual to the number of starting
     // parameters
     assert(trajectoryCollection.size() == startParametersCollection.size());
 
-    // Assign index to the alignable surface
-    std::unordered_map<const Acts::Surface*, size_t> idxedAlignSurfaces;
-    for (unsigned int iDetElement = 0; iDetElement < alignedDetElements.size();
-         iDetElement++) {
-      idxedAlignSurfaces.emplace(&alignedDetElements.at(iDetElement)->surface(),
-                                 iDetElement);
-    }
-
     // The total alignment degree of freedom
-    alignResult.alignmentDof = idxedAlignSurfaces.size() * Acts::eAlignmentSize;
+    alignResult.alignmentDof =
+        alignResult.idxedAlignSurfaces.size() * Acts::eAlignmentSize;
     // Initialize derivative of chi2 w.r.t. aligment parameters for all tracks
     Acts::ActsVectorX<Acts::BoundScalar> sumChi2Derivative =
         Acts::ActsVectorX<Acts::BoundScalar>::Zero(alignResult.alignmentDof);
@@ -251,7 +241,7 @@ struct Alignment {
       // The result for one single track
       auto evaluateRes = evaluateTrackAlignmentState(
           fitOptions.geoContext, sourcelinks, sParameters,
-          fitOptionsWithRefSurface, idxedAlignSurfaces, alignMask);
+          fitOptionsWithRefSurface, alignResult.idxedAlignSurfaces, alignMask);
       if (not evaluateRes.ok()) {
         ACTS_WARNING("Evaluation of alignment state for track " << iTraj
                                                                 << " failed");
@@ -305,19 +295,31 @@ struct Alignment {
         -sumChi2SecondDerivative.fullPivLu().solve(sumChi2Derivative);
     ACTS_INFO("The solved delta of alignmentParameters = \n "
               << alignResult.deltaAlignmentParameters);
+
     // Alignment parameters covariance
     alignResult.alignmentCovariance = 2 * sumChi2SecondDerivativeInverse;
     // chi2 change
     alignResult.deltaChi2 = 0.5 * sumChi2Derivative.transpose() *
                             alignResult.deltaAlignmentParameters;
+  }
 
+  /// @brief update the detector element alignment parameters
+  ///
+  /// @param gctx The geometry context
+  /// @param alignedDetElements The detector elements to be aligned
+  /// @param alignedTransformUpdater The updater for updating the aligned
+  /// @param alignResult [in, out] The aligned result
+  Acts::Result<void> updateAlignmentParameters(
+      const Acts::GeometryContext& gctx,
+      const std::vector<Acts::DetectorElementBase*>& alignedDetElements,
+      const AlignedTransformUpdater& alignedTransformUpdater,
+      AlignmentResult& alignResult) const {
     // Update the aligned transform
     Acts::AlignmentVector deltaAlignmentParam = Acts::AlignmentVector::Zero();
-    for (const auto& [surface, index] : idxedAlignSurfaces) {
+    for (const auto& [surface, index] : alignResult.idxedAlignSurfaces) {
       // (1) The original transform
-      const Acts::Vector3D& oldCenter = surface->center(fitOptions.geoContext);
-      const Acts::Transform3D& oldTransform =
-          surface->transform(fitOptions.geoContext);
+      const Acts::Vector3D& oldCenter = surface->center(gctx);
+      const Acts::Transform3D& oldTransform = surface->transform(gctx);
       const Acts::RotationMatrix3D& oldRotation = oldTransform.rotation();
       // The elements stored below is (rotZ, rotY, rotX)
       const Acts::Vector3D& oldEulerAngles = oldRotation.eulerAngles(2, 1, 0);
@@ -353,8 +355,8 @@ struct Alignment {
       ACTS_VERBOSE("Delta of alignment parameters at element "
                    << index << "= \n"
                    << deltaAlignmentParam);
-      bool updated = alignedTransformUpdater(
-          alignedDetElements.at(index), fitOptions.geoContext, newTransform);
+      bool updated = alignedTransformUpdater(alignedDetElements.at(index), gctx,
+                                             newTransform);
       if (not updated) {
         ACTS_ERROR("Update alignment parameters for detector element failed");
         return AlignmentError::AlignmentParametersUpdateFailure;
@@ -384,7 +386,15 @@ struct Alignment {
       const start_parameters_container_t& startParametersCollection,
       const AlignmentOptions<fit_options_t>& alignOptions) const {
     // Construct an AlignmentResult object
-    AlignmentResult alignRes;
+    AlignmentResult alignResult;
+
+    // Assign index to the alignable surface
+    for (unsigned int iDetElement = 0;
+         iDetElement < alignOptions.alignedDetElements.size(); iDetElement++) {
+      alignResult.idxedAlignSurfaces.emplace(
+          &alignOptions.alignedDetElements.at(iDetElement)->surface(),
+          iDetElement);
+    }
 
     // Start the iteration to minimize the chi2
     bool converged = false;
@@ -397,21 +407,19 @@ struct Alignment {
       if (iter_it != alignOptions.iterationState.end()) {
         alignmentMask = iter_it->second;
       }
-      auto updateRes = updateAlignmentParameters(
+      // Calculate the alignment parameters delta etc.
+      calculateAlignmentParameters(
           trajectoryCollection, startParametersCollection,
-          alignOptions.fitOptions, alignOptions.alignedDetElements,
-          alignOptions.alignedTransformUpdater, alignRes, alignmentMask);
-      if (not updateRes.ok()) {
-        ACTS_ERROR("Update alignment parameters failed: " << updateRes.error());
-        return updateRes.error();
-      }
-      ACTS_INFO("iIter = " << iIter << ", total chi2 = " << alignRes.chi2
+          alignOptions.fitOptions, alignResult, alignmentMask);
+      // Screen out the information
+      ACTS_INFO("iIter = " << iIter << ", total chi2 = " << alignResult.chi2
                            << ", total measurementDim = "
-                           << alignRes.measurementDim);
-      ACTS_INFO("Average chi2/ndf = " << alignRes.averageChi2ONdf);
+                           << alignResult.measurementDim
+                           << "\n Average chi2/ndf = "
+                           << alignResult.averageChi2ONdf);
       // Check if it has converged against the provided precision
       // (1) firstly check the average chi2/ndf (is this correct?)
-      if (alignRes.averageChi2ONdf <= alignOptions.averageChi2ONdfCutOff) {
+      if (alignResult.averageChi2ONdf <= alignOptions.averageChi2ONdfCutOff) {
         ACTS_INFO("Alignment has converaged with average chi2/ndf smaller than "
                   << alignOptions.averageChi2ONdfCutOff);
         converged = true;
@@ -421,7 +429,7 @@ struct Alignment {
       // iterations is within tolerance
       if (recentChi2ONdf.size() >=
           alignOptions.deltaAverageChi2ONdfCutOff.first) {
-        if (std::abs(recentChi2ONdf.front() - alignRes.averageChi2ONdf) <=
+        if (std::abs(recentChi2ONdf.front() - alignResult.averageChi2ONdf) <=
             alignOptions.deltaAverageChi2ONdfCutOff.second) {
           ACTS_INFO(
               "Alignment has converaged with change of chi2/ndf smaller than "
@@ -436,22 +444,32 @@ struct Alignment {
         recentChi2ONdf.pop();
       }
       // Store the result in the queue
-      recentChi2ONdf.push(alignRes.averageChi2ONdf);
-    }
+      recentChi2ONdf.push(alignResult.averageChi2ONdf);
+
+      // Not coveraged yet, update the detector element alignment parameters
+      auto updateRes = updateAlignmentParameters(
+          alignOptions.fitOptions.geoContext, alignOptions.alignedDetElements,
+          alignOptions.alignedTransformUpdater, alignResult);
+      if (not updateRes.ok()) {
+        ACTS_ERROR("Update alignment parameters failed: " << updateRes.error());
+        return updateRes.error();
+      }
+    }  // end of all iterations
+
     // Alignment failure if not converged
     if (not converged) {
       ACTS_ERROR("Alignment is not converged.");
-      alignRes.result = AlignmentError::ConvergeFailure;
+      alignResult.result = AlignmentError::ConvergeFailure;
     }
 
-    // Print out the final aligned parameters
+    // Screen out the final aligned parameters
     unsigned int iDetElement = 0;
     for (const auto& det : alignOptions.alignedDetElements) {
       const auto& surface = &det->surface();
       const auto& transform =
           det->transform(alignOptions.fitOptions.geoContext);
       // write it to the result
-      alignRes.alignedParameters.emplace(det, transform);
+      alignResult.alignedParameters.emplace(det, transform);
       const auto& translation = transform.translation();
       const auto& rotation = transform.rotation();
       const Acts::Vector3D rotAngles = rotation.eulerAngles(2, 1, 0);
@@ -464,7 +482,7 @@ struct Alignment {
       iDetElement++;
     }
 
-    return alignRes;
+    return alignResult;
   }
 
  private:
