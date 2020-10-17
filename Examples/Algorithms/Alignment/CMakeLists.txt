@@ -1,7 +1,7 @@
 add_library(
   ActsExamplesAlignment SHARED
   src/AlignmentAlgorithm.cpp
-  src/AlignmentAlgorithmAlignmentFunction.cpp)
+  src/AlignmentAlgorithmFunction.cpp)
 target_include_directories(
   ActsExamplesAlignment
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
