@@ -332,13 +332,14 @@ BOOST_AUTO_TEST_CASE(Alignment_zero_field) {
   using Updater = GainMatrixUpdater;
   using Smoother = GainMatrixSmoother;
   using KalmanFitter = KalmanFitter<RecoPropagator, Updater, Smoother>;
-  using KalmanFitterOptions = KalmanFitterOptions<VoidOutlierFinder>;
+  using KalmanFitterOptions =
+      KalmanFitterOptions<MinimalSourceLinkCalibrator, VoidOutlierFinder>;
 
   auto kfLogger = getDefaultLogger("KalmanFilter", Logging::VERBOSE);
   // Construct the KalmanFitter options
-  KalmanFitterOptions kfOptions(tgContext, mfContext, calContext,
-                                VoidOutlierFinder(), LoggerWrapper{*kfLogger},
-                                PropagatorPlainOptions());
+  KalmanFitterOptions kfOptions(
+      tgContext, mfContext, calContext, MinimalSourceLinkCalibrator(),
+      VoidOutlierFinder(), LoggerWrapper{*kfLogger}, PropagatorPlainOptions());
 
   // Construct the KalmanFitter
   KalmanFitter kFitter(rPropagator);

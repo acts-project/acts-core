@@ -8,17 +8,18 @@
 
 #include "ActsExamples/Alignment/AlignmentAlgorithm.hpp"
 
-#include <stdexcept>
-
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "ActsExamples/EventData/ProtoTrack.hpp"
-#include "ActsExamples/EventData/Track.hpp"
+#include "ActsExamples/EventData/Trajectories.hpp"
 #include "ActsExamples/Framework/WhiteBoard.hpp"
 
 ActsExamples::AlignmentAlgorithm::AlignmentAlgorithm(Config cfg,
                                                      Acts::Logging::Level level)
     : ActsExamples::BareAlgorithm("AlignmentAlgorithm", level),
       m_cfg(std::move(cfg)) {
+  if (m_cfg.inputMeasurements.empty()) {
+    throw std::invalid_argument("Missing input measurement collection");
+  }
   if (m_cfg.inputSourceLinks.empty()) {
     throw std::invalid_argument("Missing input source links collection");
   }
@@ -37,9 +38,11 @@ ActsExamples::AlignmentAlgorithm::AlignmentAlgorithm(Config cfg,
 ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
     const ActsExamples::AlgorithmContext& ctx) const {
   // Read input data
+  const auto& measurements =
+      ctx.eventStore.get<MeasurementContainer>(m_cfg.inputMeasurements);
   const auto sourceLinks =
-      ctx.eventStore.get<SimSourceLinkContainer>(m_cfg.inputSourceLinks);
-  const auto protoTracks =
+      ctx.eventStore.get<IndexSourceLinkContainer>(m_cfg.inputSourceLinks);
+  const auto& protoTracks =
       ctx.eventStore.get<ProtoTrackContainer>(m_cfg.inputProtoTracks);
   const auto initialParameters = ctx.eventStore.get<TrackParametersContainer>(
       m_cfg.inputInitialTrackParameters);
@@ -51,9 +54,9 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   }
 
   // Prepare the input track collection
-  std::vector<std::vector<SimSourceLink>> sourceLinkTrackContainer;
+  std::vector<std::vector<IndexSourceLink>> sourceLinkTrackContainer;
   sourceLinkTrackContainer.reserve(protoTracks.size());
-  std::vector<SimSourceLink> trackSourceLinks;
+  std::vector<IndexSourceLink> trackSourceLinks;
   for (std::size_t itrack = 0; itrack < protoTracks.size(); ++itrack) {
     // The list of hits and the initial start parameters
     const auto& protoTrack = protoTracks[itrack];
@@ -76,7 +79,7 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   }
 
   // Prepare the output data with MultiTrajectory
-  TrajectoryContainer trajectories;
+  TrajectoriesContainer trajectories;
   trajectories.reserve(protoTracks.size());
 
   // Construct a perigee surface as the target surface for the fitter
@@ -84,17 +87,16 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
       Acts::Vector3D{0., 0., 0.});
 
   // Set the KalmanFitter options
-  Acts::KalmanFitterOptions<Acts::VoidOutlierFinder> kfOptions(
+  TrackFitterOptions kfOptions(
       ctx.geoContext, ctx.magFieldContext, ctx.calibContext,
-      Acts::VoidOutlierFinder(), Acts::LoggerWrapper{logger()},
-      Acts::PropagatorPlainOptions(), &(*pSurface));
+      MeasurementCalibrator(measurements), Acts::VoidOutlierFinder(),
+      Acts::LoggerWrapper{logger()}, Acts::PropagatorPlainOptions(),
+      &(*pSurface));
 
   // Set the alignment options
-  ActsAlignment::AlignmentOptions<
-      Acts::KalmanFitterOptions<Acts::VoidOutlierFinder>>
-      alignOptions(kfOptions, m_cfg.alignedTransformUpdater,
-                   m_cfg.alignedDetElements, m_cfg.chi2ONdfCutOff,
-                   m_cfg.deltaChi2ONdfCutOff, m_cfg.maxNumIterations);
+  ActsAlignment::AlignmentOptions<TrackFitterOptions> alignOptions(
+      kfOptions, m_cfg.alignedTransformUpdater, m_cfg.alignedDetElements,
+      m_cfg.chi2ONdfCutOff, m_cfg.deltaChi2ONdfCutOff, m_cfg.maxNumIterations);
 
   ACTS_DEBUG("Invoke alignment");
   auto result =

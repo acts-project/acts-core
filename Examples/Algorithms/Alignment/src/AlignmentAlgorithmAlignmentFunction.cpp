@@ -1,16 +1,10 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2019 CERN for the benefit of the Acts project
+// Copyright (C) 2020 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
-#include <iostream>
-#include <map>
-#include <random>
-#include <stdexcept>
-#include <boost/program_options.hpp>
 
 #include "Acts/Geometry/GeometryIdentifier.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
@@ -24,24 +18,24 @@
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/ParameterDefinitions.hpp"
-
 #include "ActsAlignment/Kernel/Alignment.hpp"
-
 #include "ActsExamples/Alignment/AlignmentAlgorithm.hpp"
 #include "ActsExamples/Plugins/BField/ScalableBField.hpp"
 
 namespace {
-template <typename Alignment>
+template <typename alignment_t>
 struct AlignmentFunctionImpl {
-  Alignment align;
+  alignment_t align;
 
-  AlignmentFunctionImpl(Alignment&& a) : align(std::move(a)) {}
+  AlignmentFunctionImpl(alignment_t&& a) : align(std::move(a)) {}
 
   ActsExamples::AlignmentAlgorithm::AlignResult operator()(
-      const std::vector<std::vector<ActsExamples::SimSourceLink>>& sourceLinks,
+      const std::vector<std::vector<ActsExamples::IndexSourceLink>>&
+          sourceLinks,
       const ActsExamples::TrackParametersContainer& initialParameters,
       const ActsAlignment::AlignmentOptions<
-          Acts::KalmanFitterOptions<Acts::VoidOutlierFinder>>& options) const {
+          ActsExamples::AlignmentAlgorithm::TrackFitterOptions>& options)
+      const {
     return align.align(sourceLinks, initialParameters, options);
   };
 };

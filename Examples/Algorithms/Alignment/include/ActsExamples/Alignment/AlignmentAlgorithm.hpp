@@ -12,11 +12,10 @@
 #include <memory>
 #include <vector>
 
-#include "ActsAlignment/Kernel/Alignment.hpp"
-
-#include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/TrackFitting/KalmanFitter.hpp"
-#include "ActsExamples/EventData/SimSourceLink.hpp"
+#include "ActsAlignment/Kernel/Alignment.hpp"
+#include "ActsExamples/EventData/IndexSourceLink.hpp"
+#include "ActsExamples/EventData/Measurement.hpp"
 #include "ActsExamples/EventData/Track.hpp"
 #include "ActsExamples/Framework/BareAlgorithm.hpp"
 #include "ActsExamples/Plugins/BField/BFieldOptions.hpp"
@@ -26,13 +25,15 @@ namespace ActsExamples {
 class AlignmentAlgorithm final : public BareAlgorithm {
  public:
   using AlignResult = Acts::Result<ActsAlignment::AlignmentResult>;
-  /// Fit function that takes input measurements, initial trackstate and fitter
-  /// options and returns some fit-specific result.
+  /// Alignment function that takes sets of input measurements, initial
+  /// trackstate and alignment options and returns some alignment-specific
+  /// result.
+  using TrackFitterOptions =
+      Acts::KalmanFitterOptions<MeasurementCalibrator, Acts::VoidOutlierFinder>;
   using AlignmentFunction = std::function<AlignResult(
-      const std::vector<std::vector<SimSourceLink>>&,
+      const std::vector<std::vector<IndexSourceLink>>&,
       const TrackParametersContainer&,
-      const ActsAlignment::AlignmentOptions<
-          Acts::KalmanFitterOptions<Acts::VoidOutlierFinder>>&)>;
+      const ActsAlignment::AlignmentOptions<TrackFitterOptions>&)>;
 
   /// Create the fitter function implementation.
   ///
@@ -43,6 +44,8 @@ class AlignmentAlgorithm final : public BareAlgorithm {
       Options::BFieldVariant magneticField, Acts::Logging::Level lvl);
 
   struct Config {
+    /// Input measurements collection.
+    std::string inputMeasurements;
     /// Input source links collection.
     std::string inputSourceLinks;
     /// Input proto tracks collection, i.e. groups of hit indices.
