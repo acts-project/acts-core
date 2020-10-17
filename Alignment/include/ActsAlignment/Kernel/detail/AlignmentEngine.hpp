@@ -214,19 +214,20 @@ TrackAlignmentState trackAlignmentState(
       iSurface -= 1;
       const auto surface = &state.referenceSurface();
       alignState.alignedSurfaces.at(surface).second = iSurface;
-      // const BoundParameters& smoothedParams = state.smoothedParameters(gctx);
-      const FreeVector& smoothedParams =
+      // The free parameters transformed from the smoothed parameters
+      const FreeVector freeParams =
           Acts::MultiTrajectoryHelpers::freeSmoothed(gctx, state);
-      Vector3D position = smoothedParams.head<3>();
-      // @note: needs to check the charge
-      Vector3D direction =
-          (smoothedParams.segment<3>(4) * 1.0 / smoothedParams[7]).normalized();
-      // @Todo: How to get the derivative from stepper?
-      FreeVector pathToFree = FreeVector::Zero();
-      pathToFree.segment<3>(0) = direction;
+      // The direction
+      const Vector3D direction = freeParams.segment<3>(eFreeDir0);
+      // The derivative of free parameters w.r.t. path length. @note Here, we
+      // assumes a linear track model, i.e. negecting the change of track
+      // direction. Otherwise, we need to know the magnetic field at the free
+      // parameters
+      FreeVector pathDerivative = FreeVector::Zero();
+      pathDerivative.head<3>() = direction;
+      // Get the derivative of bound parameters w.r.t. alignment parameters
       const AlignmentToBoundMatrix alignToBound =
-          surface->alignmentToBoundDerivative(gctx, pathToFree, position,
-                                              direction);
+          surface->alignmentToBoundDerivative(gctx, pathDerivative, freeParams);
       //@Todo: use separate consideration for different surfaces
       AlignmentMatrix project = AlignmentMatrix::Identity();
       for (unsigned int iAlignParam = 0; iAlignParam < 6; iAlignParam++) {
