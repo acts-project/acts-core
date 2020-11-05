@@ -38,6 +38,7 @@
 #include "Acts/Tests/CommonHelpers/DetectorElementStub.hpp"
 #include "Acts/Tests/CommonHelpers/FloatComparisons.hpp"
 #include "Acts/Tests/CommonHelpers/PredefinedMaterials.hpp"
+#include "Acts/Tests/CommonHelpers/TestSourceLink.hpp"
 
 #include <cmath>
 #include <random>
@@ -47,9 +48,10 @@ using namespace Acts;
 using namespace ActsAlignment;
 
 namespace {
-using SourceLink = MinimalSourceLink;
-using Covariance = BoundSymMatrix;
 
+using SourceLink = Acts::Test::TestSourceLink;
+using SourceLinkCalibrator = Acts::Test::TestSourceLinkCalibrator;
+using Covariance = BoundSymMatrix;
 template <BoundIndices... params>
 using MeasurementType = Measurement<SourceLink, BoundIndices, params...>;
 
@@ -284,7 +286,7 @@ std::vector<KalmanFitterInputTrajectory> createTrajectories(
     // Make a vector of source links as input to the KF
     std::transform(traj.measurements.begin(), traj.measurements.end(),
                    std::back_inserter(traj.sourcelinks),
-                   [](const auto& m) { return SourceLink{&m}; });
+                   [](const auto& m) { return SourceLink{m}; });
 
     // Smear the start parameters to be used as input of KF
     Covariance cov;
@@ -333,12 +335,12 @@ BOOST_AUTO_TEST_CASE(Alignment_zero_field) {
   using Smoother = GainMatrixSmoother;
   using KalmanFitter = KalmanFitter<RecoPropagator, Updater, Smoother>;
   using KalmanFitterOptions =
-      KalmanFitterOptions<MinimalSourceLinkCalibrator, VoidOutlierFinder>;
+      KalmanFitterOptions<SourceLinkCalibrator, VoidOutlierFinder>;
 
   auto kfLogger = getDefaultLogger("KalmanFilter", Logging::VERBOSE);
   // Construct the KalmanFitter options
   KalmanFitterOptions kfOptions(
-      tgContext, mfContext, calContext, MinimalSourceLinkCalibrator(),
+      tgContext, mfContext, calContext, SourceLinkCalibrator(),
       VoidOutlierFinder(), LoggerWrapper{*kfLogger}, PropagatorPlainOptions());
 
   // Construct the KalmanFitter
