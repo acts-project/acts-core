@@ -93,11 +93,12 @@ ActsExamples::TGeo::buildTGeoDetector(
   std::list<std::shared_ptr<const Acts::ITrackingVolumeBuilder>> volumeBuilders;
 
   std::string rootFileName = vm["geo-tgeo-filename"].template as<std::string>();
+  std::string jsonFileName = vm["geo-tgeo-jsonconfig"].template as<std::string>();
 
   // Create a beam pipe if configured to do so
-  if (vm.count("geo-tgeo-beampipe-parameters")) {
-    auto beamPipeParameters =
-        vm["geo-tgeo-beampipe-parameters"].template as<Options::Reals<3>>();
+  auto beamPipeParameters = 
+      ActsExamples::Options::readBeampipeBuilderParam(jsonFileName);
+  if (beamPipeParameters.size() > 0) {
     /// configure the beam pipe layer builder
     Acts::PassiveLayerBuilder::Config bplConfig;
     bplConfig.layerIdentification = "BeamPipe";
@@ -129,7 +130,7 @@ ActsExamples::TGeo::buildTGeoDetector(
   TGeoManager::Import(rootFileName.c_str());
 
   auto layerBuilderConfigs =
-      ActsExamples::Options::readTGeoLayerBuilderConfigs(vm);
+      ActsExamples::Options::readTGeoLayerBuilderConfigs(jsonFileName);
 
   // Remember the layer builders to collect the detector elements
   std::vector<std::shared_ptr<const Acts::TGeoLayerBuilder>> tgLayerBuilders;
