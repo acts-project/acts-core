@@ -6,9 +6,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include "Acts/Definitions/TrackParametrization.hpp"
 #include "Acts/Geometry/GeometryIdentifier.hpp"
-#include "Acts/MagneticField/ConstantBField.hpp"
-#include "Acts/MagneticField/InterpolatedBFieldMap.hpp"
 #include "Acts/MagneticField/SharedBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
 #include "Acts/Propagator/Navigator.hpp"
@@ -17,12 +16,19 @@
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/Utilities/Helpers.hpp"
-#include "Acts/Utilities/ParameterDefinitions.hpp"
 #include "ActsAlignment/Kernel/Alignment.hpp"
 #include "ActsExamples/Alignment/AlignmentAlgorithm.hpp"
-#include "ActsExamples/Plugins/BField/ScalableBField.hpp"
+#include "ActsExamples/MagneticField/MagneticField.hpp"
 
 namespace {
+
+using Updater = Acts::GainMatrixUpdater;
+using Smoother = Acts::GainMatrixSmoother;
+using Stepper = Acts::EigenStepper<>;
+using Propagator = Acts::Propagator<Stepper, Acts::Navigator>;
+using Fitter = Acts::KalmanFitter<Propagator, Updater, Smoother>;
+using Alignment = ActsAlignment::Alignment<Fitter>;
+
 template <typename alignment_t>
 struct AlignmentFunctionImpl {
   alignment_t align;
@@ -44,38 +50,17 @@ struct AlignmentFunctionImpl {
 ActsExamples::AlignmentAlgorithm::AlignmentFunction
 ActsExamples::AlignmentAlgorithm::makeAlignmentFunction(
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry,
-    Options::BFieldVariant magneticField, Acts::Logging::Level lvl) {
-  using Updater = Acts::GainMatrixUpdater;
-  using Smoother = Acts::GainMatrixSmoother;
+    std::shared_ptr<const Acts::MagneticFieldProvider> magneticField) {
+  Stepper stepper(std::move(magneticField));
+  Acts::Navigator::Config cfg{trackingGeometry};
+  cfg.resolvePassive = false;
+  cfg.resolveMaterial = true;
+  cfg.resolveSensitive = true;
+  Acts::Navigator navigator(cfg);
+  Propagator propagator(std::move(stepper), std::move(navigator));
+  Fitter trackFitter(std::move(propagator));
+  Alignment alignment(std::move(trackFitter));
 
-  // unpack the magnetic field variant and instantiate the corresponding fitter.
-  return std::visit(
-      [trackingGeometry, lvl](auto&& inputField) -> AlignmentFunction {
-        // each entry in the variant is already a shared_ptr
-        // need ::element_type to get the real magnetic field type
-        using InputMagneticField =
-            typename std::decay_t<decltype(inputField)>::element_type;
-        using MagneticField = Acts::SharedBField<InputMagneticField>;
-        using Stepper = Acts::EigenStepper<MagneticField>;
-        using Navigator = Acts::Navigator;
-        using Propagator = Acts::Propagator<Stepper, Navigator>;
-        using Fitter = Acts::KalmanFitter<Propagator, Updater, Smoother>;
-        using Alignment = ActsAlignment::Alignment<Fitter>;
-
-        // construct all components for the fitter
-        MagneticField field(std::move(inputField));
-        Stepper stepper(std::move(field));
-        Navigator navigator(trackingGeometry);
-        navigator.resolvePassive = false;
-        navigator.resolveMaterial = true;
-        navigator.resolveSensitive = true;
-        Propagator propagator(std::move(stepper), std::move(navigator));
-        Fitter fitter(std::move(propagator));
-        Alignment alignment(std::move(fitter),
-                            Acts::getDefaultLogger("Alignment", lvl));
-
-        // build the alignment functions. owns the alignment object.
-        return AlignmentFunctionImpl<Alignment>(std::move(alignment));
-      },
-      std::move(magneticField));
+  // build the alignment functions. owns the alignment object.
+  return AlignmentFunctionImpl<Alignment>(std::move(alignment));
 }

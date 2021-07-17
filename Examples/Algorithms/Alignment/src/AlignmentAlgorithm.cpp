@@ -84,7 +84,7 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
 
   // Construct a perigee surface as the target surface for the fitter
   auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
-      Acts::Vector3D{0., 0., 0.});
+      Acts::Vector3{0., 0., 0.});
 
   // Set the KalmanFitter options
   TrackFitterOptions kfOptions(
@@ -95,8 +95,9 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
 
   // Set the alignment options
   ActsAlignment::AlignmentOptions<TrackFitterOptions> alignOptions(
-      kfOptions, m_cfg.alignedTransformUpdater, m_cfg.alignedDetElements,
-      m_cfg.chi2ONdfCutOff, m_cfg.deltaChi2ONdfCutOff, m_cfg.maxNumIterations);
+      kfOptions, m_cfg.alignedTransformUpdater, Acts::LoggerWrapper{logger()},
+      m_cfg.alignedDetElements, m_cfg.chi2ONdfCutOff, m_cfg.deltaChi2ONdfCutOff,
+      m_cfg.maxNumIterations);
 
   ACTS_DEBUG("Invoke alignment");
   auto result =
