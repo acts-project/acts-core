@@ -40,11 +40,11 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   // Read input data
   const auto& measurements =
       ctx.eventStore.get<MeasurementContainer>(m_cfg.inputMeasurements);
-  const auto sourceLinks =
+  const auto& sourceLinks =
       ctx.eventStore.get<IndexSourceLinkContainer>(m_cfg.inputSourceLinks);
   const auto& protoTracks =
       ctx.eventStore.get<ProtoTrackContainer>(m_cfg.inputProtoTracks);
-  const auto initialParameters = ctx.eventStore.get<TrackParametersContainer>(
+  const auto& initialParameters = ctx.eventStore.get<TrackParametersContainer>(
       m_cfg.inputInitialTrackParameters);
 
   // Consistency cross checks
@@ -53,11 +53,17 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
     return ProcessCode::ABORT;
   }
 
+  size_t numTracksUsed = protoTracks.size();
+  if (m_cfg.maxNumTracks > 0 and
+      m_cfg.maxNumTracks < static_cast<int>(protoTracks.size())) {
+    numTracksUsed = m_cfg.maxNumTracks;
+  }
+
   // Prepare the input track collection
   std::vector<std::vector<IndexSourceLink>> sourceLinkTrackContainer;
-  sourceLinkTrackContainer.reserve(protoTracks.size());
+  sourceLinkTrackContainer.reserve(numTracksUsed);
   std::vector<IndexSourceLink> trackSourceLinks;
-  for (std::size_t itrack = 0; itrack < protoTracks.size(); ++itrack) {
+  for (std::size_t itrack = 0; itrack < numTracksUsed; ++itrack) {
     // The list of hits and the initial start parameters
     const auto& protoTrack = protoTracks[itrack];
 
@@ -80,7 +86,7 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
 
   // Prepare the output data with MultiTrajectory
   TrajectoriesContainer trajectories;
-  trajectories.reserve(protoTracks.size());
+  trajectories.reserve(numTracksUsed);
 
   // Construct a perigee surface as the target surface for the fitter
   auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
@@ -99,7 +105,8 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
       m_cfg.alignedDetElements, m_cfg.chi2ONdfCutOff, m_cfg.deltaChi2ONdfCutOff,
       m_cfg.maxNumIterations);
 
-  ACTS_DEBUG("Invoke alignment");
+  ACTS_DEBUG("Invoke track-based alignment with " << numTracksUsed
+                                                  << " input tracks");
   auto result =
       m_cfg.align(sourceLinkTrackContainer, initialParameters, alignOptions);
   if (result.ok()) {
@@ -108,6 +115,8 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   } else {
     ACTS_WARNING("Alignment failed with " << result.error());
   }
+
+  // @TODO: output aligned parameters
 
   // ctx.eventStore.add(m_cfg.outputTrajectories, std::move(trajectories));
   return ActsExamples::ProcessCode::SUCCESS;

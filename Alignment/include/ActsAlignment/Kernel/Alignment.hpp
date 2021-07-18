@@ -207,7 +207,7 @@ struct Alignment {
   template <typename trajectory_container_t,
             typename start_parameters_container_t, typename fit_options_t>
   void calculateAlignmentParameters(
-      trajectory_container_t& trajectoryCollection,
+      const trajectory_container_t& trajectoryCollection,
       const start_parameters_container_t& startParametersCollection,
       const fit_options_t& fitOptions, AlignmentResult& alignResult,
       const AlignmentMask& alignMask = AlignmentMask::All,
@@ -295,6 +295,9 @@ struct Alignment {
     // Solve the linear equation to get alignment parameters change
     alignResult.deltaAlignmentParameters =
         -sumChi2SecondDerivative.fullPivLu().solve(sumChi2Derivative);
+    ACTS_VERBOSE("sumChi2SecondDerivative = \n" << sumChi2SecondDerivative);
+    ACTS_VERBOSE("sumChi2Derivative = \n" << sumChi2Derivative);
+    ACTS_VERBOSE("alignResult.deltaAlignmentParameters \n");
 
     // Alignment parameters covariance
     alignResult.alignmentCovariance = 2 * sumChi2SecondDerivativeInverse;
@@ -383,7 +386,7 @@ struct Alignment {
   template <typename trajectory_container_t,
             typename start_parameters_container_t, typename fit_options_t>
   Acts::Result<AlignmentResult> align(
-      trajectory_container_t& trajectoryCollection,
+      const trajectory_container_t& trajectoryCollection,
       const start_parameters_container_t& startParametersCollection,
       const AlignmentOptions<fit_options_t>& alignOptions) const {
     const auto& logger = alignOptions.logger;
@@ -398,6 +401,8 @@ struct Alignment {
           &alignOptions.alignedDetElements.at(iDetElement)->surface(),
           iDetElement);
     }
+    ACTS_VERBOSE("There are " << alignResult.idxedAlignSurfaces.size()
+                              << " detector elements to be aligned");
 
     // Start the iteration to minimize the chi2
     bool converged = false;
@@ -485,13 +490,13 @@ struct Alignment {
         const auto& translation = transform.translation();
         const auto& rotation = transform.rotation();
         const Acts::Vector3 rotAngles = rotation.eulerAngles(2, 1, 0);
-        ACTS_INFO("Detector element with surface "
-                  << surface->geometryId()
-                  << " has aligned geometry position as below:");
-        ACTS_INFO("Center (cenX, cenY, cenZ) = " << translation.transpose());
-        ACTS_INFO(
+        ACTS_VERBOSE("Detector element with surface "
+                     << surface->geometryId()
+                     << " has aligned geometry position as below:");
+        ACTS_VERBOSE("Center (cenX, cenY, cenZ) = " << translation.transpose());
+        ACTS_VERBOSE(
             "Euler angles (rotZ, rotY, rotX) = " << rotAngles.transpose());
-        ACTS_INFO("Rotation marix = \n" << rotation);
+        ACTS_VERBOSE("Rotation marix = \n" << rotation);
         iDetElement++;
       }
     } else {

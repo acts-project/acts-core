@@ -58,7 +58,7 @@ class AlignmentAlgorithm final : public BareAlgorithm {
     AlignmentFunction align;
     /// The alignd transform updater
     ActsAlignment::AlignedTransformUpdater alignedTransformUpdater;
-    /// The surfaces (or detector elements?) to be aligned
+    /// The surfaces (with detector elements) to be aligned
     std::vector<Acts::DetectorElementBase*> alignedDetElements;
     /// The alignment mask at each iteration
     std::map<unsigned int, std::bitset<6>> iterationState;
@@ -68,6 +68,8 @@ class AlignmentAlgorithm final : public BareAlgorithm {
     std::pair<size_t, double> deltaChi2ONdfCutOff = {10, 0.00001};
     /// Maximum number of iterations
     size_t maxNumIterations = 100;
+    /// Number of tracks to be used for alignment
+    int maxNumTracks = -1;
   };
 
   /// Constructor of the alignment algorithm

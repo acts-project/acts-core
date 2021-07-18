@@ -127,7 +127,11 @@ TrackAlignmentState trackAlignmentState(
     // Remember the number of smoothed states
     if (ts.hasSmoothed()) {
       nSmoothedStates++;
+    } else {
+      // @FIXME: is this possible?
+      return true;
     }
+
     // Only measurement states matter (we can't align non-measurement states,
     // no?)
     if (not ts.typeFlags().test(TrackStateFlag::MeasurementFlag)) {
@@ -210,7 +214,6 @@ TrackAlignmentState trackAlignmentState(
         state.projector().template topLeftCorner(measdim, eBoundSize);
     alignState.projectionMatrix.block(iMeasurement, iParams, measdim,
                                       eBoundSize) = H;
-
     // (c) Get and fill the residual
     alignState.residual.segment(iMeasurement, measdim) =
         state.calibrated().template head(measdim) - H * state.smoothed();
@@ -234,7 +237,7 @@ TrackAlignmentState trackAlignmentState(
       pathDerivative.head<3>() = direction;
       // Get the derivative of bound parameters w.r.t. alignment parameters
       AlignmentToBoundMatrix alignToBound =
-          surface->alignmentToBoundDerivative(gctx, pathDerivative, freeParams);
+          surface->alignmentToBoundDerivative(gctx, freeParams, pathDerivative);
       // Set the degree of freedom per surface.
       // @Todo: don't allocate memory for fixed degree of freedom
       resetAlignmentDerivative(alignToBound, alignMask);

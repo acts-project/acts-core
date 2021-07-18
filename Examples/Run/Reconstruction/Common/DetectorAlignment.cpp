@@ -153,8 +153,9 @@ int runDetectorAlignment(
   alignment.deltaChi2ONdfCutOff = {10, 0.00005};
   alignment.chi2ONdfCutOff = 0.01;
   alignment.maxNumIterations = 60;
-  alignment.maxNumTracks = 1000;
-  AlignmentAlgorithm::makeAlignmentFunction(trackingGeometry, magneticField);
+  // alignment.maxNumTracks = 1000;
+  alignment.align = AlignmentAlgorithm::makeAlignmentFunction(trackingGeometry,
+                                                              magneticField);
   sequencer.addAlgorithm(
       std::make_shared<AlignmentAlgorithm>(alignment, logLevel));
 
