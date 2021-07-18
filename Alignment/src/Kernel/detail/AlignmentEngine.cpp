@@ -15,22 +15,22 @@ namespace detail {
 
 void resetAlignmentDerivative(Acts::AlignmentToBoundMatrix& alignToBound,
                               AlignmentMask mask) {
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Center0)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Center0)) {
     alignToBound.col(Acts::eAlignmentCenter0) = Acts::AlignmentVector::Zero();
   }
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Center1)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Center1)) {
     alignToBound.col(Acts::eAlignmentCenter1) = Acts::AlignmentVector::Zero();
   }
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Center2)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Center2)) {
     alignToBound.col(Acts::eAlignmentCenter2) = Acts::AlignmentVector::Zero();
   }
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Rotation0)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Rotation0)) {
     alignToBound.col(Acts::eAlignmentRotation0) = Acts::AlignmentVector::Zero();
   }
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Rotation1)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Rotation1)) {
     alignToBound.col(Acts::eAlignmentRotation1) = Acts::AlignmentVector::Zero();
   }
-  if (ACTS_CHECK_BIT(mask, AlignmentMask::Rotation2)) {
+  if (not ACTS_CHECK_BIT(mask, AlignmentMask::Rotation2)) {
     alignToBound.col(Acts::eAlignmentRotation2) = Acts::AlignmentVector::Zero();
   }
 }
