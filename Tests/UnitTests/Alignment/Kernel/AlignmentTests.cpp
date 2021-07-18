@@ -9,8 +9,6 @@
 #include <boost/test/unit_test.hpp>
 
 #include "Acts/Definitions/Units.hpp"
-#include "Acts/EventData/Measurement.hpp"
-#include "Acts/EventData/MeasurementHelpers.hpp"
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/CuboidVolumeBounds.hpp"
 #include "Acts/Geometry/CuboidVolumeBuilder.hpp"
@@ -22,7 +20,6 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Geometry/TrackingGeometryBuilder.hpp"
 #include "Acts/Geometry/TrackingVolume.hpp"
-#include "Acts/Geometry/TrackingVolumeArrayCreator.hpp"
 #include "Acts/MagneticField/ConstantBField.hpp"
 #include "Acts/MagneticField/MagneticFieldContext.hpp"
 #include "Acts/Material/HomogeneousSurfaceMaterial.hpp"
@@ -44,7 +41,6 @@
 #include "Acts/TrackFitting/detail/KalmanGlobalCovariance.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
 #include "ActsAlignment/Kernel/Alignment.hpp"
-#include "ActsAlignment/Kernel/detail/AlignmentEngine.hpp"
 
 #include <cmath>
 #include <random>
@@ -309,16 +305,13 @@ BOOST_AUTO_TEST_CASE(ZeroFieldKalmanAlignment) {
     }
   }
 
-  // The alignment mask
-  const auto alignMask = std::bitset<eAlignmentSize>(std::string("111111"));
-
   // Test the method to evaluate alignment state for a single track
   const auto& inputTraj = trajectories.front();
   kfOptions.referenceSurface = &(*inputTraj.startParameters).referenceSurface();
 
   auto evaluateRes = alignZero.evaluateTrackAlignmentState(
       kfOptions.geoContext, inputTraj.sourcelinks, *inputTraj.startParameters,
-      kfOptions, idxedAlignSurfaces, alignMask, alignOptions.logger);
+      kfOptions, idxedAlignSurfaces, AlignmentMask::All, alignOptions.logger);
   BOOST_CHECK(evaluateRes.ok());
 
   const auto& alignState = evaluateRes.value();

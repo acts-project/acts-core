@@ -15,6 +15,7 @@
 #include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Surfaces/Surface.hpp"
+#include "ActsAlignment/Kernel/AlignmentMask.hpp"
 
 #include <unordered_map>
 
@@ -66,6 +67,14 @@ struct TrackAlignmentState {
   std::unordered_map<const Surface*, std::pair<size_t, size_t>> alignedSurfaces;
 };
 
+/// Reset some columns of the alignment to bound derivative to zero if the
+/// relevant degree of freedom is fixed
+///
+/// @param alignToBound The alignment to bound parameters derivative
+/// @param mask The alignment mask
+void resetAlignmentDerivative(Acts::AlignmentToBoundMatrix& alignToBound,
+                              AlignmentMask mask);
+
 ///
 /// Calculate the first and second derivative of chi2 w.r.t. alignment
 /// parameters for a single track
@@ -99,7 +108,7 @@ TrackAlignmentState trackAlignmentState(
     const std::pair<ActsDynamicMatrix, std::unordered_map<size_t, size_t>>&
         globalTrackParamsCov,
     const std::unordered_map<const Surface*, size_t>& idxedAlignSurfaces,
-    const std::bitset<6>& alignMask) {
+    const AlignmentMask& alignMask) {
   using CovMatrix = typename parameters_t::CovarianceMatrix;
 
   // Construct an alignment state
@@ -224,18 +233,27 @@ TrackAlignmentState trackAlignmentState(
       FreeVector pathDerivative = FreeVector::Zero();
       pathDerivative.head<3>() = direction;
       // Get the derivative of bound parameters w.r.t. alignment parameters
-      const AlignmentToBoundMatrix alignToBound =
+      AlignmentToBoundMatrix alignToBound =
           surface->alignmentToBoundDerivative(gctx, pathDerivative, freeParams);
-      //@Todo: use separate consideration for different surfaces
-      AlignmentMatrix project = AlignmentMatrix::Identity();
-      for (unsigned int iAlignParam = 0; iAlignParam < 6; iAlignParam++) {
-        project(iAlignParam, iAlignParam) = alignMask[iAlignParam];
-      }
-      // Residual is calculated as the measurement - parameters, thus we need a
+      // Set the degree of freedom per surface.
+      // @Todo: don't allocate memory for fixed degree of freedom
+      resetAlignmentDerivative(alignToBound, alignMask);
+
+      //      AlignmentMatrix project = AlignmentMatrix::Identity();
+      //      for (unsigned int iAlignParam = 0; iAlignParam <
+      //      Acts::eAlignmentSize; iAlignParam++) {
+      //        if (ACTS_CHECK_BIT(alignMask, AlignmentMask::Center0)) {
+      //	      alignToBound(iAlignParam, iAlignParam) =
+      // alignMask[iAlignParam];
+      //        }
+      //	}
+
+      // Residual is calculated as the (measurement - parameters), thus we need
+      // a
       // minus sign below
       alignState.alignmentToResidualDerivative.block(
           iMeasurement, iSurface * eAlignmentSize, measdim, eAlignmentSize) =
-          -H * (alignToBound * project);
+          -H * (alignToBound);
     }
 
     // (e) Extract and fill the track parameters covariance matrix for only

@@ -56,10 +56,9 @@ struct AlignmentOptions {
       Acts::LoggerWrapper logger_,
       const std::vector<Acts::DetectorElementBase*>& aDetElements = {},
       double chi2CutOff = 0.5,
-      const std::pair<size_t, double>& deltaChi2CutOff = {10, 0.00001},
+      const std::pair<size_t, double>& deltaChi2CutOff = {5, 0.01},
       size_t maxIters = 5,
-      const std::map<unsigned int, std::bitset<Acts::eAlignmentSize>>&
-          iterState = {})
+      const std::map<unsigned int, AlignmentMask>& iterState = {})
       : fitOptions(fOptions),
         alignedTransformUpdater(aTransformUpdater),
         alignedDetElements(aDetElements),
@@ -83,13 +82,13 @@ struct AlignmentOptions {
 
   // The delta of average chi2/ndf within a couple of iterations to determine if
   // alignment is converged
-  std::pair<size_t, double> deltaAverageChi2ONdfCutOff = {10, 0.00001};
+  std::pair<size_t, double> deltaAverageChi2ONdfCutOff = {5, 0.01};
 
   // The maximum number of iterations to run alignment
   size_t maxIterations = 5;
 
   // The alignment mask for different iterations
-  std::map<unsigned int, std::bitset<Acts::eAlignmentSize>> iterationState;
+  std::map<unsigned int, AlignmentMask> iterationState;
 
   /// Logger
   Acts::LoggerWrapper logger;
@@ -167,7 +166,7 @@ struct Alignment {
       const start_parameters_t& sParameters, const fit_options_t& fitOptions,
       const std::unordered_map<const Acts::Surface*, size_t>&
           idxedAlignSurfaces,
-      const std::bitset<Acts::eAlignmentSize>& alignMask,
+      const AlignmentMask& alignMask,
       Acts::LoggerWrapper logger = Acts::getDummyLogger()) const {
     // Perform the fit
     auto fitRes = m_fitter.fit(sourcelinks, sParameters, fitOptions);
@@ -211,8 +210,7 @@ struct Alignment {
       trajectory_container_t& trajectoryCollection,
       const start_parameters_container_t& startParametersCollection,
       const fit_options_t& fitOptions, AlignmentResult& alignResult,
-      const std::bitset<Acts::eAlignmentSize>& alignMask =
-          std::bitset<Acts::eAlignmentSize>(std::string("111111")),
+      const AlignmentMask& alignMask = AlignmentMask::All,
       Acts::LoggerWrapper logger = Acts::getDummyLogger()) const {
     // The number of trajectories must be eual to the number of starting
     // parameters
@@ -408,15 +406,17 @@ struct Alignment {
     ACTS_INFO("Max number of iterations: " << alignOptions.maxIterations);
     for (unsigned int iIter = 0; iIter < alignOptions.maxIterations; iIter++) {
       // Perform the fit to the trajectories and update alignment parameters
-      std::bitset<Acts::eAlignmentSize> alignmentMask(std::string("111111"));
+      // Initialize the alignment mask (all dof in default)
+      AlignmentMask alignMask = AlignmentMask::All;
+      // Set the alignment mask
       auto iter_it = alignOptions.iterationState.find(iIter);
       if (iter_it != alignOptions.iterationState.end()) {
-        alignmentMask = iter_it->second;
+        alignMask = iter_it->second;
       }
       // Calculate the alignment parameters delta etc.
       calculateAlignmentParameters(
           trajectoryCollection, startParametersCollection,
-          alignOptions.fitOptions, alignResult, alignmentMask, logger);
+          alignOptions.fitOptions, alignResult, alignMask, logger);
       // Screen out the information
       ACTS_INFO("iIter = " << iIter << ", total chi2 = " << alignResult.chi2
                            << ", total measurementDim = "
@@ -424,15 +424,7 @@ struct Alignment {
                            << " and average chi2/ndf = "
                            << alignResult.averageChi2ONdf);
       // Check if it has converged against the provided precision
-      // 1. firstly check the average chi2/ndf (is this correct?)
-      if (alignResult.averageChi2ONdf <= alignOptions.averageChi2ONdfCutOff) {
-        ACTS_INFO("Alignment has converaged with average chi2/ndf < "
-                  << alignOptions.averageChi2ONdfCutOff << " after " << iIter
-                  << " iteration(s)");
-        converged = true;
-        break;
-      }
-      // 2. secondly check if the delta average chi2/ndf in the last few
+      // 1. either the delta average chi2/ndf in the last few
       // iterations is within tolerance
       if (recentChi2ONdf.size() >=
           alignOptions.deltaAverageChi2ONdfCutOff.first) {
@@ -440,16 +432,24 @@ struct Alignment {
             alignOptions.deltaAverageChi2ONdfCutOff.second) {
           ACTS_INFO("Alignment has converaged with change of chi2/ndf < "
                     << alignOptions.deltaAverageChi2ONdfCutOff.second
-                    << " in the latest "
+                    << " in the last "
                     << alignOptions.deltaAverageChi2ONdfCutOff.first
                     << " iterations"
                     << " after " << iIter << " iteration(s)");
           converged = true;
           break;
         }
-        // Remove the first element
         recentChi2ONdf.pop();
       }
+      // 2. or the average chi2/ndf (is this correct?)
+      if (alignResult.averageChi2ONdf <= alignOptions.averageChi2ONdfCutOff) {
+        ACTS_INFO("Alignment has converaged with average chi2/ndf < "
+                  << alignOptions.averageChi2ONdfCutOff << " after " << iIter
+                  << " iteration(s)");
+        converged = true;
+        break;
+      }
+      // Remove the first element
       // Store the result in the queue
       recentChi2ONdf.push(alignResult.averageChi2ONdf);
 
