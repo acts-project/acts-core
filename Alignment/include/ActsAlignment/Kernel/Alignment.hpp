@@ -55,7 +55,7 @@ struct AlignmentOptions {
       const AlignedTransformUpdater& aTransformUpdater,
       Acts::LoggerWrapper logger_,
       const std::vector<Acts::DetectorElementBase*>& aDetElements = {},
-      double chi2CutOff = 0.05,
+      double chi2CutOff = 0.5,
       const std::pair<size_t, double>& deltaChi2CutOff = {10, 0.00001},
       size_t maxIters = 5,
       const std::map<unsigned int, std::bitset<Acts::eAlignmentSize>>&
@@ -79,7 +79,7 @@ struct AlignmentOptions {
   std::vector<Acts::DetectorElementBase*> alignedDetElements;
 
   // The alignment tolerance to determine if the alignment is coveraged
-  double averageChi2ONdfCutOff = 0.05;
+  double averageChi2ONdfCutOff = 0.5;
 
   // The delta of average chi2/ndf within a couple of iterations to determine if
   // alignment is converged
@@ -297,8 +297,6 @@ struct Alignment {
     // Solve the linear equation to get alignment parameters change
     alignResult.deltaAlignmentParameters =
         -sumChi2SecondDerivative.fullPivLu().solve(sumChi2Derivative);
-    ACTS_INFO("The solved delta of alignmentParameters = \n "
-              << alignResult.deltaAlignmentParameters);
 
     // Alignment parameters covariance
     alignResult.alignmentCovariance = 2 * sumChi2SecondDerivativeInverse;
@@ -405,6 +403,7 @@ struct Alignment {
 
     // Start the iteration to minimize the chi2
     bool converged = false;
+    bool alignmentParametersUpdated = false;
     std::queue<double> recentChi2ONdf;
     ACTS_INFO("Max number of iterations: " << alignOptions.maxIterations);
     for (unsigned int iIter = 0; iIter < alignOptions.maxIterations; iIter++) {
@@ -422,13 +421,14 @@ struct Alignment {
       ACTS_INFO("iIter = " << iIter << ", total chi2 = " << alignResult.chi2
                            << ", total measurementDim = "
                            << alignResult.measurementDim
-                           << "\n Average chi2/ndf = "
+                           << " and average chi2/ndf = "
                            << alignResult.averageChi2ONdf);
       // Check if it has converged against the provided precision
       // 1. firstly check the average chi2/ndf (is this correct?)
       if (alignResult.averageChi2ONdf <= alignOptions.averageChi2ONdfCutOff) {
-        ACTS_INFO("Alignment has converaged with average chi2/ndf smaller than "
-                  << alignOptions.averageChi2ONdfCutOff);
+        ACTS_INFO("Alignment has converaged with average chi2/ndf < "
+                  << alignOptions.averageChi2ONdfCutOff << " after " << iIter
+                  << " iteration(s)");
         converged = true;
         break;
       }
@@ -438,12 +438,12 @@ struct Alignment {
           alignOptions.deltaAverageChi2ONdfCutOff.first) {
         if (std::abs(recentChi2ONdf.front() - alignResult.averageChi2ONdf) <=
             alignOptions.deltaAverageChi2ONdfCutOff.second) {
-          ACTS_INFO(
-              "Alignment has converaged with change of chi2/ndf smaller than "
-              << alignOptions.deltaAverageChi2ONdfCutOff.second
-              << " in the latest "
-              << alignOptions.deltaAverageChi2ONdfCutOff.first
-              << " iterations");
+          ACTS_INFO("Alignment has converaged with change of chi2/ndf < "
+                    << alignOptions.deltaAverageChi2ONdfCutOff.second
+                    << " in the latest "
+                    << alignOptions.deltaAverageChi2ONdfCutOff.first
+                    << " iterations"
+                    << " after " << iIter << " iteration(s)");
           converged = true;
           break;
         }
@@ -453,6 +453,8 @@ struct Alignment {
       // Store the result in the queue
       recentChi2ONdf.push(alignResult.averageChi2ONdf);
 
+      ACTS_INFO("The solved delta of alignmentParameters = \n "
+                << alignResult.deltaAlignmentParameters);
       // Not coveraged yet, update the detector element alignment parameters
       auto updateRes = updateAlignmentParameters(
           alignOptions.fitOptions.geoContext, alignOptions.alignedDetElements,
@@ -461,6 +463,7 @@ struct Alignment {
         ACTS_ERROR("Update alignment parameters failed: " << updateRes.error());
         return updateRes.error();
       }
+      alignmentParametersUpdated = true;
     }  // end of all iterations
 
     // Alignment failure if not converged
@@ -471,23 +474,28 @@ struct Alignment {
 
     // Screen out the final aligned parameters
     // @todo
-    unsigned int iDetElement = 0;
-    for (const auto& det : alignOptions.alignedDetElements) {
-      const auto& surface = &det->surface();
-      const auto& transform =
-          det->transform(alignOptions.fitOptions.geoContext);
-      // write it to the result
-      alignResult.alignedParameters.emplace(det, transform);
-      const auto& translation = transform.translation();
-      const auto& rotation = transform.rotation();
-      const Acts::Vector3 rotAngles = rotation.eulerAngles(2, 1, 0);
-      ACTS_INFO("Detector element with surface "
-                << surface->geometryId()
-                << " has aligned geometry position as below:");
-      ACTS_INFO("Center (cenX, cenY, cenZ) = " << translation.transpose());
-      ACTS_INFO("Euler angles (rotZ, rotY, rotX) = " << rotAngles.transpose());
-      ACTS_INFO("Rotation marix = \n" << rotation);
-      iDetElement++;
+    if (alignmentParametersUpdated) {
+      unsigned int iDetElement = 0;
+      for (const auto& det : alignOptions.alignedDetElements) {
+        const auto& surface = &det->surface();
+        const auto& transform =
+            det->transform(alignOptions.fitOptions.geoContext);
+        // write it to the result
+        alignResult.alignedParameters.emplace(det, transform);
+        const auto& translation = transform.translation();
+        const auto& rotation = transform.rotation();
+        const Acts::Vector3 rotAngles = rotation.eulerAngles(2, 1, 0);
+        ACTS_INFO("Detector element with surface "
+                  << surface->geometryId()
+                  << " has aligned geometry position as below:");
+        ACTS_INFO("Center (cenX, cenY, cenZ) = " << translation.transpose());
+        ACTS_INFO(
+            "Euler angles (rotZ, rotY, rotX) = " << rotAngles.transpose());
+        ACTS_INFO("Rotation marix = \n" << rotation);
+        iDetElement++;
+      }
+    } else {
+      ACTS_WARNING("Alignment parameters is not updated.");
     }
 
     return alignResult;
