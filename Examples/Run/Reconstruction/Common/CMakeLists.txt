@@ -3,7 +3,8 @@ add_library(
   RecInput.cpp 
   RecTruthTracks.cpp
   RecCKFTracks.cpp
-  SeedingExample.cpp)
+  SeedingExample.cpp
+  DetectorAlignment.cpp)
 target_include_directories(
   ActsExamplesRecTracksCommon
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
@@ -18,7 +19,8 @@ target_link_libraries(
     ActsExamplesMagneticField
     ActsExamplesTruthTracking
     ActsExamplesIoCsv
-    ActsExamplesIoPerformance)
+    ActsExamplesIoPerformance
+    ActsExamplesAlignment)
 if(ACTS_BUILD_PLUGIN_ONNX)
   target_compile_definitions(
     ActsExamplesRecTracksCommon PUBLIC ACTS_PLUGIN_ONNX)
