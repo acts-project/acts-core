@@ -39,10 +39,10 @@ using namespace ActsExamples;
 using namespace boost::filesystem;
 
 void addAlignmentOptions(ActsExamples::Options::Description& desc) {
+  using boost::program_options::value;
   auto opt = desc.add_options();
-  opt.add_options()("reco-with-misalignment-correction",
-                    value<bool>()->default_value(false),
-                    "Correct for detector misalignment effects.");
+  opt("reco-with-misalignment-correction", value<bool>()->default_value(false),
+      "Correct for detector misalignment effects.");
 }
 
 int runDetectorAlignment(
@@ -52,7 +52,7 @@ int runDetectorAlignment(
     std::function<std::vector<Acts::DetectorElementBase*>(
         const std::shared_ptr<ActsExamples::IBaseDetector>&)>
         alignedDetElementsGetter) {
-  using boost::program_options::value;
+  // using boost::program_options::value;
 
   // setup and parse options
   auto desc = Options::makeDefaultOptions();
