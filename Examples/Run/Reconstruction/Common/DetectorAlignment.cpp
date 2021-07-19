@@ -6,8 +6,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "DetectorAlignment.hpp"
-
 #include "Acts/Definitions/Units.hpp"
 #include "ActsExamples/Alignment/AlignmentAlgorithm.hpp"
 #include "ActsExamples/Detector/IBaseDetector.hpp"
@@ -38,12 +36,22 @@
 
 using namespace Acts::UnitLiterals;
 using namespace ActsExamples;
+using namespace boost::filesystem;
+
+void addAlignmentOptions(ActsExamples::Options::Description& desc) {
+  auto opt = desc.add_options();
+  opt.add_options()("reco-with-misalignment-correction",
+                    value<bool>()->default_value(false),
+                    "Correct for detector misalignment effects.");
+}
 
 int runDetectorAlignment(
     int argc, char* argv[],
     std::shared_ptr<ActsExamples::IBaseDetector> detector,
     ActsAlignment::AlignedTransformUpdater alignedTransformUpdater,
-    AlignedDetElementGetter alignedDetElementsGetter) {
+    std::function<std::vector<Acts::DetectorElementBase*>(
+        const std::shared_ptr<ActsExamples::IBaseDetector>&)>
+        alignedDetElementsGetter) {
   using boost::program_options::value;
 
   // setup and parse options
@@ -59,6 +67,7 @@ int runDetectorAlignment(
   Options::addFittingOptions(desc);
   Options::addDigitizationOptions(desc);
   TruthSeedSelector::addOptions(desc);
+  addAlignmentOptions(desc);
 
   auto vm = Options::parse(desc, argc, argv);
   if (vm.empty()) {
@@ -137,27 +146,28 @@ int runDetectorAlignment(
         std::make_shared<SurfaceSortingAlgorithm>(sorterCfg, logLevel));
   }
 
-  // setup the alignment (which will update the aligned transforms of the
-  // detector elements)
-  AlignmentAlgorithm::Config alignment;
-  alignment.inputSourceLinks = digiCfg.outputSourceLinks;
-  alignment.inputMeasurements = digiCfg.outputMeasurements;
-  alignment.inputProtoTracks = trackFinderCfg.outputProtoTracks;
-  alignment.inputInitialTrackParameters =
-      particleSmearingCfg.outputTrackParameters;
-  // @todo: remove or change it. Useless currently.
-  alignment.outputTrajectories = "trajectories";
-  alignment.alignedTransformUpdater = alignedTransformUpdater;
-  alignment.alignedDetElements = alignedDetElementsGetter(detector);
-  // The criteria to determine if the iteration has converged.
-  alignment.deltaChi2ONdfCutOff = {10, 0.00005};
-  alignment.chi2ONdfCutOff = 0.01;
-  alignment.maxNumIterations = 60;
-  // alignment.maxNumTracks = 1000;
-  alignment.align = AlignmentAlgorithm::makeAlignmentFunction(trackingGeometry,
-                                                              magneticField);
-  sequencer.addAlgorithm(
-      std::make_shared<AlignmentAlgorithm>(alignment, logLevel));
+  if (vm["reco-with-misalignment-correction"].as<bool>()) {
+    // setup the alignment (which will update the aligned transforms of the
+    // detector elements)
+    AlignmentAlgorithm::Config alignment;
+    alignment.inputSourceLinks = digiCfg.outputSourceLinks;
+    alignment.inputMeasurements = digiCfg.outputMeasurements;
+    alignment.inputProtoTracks = trackFinderCfg.outputProtoTracks;
+    alignment.inputInitialTrackParameters =
+        particleSmearingCfg.outputTrackParameters;
+    // @todo: remove or change it. Useless currently.
+    alignment.outputTrajectories = "trajectories";
+    alignment.alignedTransformUpdater = alignedTransformUpdater;
+    alignment.alignedDetElements = alignedDetElementsGetter(detector);
+    // The criteria to determine if the iteration has converged.
+    alignment.deltaChi2ONdfCutOff = {10, 0.00005};
+    alignment.chi2ONdfCutOff = 0.01;
+    alignment.maxNumIterations = 60;
+    alignment.align = AlignmentAlgorithm::makeAlignmentFunction(
+        trackingGeometry, magneticField);
+    sequencer.addAlgorithm(
+        std::make_shared<AlignmentAlgorithm>(alignment, logLevel));
+  }
 
   // setup the fitter
   TrackFittingAlgorithm::Config fitter;

@@ -9,6 +9,8 @@
 #pragma once
 
 #include "ActsAlignment/Kernel/Alignment.hpp"
+#include "ActsExamples/Options/CommonOptions.hpp"
+#include "ActsExamples/Utilities/Options.hpp"
 
 #include <memory>
 
@@ -19,6 +21,11 @@ class IBaseDetector;
 using AlignedDetElementGetter =
     std::function<std::vector<Acts::DetectorElementBase*>(
         const std::shared_ptr<ActsExamples::IBaseDetector>&)>;
+
+/// The options for running alignment or not
+///
+/// @param desc The options description to add options to
+void addAlignmentOptions(ActsExamples::Options::Description& desc);
 
 /// Main function for running alignment for specific detector.
 ///
