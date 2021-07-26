@@ -86,14 +86,14 @@ target_link_libraries(
 
 # Alignment for Generic Contextual detector 
 add_executable(
-	ActsExampleDetectorAlignGeneric
-	ContextualAlignment.cpp)
+  ActsExampleDetectorAlignGeneric
+  ContextualAlignment.cpp)
 target_link_libraries(
   ActsExampleDetectorAlignGeneric 
-	PRIVATE
+  PRIVATE
     ActsExamplesRecTracksCommon
-    ActsExamplesDetectorContextual)
-
+    ActsExamplesDetectorContextual
+)
 
 
 install(
