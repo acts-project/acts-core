@@ -242,18 +242,8 @@ TrackAlignmentState trackAlignmentState(
       // @Todo: don't allocate memory for fixed degree of freedom
       resetAlignmentDerivative(alignToBound, alignMask);
 
-      //      AlignmentMatrix project = AlignmentMatrix::Identity();
-      //      for (unsigned int iAlignParam = 0; iAlignParam <
-      //      Acts::eAlignmentSize; iAlignParam++) {
-      //        if (ACTS_CHECK_BIT(alignMask, AlignmentMask::Center0)) {
-      //	      alignToBound(iAlignParam, iAlignParam) =
-      // alignMask[iAlignParam];
-      //        }
-      //	}
-
       // Residual is calculated as the (measurement - parameters), thus we need
-      // a
-      // minus sign below
+      // a minus sign below
       alignState.alignmentToResidualDerivative.block(
           iMeasurement, iSurface * eAlignmentSize, measdim, eAlignmentSize) =
           -H * (alignToBound);
