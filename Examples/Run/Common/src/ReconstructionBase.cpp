@@ -6,10 +6,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include "ActsExamples/Reconstruction/ReconstructionBase.hpp"
+
 #include "ActsExamples/Detector/IBaseDetector.hpp"
-//#ifdef ACTS_PLUGIN_ONNX
-//#include "Acts/Plugins/Onnx/MLTrackClassifier.hpp"
-//#endif
 #include "ActsExamples/Digitization/DigitizationOptions.hpp"
 #include "ActsExamples/Digitization/SmearingAlgorithm.hpp"
 #include "ActsExamples/Geometry/CommonGeometry.hpp"
@@ -30,8 +29,6 @@
 #include "ActsExamples/TruthTracking/ParticleSmearing.hpp"
 #include "ActsExamples/TruthTracking/TruthTrackFinder.hpp"
 #include "ActsExamples/Utilities/Options.hpp"
-
-#include "RecInput.hpp"
 
 ActsExamples::CsvSimHitReader::Config setupSimHitReading(
     const ActsExamples::Options::Variables& vars,

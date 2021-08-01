@@ -21,6 +21,7 @@
 #include "ActsExamples/Io/Root/RootTrajectorySummaryWriter.hpp"
 #include "ActsExamples/MagneticField/MagneticFieldOptions.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
+#include "ActsExamples/Reconstruction/ReconstructionBase.hpp"
 #include "ActsExamples/TrackFitting/SurfaceSortingAlgorithm.hpp"
 #include "ActsExamples/TrackFitting/TrackFittingAlgorithm.hpp"
 #include "ActsExamples/TrackFitting/TrackFittingOptions.hpp"
@@ -30,8 +31,6 @@
 #include "ActsExamples/Utilities/Paths.hpp"
 
 #include <memory>
-
-#include "RecInput.hpp"
 
 using namespace Acts::UnitLiterals;
 using namespace ActsExamples;
