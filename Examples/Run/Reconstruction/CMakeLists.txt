@@ -9,8 +9,7 @@ target_link_libraries(
   ActsExampleTruthTracksGeneric
   PRIVATE
     ActsExamplesRecTracksCommon 
-    ActsExamplesDetectorGeneric)
-
+    ActsExamplesDetectorGeneric) 
 # Truth fitting for TGeo detector 
 add_executable(
   ActsExampleTruthTracksTGeo
@@ -83,19 +82,6 @@ target_link_libraries(
     ActsExamplesDetectorTGeo
 )
 
-
-# Alignment for Generic Contextual detector 
-add_executable(
-  ActsExampleDetectorAlignGeneric
-  ContextualAlignment.cpp)
-target_link_libraries(
-  ActsExampleDetectorAlignGeneric 
-  PRIVATE
-    ActsExamplesRecTracksCommon
-    ActsExamplesDetectorContextual
-)
-
-
 install(
   TARGETS
     ActsExampleTruthTracksGeneric
@@ -106,7 +92,6 @@ install(
     ActsExampleCKFTracksTelescope
     ActsExampleSeedingGeneric
     ActsExampleSeedingTGeo
-    ActsExampleDetectorAlignGeneric
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_subdirectory_if(DD4hep ACTS_BUILD_EXAMPLES_DD4HEP)
