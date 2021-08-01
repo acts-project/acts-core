@@ -20,7 +20,8 @@ class IBaseDetector;
 
 using AlignedDetElementGetter =
     std::function<std::vector<Acts::DetectorElementBase*>(
-        const std::shared_ptr<ActsExamples::IBaseDetector>&)>;
+        const std::shared_ptr<ActsExamples::IBaseDetector>&,
+        const std::vector<Acts::GeometryIdentifier>&)>;
 
 /// The options for running alignment or not
 ///

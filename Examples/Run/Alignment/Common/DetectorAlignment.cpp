@@ -16,6 +16,7 @@
 #include "ActsExamples/Io/Csv/CsvOptionsReader.hpp"
 #include "ActsExamples/Io/Csv/CsvParticleReader.hpp"
 #include "ActsExamples/Io/Csv/CsvSimHitReader.hpp"
+#include "ActsExamples/Io/Json/JsonGeometryList.hpp"
 #include "ActsExamples/Io/Performance/TrackFinderPerformanceWriter.hpp"
 #include "ActsExamples/Io/Performance/TrackFitterPerformanceWriter.hpp"
 #include "ActsExamples/Io/Root/RootTrajectoryStatesWriter.hpp"
@@ -42,6 +43,8 @@ void addAlignmentOptions(ActsExamples::Options::Description& desc) {
   auto opt = desc.add_options();
   opt("reco-with-misalignment-correction", value<bool>()->default_value(false),
       "Correct for detector misalignment effects.");
+  opt("alignment-geo--config-file", value<std::string>()->default_value(""),
+      "Json file for alignment geometry elements selection");
 }
 
 int runDetectorAlignment(
@@ -49,7 +52,8 @@ int runDetectorAlignment(
     std::shared_ptr<ActsExamples::IBaseDetector> detector,
     ActsAlignment::AlignedTransformUpdater alignedTransformUpdater,
     std::function<std::vector<Acts::DetectorElementBase*>(
-        const std::shared_ptr<ActsExamples::IBaseDetector>&)>
+        const std::shared_ptr<ActsExamples::IBaseDetector>&,
+        const std::vector<Acts::GeometryIdentifier>&)>
         alignedDetElementsGetter) {
   // using boost::program_options::value;
 
@@ -157,7 +161,12 @@ int runDetectorAlignment(
     // @todo: remove or change it. Useless currently.
     alignment.outputTrajectories = "trajectories";
     alignment.alignedTransformUpdater = alignedTransformUpdater;
-    alignment.alignedDetElements = alignedDetElementsGetter(detector);
+    std::string path{vm["geo-selection-config-file"].as<std::string>()};
+    if (not path.empty()) {
+      alignment.alignedDetElements = alignedDetElementsGetter(
+          detector, ActsExamples::readJsonGeometryList(path));
+    }
+
     // The criteria to determine if the iteration has converged.
     alignment.deltaChi2ONdfCutOff = {10, 0.00005};
     alignment.chi2ONdfCutOff = 0.01;

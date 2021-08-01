@@ -31,9 +31,10 @@ int main(int argc, char* argv[]) {
       };
 
   // 2. Selector for the detector elements to be aligned
-  // @FIXME: use jason geometry selection
+  // @todo: allow different levels of alignment
   auto alignedDetElementsGetter =
-      [](const std::shared_ptr<ActsExamples::IBaseDetector>& detector)
+      [](const std::shared_ptr<ActsExamples::IBaseDetector>& detector,
+         const std::vector<Acts::GeometryIdentifier>& geometrySelection)
       -> std::vector<Acts::DetectorElementBase*> {
     std::vector<Acts::DetectorElementBase*> dets;
     AlignedDetector* alignedDetector =
@@ -43,11 +44,11 @@ int main(int argc, char* argv[]) {
         // get the detetor surface
         const auto& surface = &ldet->surface();
         auto geoID = surface->geometryId();
-        if (not(geoID.volume() == 8 and geoID.layer() == 8 and
-                geoID.sensitive() >= 469 and geoID.sensitive() <= 624)) {
-          continue;
+        auto it = std::find(geometrySelection.begin(), geometrySelection.end(),
+                            geoID);
+        if (it != geometrySelection.end()) {
+          dets.push_back(ldet.get());
         }
-        dets.push_back(ldet.get());
       }
     }
     return dets;
