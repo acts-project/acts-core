@@ -251,7 +251,6 @@ std::vector<KalmanFitterInputTrajectory> createTrajectories(
 
     trajectories.push_back(std::move(traj));
   }
-  std::cout << "Simulating " << nTrajectories << std::endl;
   return trajectories;
 }
 }  // namespace
@@ -270,7 +269,7 @@ BOOST_AUTO_TEST_CASE(ZeroFieldKalmanAlignment) {
   const auto kfZero = KalmanFitterType(kfZeroPropagator);
 
   // alignment
-  const auto alignLogger = getDefaultLogger("Alignment", Logging::VERBOSE);
+  const auto alignLogger = getDefaultLogger("Alignment", Logging::INFO);
   const auto alignZero = Alignment(kfZero);
 
   // Create 10 trajectories

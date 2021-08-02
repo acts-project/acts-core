@@ -205,18 +205,17 @@ TrackAlignmentState trackAlignmentState(
     iParams -= eBoundSize;
     // (a) Get and fill the measurement covariance matrix
     const ActsDynamicMatrix measCovariance =
-        state.calibratedCovariance().template topLeftCorner(measdim, measdim);
+        state.effectiveCalibratedCovariance();
     alignState.measurementCovariance.block(iMeasurement, iMeasurement, measdim,
                                            measdim) = measCovariance;
 
     // (b) Get and fill the bound parameters to measurement projection matrix
-    const ActsDynamicMatrix H =
-        state.projector().template topLeftCorner(measdim, eBoundSize);
+    const ActsDynamicMatrix H = state.effectiveProjector();
     alignState.projectionMatrix.block(iMeasurement, iParams, measdim,
                                       eBoundSize) = H;
     // (c) Get and fill the residual
     alignState.residual.segment(iMeasurement, measdim) =
-        state.calibrated().template head(measdim) - H * state.smoothed();
+        state.effectiveCalibrated() - H * state.smoothed();
 
     // (d) @Todo: Get the derivative of alignment parameters w.r.t. measurement
     // or residual

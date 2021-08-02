@@ -245,8 +245,8 @@ struct Alignment {
           fitOptionsWithRefSurface, alignResult.idxedAlignSurfaces, alignMask,
           logger);
       if (not evaluateRes.ok()) {
-        ACTS_WARNING("Evaluation of alignment state for track " << iTraj
-                                                                << " failed");
+        ACTS_DEBUG("Evaluation of alignment state for track " << iTraj
+                                                              << " failed");
         continue;
       }
       const auto& alignState = evaluateRes.value();

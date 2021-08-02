@@ -43,7 +43,7 @@ void addAlignmentOptions(ActsExamples::Options::Description& desc) {
   auto opt = desc.add_options();
   opt("reco-with-misalignment-correction", value<bool>()->default_value(false),
       "Correct for detector misalignment effects.");
-  opt("alignment-geo--config-file", value<std::string>()->default_value(""),
+  opt("alignment-geo-config-file", value<std::string>()->default_value(""),
       "Json file for alignment geometry elements selection");
 }
 
@@ -161,7 +161,7 @@ int runDetectorAlignment(
     // @todo: remove or change it. Useless currently.
     alignment.outputTrajectories = "trajectories";
     alignment.alignedTransformUpdater = alignedTransformUpdater;
-    std::string path{vm["geo-selection-config-file"].as<std::string>()};
+    std::string path = vm["alignment-geo-config-file"].as<std::string>();
     if (not path.empty()) {
       alignment.alignedDetElements = alignedDetElementsGetter(
           detector, ActsExamples::readJsonGeometryList(path));
