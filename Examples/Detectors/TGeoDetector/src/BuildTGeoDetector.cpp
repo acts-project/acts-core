@@ -24,7 +24,6 @@
 #include "Acts/Plugins/TGeo/TGeoDetectorElement.hpp"
 #include "Acts/Utilities/BinningType.hpp"
 #include "ActsExamples/TGeoDetector/BuildTGeoDetector.hpp"
-#include "ActsExamples/TGeoDetector/TGeoDetectorOptions.hpp"
 #include "ActsExamples/Utilities/Options.hpp"
 
 #include <list>
