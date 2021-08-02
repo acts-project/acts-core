@@ -283,7 +283,7 @@ struct Alignment {
         Acts::ActsDynamicMatrix::Zero(alignDof, alignDof);
     sumChi2SecondDerivativeInverse = sumChi2SecondDerivative.inverse();
     if (sumChi2SecondDerivativeInverse.hasNaN()) {
-      ACTS_WARNING("Chi2 second derivative inverse has NaN");
+      ACTS_DEBUG("Chi2 second derivative inverse has NaN");
       // return AlignmentError::AlignmentParametersUpdateFailure;
     }
 
@@ -500,7 +500,7 @@ struct Alignment {
         iDetElement++;
       }
     } else {
-      ACTS_WARNING("Alignment parameters is not updated.");
+      ACTS_DEBUG("Alignment parameters is not updated.");
     }
 
     return alignResult;
