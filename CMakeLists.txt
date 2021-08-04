@@ -36,6 +36,7 @@ option(ACTS_BUILD_PLUGIN_JSON "Build json plugin" OFF)
 option(ACTS_USE_SYSTEM_NLOHMANN_JSON "Use nlohmann::json provided by the system instead of the bundled version" OFF)
 option(ACTS_BUILD_PLUGIN_LEGACY "Build legacy plugin" OFF)
 option(ACTS_BUILD_PLUGIN_ONNX "Build ONNX plugin" OFF)
+option(ACTS_BUILD_PLUGIN_PYTHON "Build python plugin" OFF)
 option(ACTS_BUILD_PLUGIN_SYCL "Build SYCL plugin" OFF)
 option(ACTS_BUILD_PLUGIN_TGEO "Build TGeo plugin" OFF)
 # fatras related options
@@ -169,6 +170,9 @@ endmacro()
 # the same package twice. This avoids having complex if/else trees to sort out
 # when a particular package is actually needed.
 # plugin dependencies
+if(ACTS_BUILD_PLUGIN_PYTHON)
+    add_subdirectory(thirdparty/pybind11)
+endif()
 if(ACTS_BUILD_PLUGIN_AUTODIFF)
   if(ACTS_USE_SYSTEM_AUTODIFF)
     find_package(autodiff ${_acts_autodiff_version} CONFIG REQUIRED)
