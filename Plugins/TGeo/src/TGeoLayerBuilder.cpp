@@ -14,8 +14,6 @@
 #include "Acts/Plugins/TGeo/TGeoParser.hpp"
 #include "Acts/Plugins/TGeo/TGeoPrimitivesHelper.hpp"
 
-#include <stdio.h>
-
 #include "TGeoManager.h"
 #include "TGeoMatrix.h"
 

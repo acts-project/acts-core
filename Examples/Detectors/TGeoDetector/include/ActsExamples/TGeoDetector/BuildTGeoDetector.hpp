@@ -11,7 +11,7 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/Material/IMaterialDecorator.hpp"
-#include "ActsExamples/TGeoDetector/TGeoDetectorOptions.hpp"
+#include "ActsExamples/Io/Json/JsonTGeoDetectorConfig.hpp"
 
 #include <memory>
 #include <vector>
