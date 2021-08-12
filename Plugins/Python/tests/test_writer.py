@@ -501,13 +501,13 @@ def hepmc_data_impl(tmp_path_factory):
     with tempfile.TemporaryDirectory() as tmp_path:
         env = os.environ.copy()
         env["NEVENTS"] = "1"
-        # subprocess.check_call([str(script)], cwd=tmp_path, env=env)
+        subprocess.check_call([str(script)], cwd=tmp_path, env=env)
 
         outfile = Path(tmp_path) / "hepmc3/event000000000-events.hepmc3"
-        fake = Path("/scratch/pagessin/acts/hepmc3/event000000000-events.hepmc3")
+        # fake = Path("/scratch/pagessin/acts/hepmc3/event000000000-events.hepmc3")
 
-        outfile.parent.mkdir()
-        shutil.copy(fake, outfile)
+        # outfile.parent.mkdir()
+        # shutil.copy(fake, outfile)
 
         assert outfile.exists()
 
@@ -525,6 +525,7 @@ def hepmc_data(hepmc_data_impl: Path, tmp_path):
 @pytest.mark.skipif(not hepmc3Enabled, reason="HepMC3 plugin not available")
 @pytest.mark.skipif(not dd4hepEnabled, reason="DD4hep not set up")
 @pytest.mark.skipif(not geant4Enabled, reason="Geant4 not set up")
+@pytest.mark.slow
 def test_hepmc3_histogram(hepmc_data, tmp_path):
 
     from acts.examples.hepmc3 import (
