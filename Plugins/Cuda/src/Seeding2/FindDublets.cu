@@ -17,6 +17,8 @@
 #include <cassert>
 #include <cmath>
 
+#include <iostream>
+
 namespace {
 
 /// Type of "other spacepoint" passed to the kernel

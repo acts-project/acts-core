@@ -9,6 +9,7 @@
 // CUDA plugin include(s).
 #include "Acts/Plugins/Cuda/Seeding2/Details/CountDublets.hpp"
 #include "Acts/Plugins/Cuda/Seeding2/Details/Types.hpp"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include "../Utilities/ErrorCheck.cuh"
 
@@ -17,6 +18,8 @@
 
 // System include(s).
 #include <algorithm>
+
+#include <iostream>
 
 namespace Acts {
 namespace Cuda {
@@ -107,7 +110,7 @@ DubletCounts countDublets(
   // Calculate the parallelisation for the dublet counting.
   const int numBlocks = (nMiddleSP + maxBlockSize - 1) / maxBlockSize;
   const int sharedMem = maxBlockSize * sizeof(DubletCounts);
-
+  
   // Create the small memory block in which we will get the count back for each
   // execution block.
   auto dubletCountsDevice = make_device_array<DubletCounts>(numBlocks);
@@ -138,6 +141,12 @@ DubletCounts countDublets(
     result.maxTriplets =
         std::max(dubletCountsHost.get()[i].maxTriplets, result.maxTriplets);
   }
+
+  /*
+  Cuda::Nmm::MemoryResource::HostMemoryResource *hmr = Cuda::getCPUmmr();
+  hmr->deallocate(static_cast<void*>(dubletCountsHost.get()), numBlocks);
+  */
+
   return result;
 }
 

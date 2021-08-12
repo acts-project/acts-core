@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Plugins/Cuda/Utilities/CpuScalar.hpp"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include <iostream>
 #include <memory>
@@ -26,22 +27,28 @@ template <typename var_t>
 class CudaScalar {
  public:
   CudaScalar() {
-    ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    m_devPtr = static_cast<var_t*>(getGPUmmr()->allocate(sizeof(var_t)));
   }
 
   CudaScalar(var_t* scalar) {
-    ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    m_devPtr = static_cast<var_t*>(getGPUmmr()->allocate(sizeof(var_t)));
     ACTS_CUDA_ERROR_CHECK(
         cudaMemcpy(m_devPtr, scalar, sizeof(var_t), cudaMemcpyHostToDevice));
   }
 
   CudaScalar(const var_t* scalar) {
-    ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(cudaMalloc((var_t**)&m_devPtr, sizeof(var_t)));
+    m_devPtr = static_cast<var_t*>(getGPUmmr()->allocate(sizeof(var_t)));
     ACTS_CUDA_ERROR_CHECK(
         cudaMemcpy(m_devPtr, scalar, sizeof(var_t), cudaMemcpyHostToDevice));
   }
 
-  ~CudaScalar() { ACTS_CUDA_ERROR_CHECK(cudaFree(m_devPtr)); }
+  ~CudaScalar() { 
+    //ACTS_CUDA_ERROR_CHECK(cudaFree(m_devPtr)); 
+    getGPUmmr()->deallocate(static_cast<void*>(m_devPtr), sizeof(var_t));
+  }
 
   var_t* get() { return m_devPtr; }
 

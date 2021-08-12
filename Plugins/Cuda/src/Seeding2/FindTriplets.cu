@@ -11,6 +11,7 @@
 #include "Acts/Plugins/Cuda/Seeding2/Details/Types.hpp"
 #include "Acts/Plugins/Cuda/Seeding2/TripletFilterConfig.hpp"
 #include "Acts/Plugins/Cuda/Utilities/MemoryManager.hpp"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include "../Utilities/ErrorCheck.cuh"
 #include "../Utilities/MatrixMacros.hpp"
@@ -25,6 +26,8 @@
 #include <cassert>
 #include <cmath>
 #include <cstring>
+
+#include <iostream>
 
 namespace Acts {
 namespace Cuda {
@@ -593,6 +596,11 @@ std::vector<std::vector<Triplet>> findTriplets(
     const device_array<std::size_t>& middleTopDublets,
     float maxScatteringAngle2, float sigmaScattering, float minHelixDiameter2,
     float pT2perRadius, float impactMax) {
+  //Acts::Cuda::Nmm::MemoryResource::CudaMemoryResource upstream;
+  //Acts::Cuda::Nmm::MemoryResource::ArenaMemoryResource< Acts::Cuda::Nmm::MemoryResource::CudaMemoryResource > arenaMr{&upstream};
+  //Acts::Cuda::Nmm::MemoryResource::detail::setCurrentDeviceResource(&arenaMr);
+  //Acts::Cuda::Nmm::MemoryResource::DeviceMemoryResource *dmr = Acts::Cuda::Nmm::MemoryResource::detail::getCurrentDeviceResource();
+  
   // Calculate the parallelisation for the parameter transformation.
   const int numBlocksLT =
       (dubletCounts.nDublets + maxBlockSize - 1) / maxBlockSize;
@@ -812,7 +820,19 @@ std::vector<std::vector<Triplet>> findTriplets(
       result[triplet.middleIndex].push_back(triplet);
     }
   }
-
+  
+  // Free host array
+  /*
+  Cuda::Nmm::MemoryResource::HostMemoryResource *hmr = Cuda::getCPUmmr();
+  hmr->deallocate(static_cast<void*>(objectCountsHostNull.get()), NObjectCountTypes);
+  hmr->deallocate(static_cast<void*>(objectCountsHost.get()), NObjectCountTypes);
+  hmr->deallocate(static_cast<void*>(filteredTripletsHost.get()), nParallelMiddleSPs * dubletCounts.maxTriplets);
+  hmr->deallocate(static_cast<void*>(tripletsPerBottomDubletHost.get()), nParallelMiddleSPs * dubletCounts.maxMBDublets);
+  hmr->deallocate(static_cast<void*>(filteredTripletCountsHostNull.get()), nParallelMiddleSPs);
+  hmr->deallocate(static_cast<void*>(filteredTripletCountsHost.get()), nParallelMiddleSPs);
+  hmr->deallocate(static_cast<void*>(middleBottomCountsHost.get()), nMiddleSPs);
+  hmr->deallocate(static_cast<void*>(middleTopCountsHost.get()), nMiddleSPs);
+  */
   // Return the indices of all identified triplets.
   assert(result.size() == nMiddleSPs);
   return result;

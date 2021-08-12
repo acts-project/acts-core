@@ -10,6 +10,7 @@
 #include "Acts/Plugins/Cuda/Seeding2/Details/Types.hpp"
 #include "Acts/Plugins/Cuda/Utilities/Arrays.hpp"
 #include "Acts/Plugins/Cuda/Utilities/MemoryManager.hpp"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include "ErrorCheck.cuh"
 #include "StreamHandlers.cuh"
@@ -19,6 +20,7 @@
 
 // System include(s).
 #include <cstdlib>
+#include <iostream>
 
 namespace Acts {
 namespace Cuda {
@@ -37,7 +39,8 @@ void HostArrayDeleter::operator()(void* ptr) {
   }
 
   // Free the host memory.
-  free(ptr);
+  //free(ptr);
+  Acts::getCPUmmr()->deallocate(ptr);
   return;
 }
 
@@ -48,7 +51,11 @@ device_array<T> make_device_array(std::size_t size) {
   // Allocate the memory.
   T* ptr = nullptr;
   if (size != 0) {
-    ptr = static_cast<T*>(MemoryManager::instance().allocate(size * sizeof(T)));
+    if(Acts::getGPUmmr() == nullptr){
+      ptr = static_cast<T*>(MemoryManager::instance().allocate(size * sizeof(T)));
+    } else {
+      ptr = static_cast<T*>(Acts::getGPUmmr()->allocate(size * sizeof(T)));
+    }
   }
   // Create the smart pointer.
   return device_array<T>(ptr);
@@ -57,11 +64,13 @@ device_array<T> make_device_array(std::size_t size) {
 template <typename T>
 host_array<T> make_host_array(std::size_t size) {
   // Allocate the memory.
+  //Acts::Cuda::Nmm::MemoryResource::HostMemoryResource *hmr = new Acts::Cuda::Nmm::MemoryResource::CPUMemoryResource();
   T* ptr = nullptr;
   if (size != 0) {
-    ptr = static_cast<T*>(malloc(size * sizeof(T)));
+    ptr = static_cast<T*>(Acts::getCPUmmr()->allocate(size * sizeof(T)));
   }
   // Create the smart pointer.
+  //delete hmr;
   return host_array<T>(ptr);
 }
 
@@ -112,7 +121,7 @@ void copyToHost(host_array<T>& host, const device_array<T>& dev,
   template class std::unique_ptr<TYPE,                                         \
                                  Acts::Cuda::Details::DeviceArrayDeleter>;     \
   template std::unique_ptr<TYPE, Acts::Cuda::Details::DeviceArrayDeleter>      \
-      Acts::Cuda::make_device_array<TYPE>(std::size_t);                        \
+      Acts::Cuda::make_device_array<TYPE>(std::size_t); \
   template class std::unique_ptr<TYPE, Acts::Cuda::Details::HostArrayDeleter>; \
   template std::unique_ptr<TYPE, Acts::Cuda::Details::HostArrayDeleter>        \
       Acts::Cuda::make_host_array<TYPE>(std::size_t);                          \

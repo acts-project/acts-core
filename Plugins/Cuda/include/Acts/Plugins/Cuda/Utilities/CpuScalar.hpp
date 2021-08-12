@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Plugins/Cuda/Utilities/CudaScalar.cu"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 namespace Acts {
 
@@ -23,7 +24,8 @@ class CpuScalar {
     if (pinned == 0) {
       m_hostPtr = new var_t[1];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, sizeof(var_t));
+      // cudaMallocHost(&m_hostPtr, sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(sizeof(var_t)));
     }
   }
 
@@ -32,7 +34,8 @@ class CpuScalar {
     if (pinned == 0) {
       m_hostPtr = new var_t[1];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, sizeof(var_t));
+      // cudaMallocHost(&m_hostPtr, sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(sizeof(var_t)));
     }
     cudaMemcpy(m_hostPtr, cuScalar->get(), sizeof(var_t),
                cudaMemcpyDeviceToHost);
@@ -42,7 +45,8 @@ class CpuScalar {
     if (!m_pinned) {
       delete m_hostPtr;
     } else if (m_pinned && m_hostPtr) {
-      cudaFreeHost(m_hostPtr);
+      // cudaFreeHost(m_hostPtr);
+      Acts::getPinnedmmr()->deallocate(m_hostPtr, m_size);
     }
   }
 

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Plugins/Cuda/Utilities/CudaMatrix.cu"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 // column-major style Matrix Definition
 
@@ -27,7 +28,8 @@ class CpuMatrix {
     if (pinned == 0) {
       m_hostPtr = new var_t[m_size];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      // cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(m_size * sizeof(var_t)));
     }
   }
 
@@ -38,7 +40,8 @@ class CpuMatrix {
     if (pinned == 0) {
       m_hostPtr = new var_t[m_size];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, m_nRows * m_nCols * sizeof(var_t));
+      // cudaMallocHost(&m_hostPtr, m_nRows * m_nCols * sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
     }
     cudaMemcpy(m_hostPtr, cuMat->get(0, 0), m_size * sizeof(var_t),
                cudaMemcpyDeviceToHost);
@@ -48,7 +51,8 @@ class CpuMatrix {
     if (!m_pinned) {
       delete m_hostPtr;
     } else if (m_pinned && m_hostPtr) {
-      cudaFreeHost(m_hostPtr);
+      //cudaFreeHost(m_hostPtr);
+      Acts::getPinnedmmr()->deallocate(m_hostPtr, m_size);
     }
   }
 

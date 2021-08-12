@@ -27,6 +27,7 @@ add_library(
   include/Acts/Plugins/Cuda/Utilities/Arrays.hpp
   include/Acts/Plugins/Cuda/Utilities/Info.hpp
   include/Acts/Plugins/Cuda/Utilities/MemoryManager.hpp
+  include/Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp
   include/Acts/Plugins/Cuda/Utilities/StreamWrapper.hpp
   src/Seeding2/CountDublets.cu
   src/Seeding2/FindDublets.cu
@@ -37,6 +38,7 @@ add_library(
   src/Utilities/Info.cu
   src/Utilities/MatrixMacros.hpp
   src/Utilities/MemoryManager.cu
+  src/Utilities/NewMemoryManager.cu
   src/Utilities/StreamHandlers.cuh
   src/Utilities/StreamWrapper.cu
 )

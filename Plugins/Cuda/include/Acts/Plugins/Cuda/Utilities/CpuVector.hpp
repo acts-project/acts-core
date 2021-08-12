@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Plugins/Cuda/Utilities/CudaVector.cu"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include <cstring>
 
@@ -27,7 +28,8 @@ class CpuVector {
     if (pinned == 0) {
       m_hostPtr = new var_t[m_size];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      //cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(m_size * sizeof(var_t)));
     }
   }
 
@@ -37,7 +39,8 @@ class CpuVector {
     if (pinned == 0) {
       m_hostPtr = new var_t[m_size];
     } else if (pinned == 1) {
-      cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      // cudaMallocHost(&m_hostPtr, m_size * sizeof(var_t));
+      m_hostPtr = static_cast<var_t*>(Acts::getPinnedmmr()->allocate(m_size * sizeof(var_t)));
     }
     cudaMemcpy(m_hostPtr, cuVec->get(), m_size * sizeof(var_t),
                cudaMemcpyDeviceToHost);
@@ -47,7 +50,8 @@ class CpuVector {
     if (!m_pinned) {
       delete m_hostPtr;
     } else if (m_pinned && m_hostPtr) {
-      cudaFreeHost(m_hostPtr);
+      // cudaFreeHost(m_hostPtr);
+      Acts::getPinnedmmr()->deallocate(m_hostPtr, m_size);
     }
   }
 

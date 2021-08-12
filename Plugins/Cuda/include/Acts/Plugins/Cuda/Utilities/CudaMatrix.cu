@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Plugins/Cuda/Utilities/CpuMatrix.hpp"
+#include "Acts/Plugins/Cuda/Utilities/NewMemoryManager.hpp"
 
 #include <iostream>
 #include <memory>
@@ -28,43 +29,50 @@ class CudaMatrix {
   CudaMatrix() = delete;
   CudaMatrix(size_t nRows, size_t nCols) {
     m_setSize(nRows, nCols);
-    ACTS_CUDA_ERROR_CHECK(
-        cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(
+    //    cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    m_devPtr = static_cast< var_t* >(getGPUmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
   }
 
   CudaMatrix(size_t nRows, size_t nCols, var_t* mat) {
     m_setSize(nRows, nCols);
-    ACTS_CUDA_ERROR_CHECK(
-        cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(
+    //    cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    m_devPtr = static_cast< var_t* >(getGPUmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
     copyH2D(mat, m_size, 0);
   }
 
   CudaMatrix(size_t nRows, size_t nCols, CpuMatrix<var_t>* mat) {
     m_setSize(nRows, nCols);
-    ACTS_CUDA_ERROR_CHECK(
-        cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(
+    //    cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    m_devPtr = static_cast< var_t* >(getGPUmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
     copyH2D(mat->get(0, 0), m_size, 0);
   }
 
   CudaMatrix(size_t nRows, size_t nCols, var_t* mat, size_t len,
              size_t offset) {
     m_setSize(nRows, nCols);
-    ACTS_CUDA_ERROR_CHECK(
-        cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(
+    //    cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    m_devPtr = static_cast< var_t* >(getGPUmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
     copyH2D(mat, len, offset);
   }
 
   CudaMatrix(size_t nRows, size_t nCols, CpuMatrix<var_t>* mat, size_t len,
              size_t offset) {
     m_setSize(nRows, nCols);
-    ACTS_CUDA_ERROR_CHECK(
-        cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    //ACTS_CUDA_ERROR_CHECK(
+    //    cudaMalloc((var_t**)&m_devPtr, m_nRows * m_nCols * sizeof(var_t)));
+    m_devPtr = static_cast< var_t* >(getGPUmmr()->allocate(m_nRows * m_nCols * sizeof(var_t)));
     copyH2D(mat->get(0, 0), len, offset);
   }
 
   ~CudaMatrix() {
-    if (m_devPtr)
-      cudaFree(m_devPtr);
+    if (m_devPtr){
+      //cudaFree(m_devPtr);
+      getGPUmmr()->deallocate(static_cast< void* >(m_devPtr), m_size * sizeof(var_t));
+    }
   }
 
   var_t* get(size_t row = 0, size_t col = 0) {
