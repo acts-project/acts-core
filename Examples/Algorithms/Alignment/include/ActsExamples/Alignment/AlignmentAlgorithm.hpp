@@ -24,22 +24,30 @@ namespace ActsExamples {
 
 class AlignmentAlgorithm final : public BareAlgorithm {
  public:
-  using AlignResult = Acts::Result<ActsAlignment::AlignmentResult>;
+  using AlignmentResult = Acts::Result<ActsAlignment::AlignmentResult>;
   /// Alignment function that takes sets of input measurements, initial
   /// trackstate and alignment options and returns some alignment-specific
   /// result.
   using TrackFitterOptions =
       Acts::KalmanFitterOptions<MeasurementCalibrator, Acts::VoidOutlierFinder>;
-  using AlignmentFunction = std::function<AlignResult(
-      const std::vector<std::vector<IndexSourceLink>>&,
-      const TrackParametersContainer&,
-      const ActsAlignment::AlignmentOptions<TrackFitterOptions>&)>;
 
-  /// Create the fitter function implementation.
+  /// Alignment function that takes the above parameters and runs alignment
+  /// @note This is separated into a virtual interface to keep compilation units
+  /// small
+  class AlignmentFunction {
+   public:
+    virtual ~AlignmentFunction() = default;
+    virtual AlignmentResult operator()(
+        const std::vector<std::vector<IndexSourceLink>>&,
+        const TrackParametersContainer&,
+        const ActsAlignment::AlignmentOptions<TrackFitterOptions>&) const = 0;
+  };
+
+  /// Create the alignment function implementation.
   ///
   /// The magnetic field is intentionally given by-value since the variant
   /// contains shared_ptr anyways.
-  static AlignmentFunction makeAlignmentFunction(
+  static std::shared_ptr<AlignmentFunction> makeAlignmentFunction(
       std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry,
       std::shared_ptr<const Acts::MagneticFieldProvider> magneticField);
 
@@ -55,7 +63,7 @@ class AlignmentAlgorithm final : public BareAlgorithm {
     /// Output aligned parameters collection.
     std::string outputAlignmentParameters;
     /// Type erased fitter function.
-    AlignmentFunction align;
+    std::shared_ptr<AlignmentFunction> align;
     /// The alignd transform updater
     ActsAlignment::AlignedTransformUpdater alignedTransformUpdater;
     /// The surfaces (with detector elements) to be aligned

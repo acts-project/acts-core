@@ -109,7 +109,7 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   ACTS_DEBUG("Invoke track-based alignment with " << numTracksUsed
                                                   << " input tracks");
   auto result =
-      m_cfg.align(sourceLinkTrackContainer, initialParameters, alignOptions);
+      (*m_cfg.align)(sourceLinkTrackContainer, initialParameters, alignOptions);
   if (result.ok()) {
     const auto& alignOutput = result.value();
     alignedParameters = alignOutput.alignedParameters;

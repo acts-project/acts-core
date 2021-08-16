@@ -29,13 +29,13 @@ using Propagator = Acts::Propagator<Stepper, Acts::Navigator>;
 using Fitter = Acts::KalmanFitter<Propagator, Updater, Smoother>;
 using Alignment = ActsAlignment::Alignment<Fitter>;
 
-template <typename alignment_t>
-struct AlignmentFunctionImpl {
-  alignment_t align;
+struct AlignmentFunctionImpl
+    : public ActsExamples::AlignmentAlgorithm::AlignmentFunction {
+  Alignment align;
 
-  AlignmentFunctionImpl(alignment_t&& a) : align(std::move(a)) {}
+  AlignmentFunctionImpl(Alignment&& a) : align(std::move(a)) {}
 
-  ActsExamples::AlignmentAlgorithm::AlignResult operator()(
+  ActsExamples::AlignmentAlgorithm::AlignmentResult operator()(
       const std::vector<std::vector<ActsExamples::IndexSourceLink>>&
           sourceLinks,
       const ActsExamples::TrackParametersContainer& initialParameters,
@@ -47,7 +47,7 @@ struct AlignmentFunctionImpl {
 };
 }  // namespace
 
-ActsExamples::AlignmentAlgorithm::AlignmentFunction
+std::shared_ptr<ActsExamples::AlignmentAlgorithm::AlignmentFunction>
 ActsExamples::AlignmentAlgorithm::makeAlignmentFunction(
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry,
     std::shared_ptr<const Acts::MagneticFieldProvider> magneticField) {
@@ -62,5 +62,5 @@ ActsExamples::AlignmentAlgorithm::makeAlignmentFunction(
   Alignment alignment(std::move(trackFitter));
 
   // build the alignment functions. owns the alignment object.
-  return AlignmentFunctionImpl<Alignment>(std::move(alignment));
+  return std::make_shared<AlignmentFunctionImpl>(std::move(alignment));
 }
