@@ -44,15 +44,17 @@ void ActsExamples::Options::addTGeoGeometryOptions(Description& desc) {
   //   "geo-tgeo-sfbin-phi-tolerance": [0.025,0.025],
   //   # Tolerance interval in z [mm] for automated surface binning.
   //   "geo-tgeo-sfbin-z-tolerance": [5,5],
-  //   "geo-tgeo-nlayers" false,  # boolean switch whether there are negative layers
-  //   "geo-tgeo-clayers" true,  # boolean switch whether there are central layers
-  //   "geo-tgeo-players" false,  # boolean switch whether there are positive layers
+  //   "geo-tgeo-nlayers" false,  # boolean switch whether there are negative
+  //   layers "geo-tgeo-clayers" true,  # boolean switch whether there are
+  //   central layers "geo-tgeo-players" false,  # boolean switch whether there
+  //   are positive layers
   //
   // within each volume there can be negative/central/positive layers depending
   // on the which `geo-tgeo-{n,c,p}layers` flags are set to true. If any of
   // them are set, they must be followed by the corresponding layer options. If
   // the `*layers` option is false, an empty json object must be present at the
-  // corresponding place in the "Layers" list to keep the ncp association correct.
+  // corresponding place in the "Layers" list to keep the ncp association
+  // correct.
   //
   // examples: negative and central layers, but not positive layers
   //
@@ -71,18 +73,19 @@ void ActsExamples::Options::addTGeoGeometryOptions(Description& desc) {
   //           # Axes definition for negative sensitive objects.
   //           "geo-tgeo-module-axes": "YZX",
   //
-  //           # Radial range(s) for negative layers to restrict the module parsing.
-  //           "geo-tgeo-layer-r-range": [0,135],
+  //           # Radial range(s) for negative layers to restrict the module
+  //           parsing. "geo-tgeo-layer-r-range": [0,135],
   //
   //           # R-tolerances (if > 0.) that triggers splitting
   //             of collected surfaces into different negative layers.
   //           "geo-tgeo-layer-z-range": [-3000,-250],
   //
-  //           # Longitudinal range(s) for negative layers to restrict the module
+  //           # Longitudinal range(s) for negative layers to restrict the
+  //           module
   //             parsing.
   //           "geo-tgeo-layer-r-split": -1.0,
   //
-  //           # Z-tolerances (if > 0.) that triggers splitting of collected 
+  //           # Z-tolerances (if > 0.) that triggers splitting of collected
   //             surfaces into different negative layers.
   //           "geo-tgeo-layer-z-split": 10.0
   //       },
@@ -117,10 +120,13 @@ void ActsExamples::Options::addTGeoGeometryOptions(Description& desc) {
       "Root file name.");
   opt("geo-tgeo-jsonconfig", value<std::string>()->default_value(""),
       "Json config file name.");
-  opt("geo-tgeo-dump-jsonconfig", value<std::string>()->default_value("config.json"), "Json config file name.");
+  opt("geo-tgeo-dump-jsonconfig",
+      value<std::string>()->default_value("config.json"),
+      "Json config file name.");
 }
 
-std::vector<double> ActsExamples::readBeampipeBuilderParam(const std::string& path) {
+std::vector<double> ActsExamples::readBeampipeBuilderParam(
+    const std::string& path) {
   nlohmann::json djson;
   if (path.empty()) {
     return {};
@@ -135,7 +141,6 @@ std::vector<double> ActsExamples::readBeampipeBuilderParam(const std::string& pa
 
 void ActsExamples::from_json(const nlohmann::json& j,
                              Acts::TGeoCylinderDiscSplitter::Config& msc) {
-
   /// Number of segments in phi for a disc
   msc.cylinderPhiSegments = j["geo-tgeo-cyl-nphi-segs"];
   /// Number of segments in r for a disk
@@ -148,20 +153,19 @@ void ActsExamples::from_json(const nlohmann::json& j,
 
 void ActsExamples::from_json(const nlohmann::json& j,
                              Acts::TGeoLayerBuilder::LayerConfig& psc) {
-
-  psc.volumeName  = j["geo-tgeo-volume-name"];
+  psc.volumeName = j["geo-tgeo-volume-name"];
   psc.sensorNames = j["geo-tgeo-module-name"].get<std::vector<std::string>>();
-  psc.localAxes   = j["geo-tgeo-module-axes"];
+  psc.localAxes = j["geo-tgeo-module-axes"];
   auto r_range = j["geo-tgeo-layer-r-range"].get<std::pair<double, double>>();
   auto z_range = j["geo-tgeo-layer-z-range"].get<std::pair<double, double>>();
   psc.parseRanges = {{Acts::binR, r_range}, {Acts::binZ, z_range}};
   double r_split = j["geo-tgeo-layer-r-split"];
   double z_split = j["geo-tgeo-layer-z-split"];
   if (0 < r_split) {
-      psc.splitConfigs.emplace_back(Acts::binR, r_split);
+    psc.splitConfigs.emplace_back(Acts::binR, r_split);
   }
   if (0 < z_split) {
-      psc.splitConfigs.emplace_back(Acts::binZ, z_split);
+    psc.splitConfigs.emplace_back(Acts::binZ, z_split);
   }
 }
 
@@ -187,24 +191,21 @@ ActsExamples::readTGeoLayerBuilderConfigs(const std::string& path) {
 
     // configure surface autobinning
     auto binToleranceR =
-      volume["geo-tgeo-sfbin-r-tolerance"].get<std::vector<double>>();
+        volume["geo-tgeo-sfbin-r-tolerance"].get<std::vector<double>>();
     auto binToleranceZ =
-      volume["geo-tgeo-sfbin-z-tolerance"].get<std::vector<double>>();
+        volume["geo-tgeo-sfbin-z-tolerance"].get<std::vector<double>>();
     auto binTolerancePhi =
-      volume["geo-tgeo-sfbin-phi-tolerance"].get<std::vector<double>>();
-          std::vector<std::pair<double, double>> binTolerances(
+        volume["geo-tgeo-sfbin-phi-tolerance"].get<std::vector<double>>();
+    std::vector<std::pair<double, double>> binTolerances(
         static_cast<size_t>(Acts::binValues), {0., 0.});
-    binTolerances[Acts::binR] = {binToleranceR[0],
-                                 binToleranceR[1]};
-    binTolerances[Acts::binZ] = {binToleranceZ[0],
-                                 binToleranceZ[1]};
-    binTolerances[Acts::binPhi] = {binTolerancePhi[0],
-                                   binTolerancePhi[1]};
+    binTolerances[Acts::binR] = {binToleranceR[0], binToleranceR[1]};
+    binTolerances[Acts::binZ] = {binToleranceZ[0], binToleranceZ[1]};
+    binTolerances[Acts::binPhi] = {binTolerancePhi[0], binTolerancePhi[1]};
     layerBuilderConfig.autoSurfaceBinning = true;
     layerBuilderConfig.surfaceBinMatcher =
         Acts::SurfaceBinningMatcher(binTolerances);
 
-    auto isLayers = std::vector<bool>{volume["geo-tgeo-nlayers"], 
+    auto isLayers = std::vector<bool>{volume["geo-tgeo-nlayers"],
                                       volume["geo-tgeo-clayers"],
                                       volume["geo-tgeo-players"]};
     size_t ncp = 0;
@@ -218,11 +219,12 @@ ActsExamples::readTGeoLayerBuilderConfigs(const std::string& path) {
       layerBuilderConfig.layerConfigurations[ncp++].push_back(lConfig);
     }
 
-    for(const auto& splitter : volume["Splitters"]) {
+    for (const auto& splitter : volume["Splitters"]) {
       for (const auto& cdSplitter : splitter["CylinderDisk"]) {
         Acts::TGeoCylinderDiscSplitter::Config cdConfig;
         from_json(cdSplitter, cdConfig);
-        layerBuilderConfig.detectorElementSplitter = std::make_shared<Acts::TGeoCylinderDiscSplitter>(cdConfig);
+        layerBuilderConfig.detectorElementSplitter =
+            std::make_shared<Acts::TGeoCylinderDiscSplitter>(cdConfig);
       }
     }
 

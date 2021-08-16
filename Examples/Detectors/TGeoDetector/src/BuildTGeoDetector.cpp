@@ -92,10 +92,11 @@ ActsExamples::TGeo::buildTGeoDetector(
   std::list<std::shared_ptr<const Acts::ITrackingVolumeBuilder>> volumeBuilders;
 
   std::string rootFileName = vm["geo-tgeo-filename"].template as<std::string>();
-  std::string jsonFileName = vm["geo-tgeo-jsonconfig"].template as<std::string>();
+  std::string jsonFileName =
+      vm["geo-tgeo-jsonconfig"].template as<std::string>();
 
   // Create a beam pipe if configured to do so
-  auto beamPipeParameters = 
+  auto beamPipeParameters =
       ActsExamples::readBeampipeBuilderParam(jsonFileName);
   if (beamPipeParameters.size() > 0) {
     /// configure the beam pipe layer builder
