@@ -80,9 +80,9 @@ void resetAlignmentDerivative(Acts::AlignmentToBoundMatrix& alignToBound,
 /// parameters for a single track
 ///
 /// Suppose there are n measurements on the track, and m (m<=n) of them are on
-/// alignable surface, then eAlignmentSize*m alignment parameters
+/// alignable surface, then (eAlignmentSize*m) alignment parameters
 /// will be involved for this particular track, i.e. this track will contribute
-/// to at most eAlignmentSize*m*2 elements of the full chi2
+/// to at most (eAlignmentSize*m*2) elements of the full chi2
 /// second derivative matrix
 ///
 /// @tparam source_link_t The source link type of the trajectory
@@ -128,7 +128,7 @@ TrackAlignmentState trackAlignmentState(
     if (ts.hasSmoothed()) {
       nSmoothedStates++;
     } else {
-      // @FIXME: is this possible?
+      // @note: this should in principle never happen now. But still keep it as a note
       return true;
     }
 
@@ -138,7 +138,6 @@ TrackAlignmentState trackAlignmentState(
       return true;
     }
     // Check if the reference surface is to be aligned
-    // @Todo: consider the case when some of the Dofs are fixed for one surface
     bool isAlignable = false;
     const auto surface = &ts.referenceSurface();
     auto it = idxedAlignSurfaces.find(surface);
@@ -183,13 +182,10 @@ TrackAlignmentState trackAlignmentState(
   // The residual
   alignState.residual = ActsDynamicVector::Zero(alignState.measurementDim);
 
-  // The dimension of provided global track parameters covariance should be same
-  // as eBoundSize * nSmoothedStates
-  assert(globalTrackParamsCov.first.rows() ==
-             globalTrackParamsCov.first.cols() and
-         globalTrackParamsCov.first.rows() == eBoundSize * nSmoothedStates);
   // Unpack global track parameters covariance and the starting row/column for
-  // all smoothed states
+  // all smoothed states.
+  // Note that the dimension of provided global track parameters covariance
+  // should be same as eBoundSize * nSmoothedStates
   const auto& [sourceTrackParamsCov, stateRowIndices] = globalTrackParamsCov;
 
   // Loop over the measurement states to fill those alignment matrixs
@@ -217,7 +213,7 @@ TrackAlignmentState trackAlignmentState(
     alignState.residual.segment(iMeasurement, measdim) =
         state.effectiveCalibrated() - H * state.smoothed();
 
-    // (d) @Todo: Get the derivative of alignment parameters w.r.t. measurement
+    // (d) Get the derivative of alignment parameters w.r.t. measurement
     // or residual
     if (isAlignable) {
       iSurface -= 1;
@@ -238,7 +234,7 @@ TrackAlignmentState trackAlignmentState(
       AlignmentToBoundMatrix alignToBound =
           surface->alignmentToBoundDerivative(gctx, freeParams, pathDerivative);
       // Set the degree of freedom per surface.
-      // @Todo: don't allocate memory for fixed degree of freedom
+      // @Todo: don't allocate memory for fixed degree of freedom and consider surface/layer/volume wise align mask (instead of using global mask as now)
       resetAlignmentDerivative(alignToBound, alignMask);
 
       // Residual is calculated as the (measurement - parameters), thus we need

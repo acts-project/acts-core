@@ -52,8 +52,8 @@ class AlignmentAlgorithm final : public BareAlgorithm {
     std::string inputProtoTracks;
     /// Input initial track parameter estimates for for each proto track.
     std::string inputInitialTrackParameters;
-    /// Output fitted trajectories collection.
-    std::string outputTrajectories;
+    /// Output aligned parameters collection.
+    std::string outputAlignmentParameters;
     /// Type erased fitter function.
     AlignmentFunction align;
     /// The alignd transform updater

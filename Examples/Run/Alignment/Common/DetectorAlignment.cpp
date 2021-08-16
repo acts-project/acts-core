@@ -158,8 +158,7 @@ int runDetectorAlignment(
     alignment.inputProtoTracks = trackFinderCfg.outputProtoTracks;
     alignment.inputInitialTrackParameters =
         particleSmearingCfg.outputTrackParameters;
-    // @todo: remove or change it. Useless currently.
-    alignment.outputTrajectories = "trajectories";
+    alignment.outputAlignmentParameters = "alignment-parameters";
     alignment.alignedTransformUpdater = alignedTransformUpdater;
     std::string path = vm["alignment-geo-config-file"].as<std::string>();
     if (not path.empty()) {

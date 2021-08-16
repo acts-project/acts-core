@@ -43,7 +43,7 @@ struct AlignmentOptions {
   /// AlignmentOptions
   ///
   /// @param fOptions The fit options
-  ///  @parm  logger_ The logger wrapper
+  /// @param logger_ The logger wrapper
   /// @param aTransformUpdater The updater to update aligned transform
   /// @param aDetElements The alignable detector elements
   /// @param chi2CufOff The alignment chi2 tolerance

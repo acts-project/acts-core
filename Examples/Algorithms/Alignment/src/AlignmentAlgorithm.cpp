@@ -30,8 +30,9 @@ ActsExamples::AlignmentAlgorithm::AlignmentAlgorithm(Config cfg,
     throw std::invalid_argument(
         "Missing input initial track parameters collection");
   }
-  if (m_cfg.outputTrajectories.empty()) {
-    throw std::invalid_argument("Missing output trajectories collection");
+  if (m_cfg.outputAlignmentParameters.empty()) {
+    throw std::invalid_argument(
+        "Missing output alignment parameters collection");
   }
 }
 
@@ -84,9 +85,9 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
     sourceLinkTrackContainer.push_back(trackSourceLinks);
   }
 
-  // Prepare the output data with MultiTrajectory
-  TrajectoriesContainer trajectories;
-  trajectories.reserve(numTracksUsed);
+  // Prepare the output for alignment parameters
+  std::unordered_map<Acts::DetectorElementBase*, Acts::Transform3>
+      alignedParameters;
 
   // Construct a perigee surface as the target surface for the fitter
   auto pSurface = Acts::Surface::makeShared<Acts::PerigeeSurface>(
@@ -110,14 +111,16 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   auto result =
       m_cfg.align(sourceLinkTrackContainer, initialParameters, alignOptions);
   if (result.ok()) {
+    const auto& alignOutput = result.value();
+    alignedParameters = alignOutput.alignedParameters;
     ACTS_VERBOSE(
         "Alignment finished with deltaChi2 = " << result.value().deltaChi2);
   } else {
     ACTS_WARNING("Alignment failed with " << result.error());
   }
 
-  // @TODO: output aligned parameters
-
-  // ctx.eventStore.add(m_cfg.outputTrajectories, std::move(trajectories));
+  // add alignment parameters to event store
+  ctx.eventStore.add(m_cfg.outputAlignmentParameters,
+                     std::move(alignedParameters));
   return ActsExamples::ProcessCode::SUCCESS;
 }
