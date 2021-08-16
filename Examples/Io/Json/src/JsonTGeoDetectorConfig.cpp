@@ -117,10 +117,10 @@ void ActsExamples::Options::addTGeoGeometryOptions(Description& desc) {
       "Root file name.");
   opt("geo-tgeo-jsonconfig", value<std::string>()->default_value(""),
       "Json config file name.");
+  opt("geo-tgeo-dump-jsonconfig", value<std::string>()->default_value("config.json"), "Json config file name.");
 }
 
-std::vector<double> ActsExamples::Options::readBeampipeBuilderParam(const std::string& path) {
-
+std::vector<double> ActsExamples::readBeampipeBuilderParam(const std::string& path) {
   nlohmann::json djson;
   if (path.empty()) {
     return {};
@@ -133,7 +133,7 @@ std::vector<double> ActsExamples::Options::readBeampipeBuilderParam(const std::s
   return djson["geo-tgeo-beampipe-parameters"].get<std::vector<double>>();
 }
 
-void ActsExamples::Options::from_json(const nlohmann::json& j,
+void ActsExamples::from_json(const nlohmann::json& j,
                              Acts::TGeoCylinderDiscSplitter::Config& msc) {
 
   /// Number of segments in phi for a disc
@@ -146,7 +146,7 @@ void ActsExamples::Options::from_json(const nlohmann::json& j,
   msc.discRadialSegments = j["geo-tgeo-disc-nr-segs"];
 }
 
-void ActsExamples::Options::from_json(const nlohmann::json& j,
+void ActsExamples::from_json(const nlohmann::json& j,
                              Acts::TGeoLayerBuilder::LayerConfig& psc) {
 
   psc.volumeName  = j["geo-tgeo-volume-name"];
@@ -166,7 +166,7 @@ void ActsExamples::Options::from_json(const nlohmann::json& j,
 }
 
 std::vector<Acts::TGeoLayerBuilder::Config>
-ActsExamples::Options::readTGeoLayerBuilderConfigs(const std::string& path) {
+ActsExamples::readTGeoLayerBuilderConfigs(const std::string& path) {
   std::vector<Acts::TGeoLayerBuilder::Config> detLayerConfigs = {};
 
   nlohmann::json djson;
@@ -174,8 +174,6 @@ ActsExamples::Options::readTGeoLayerBuilderConfigs(const std::string& path) {
     return detLayerConfigs;
   }
   std::ifstream infile(path, std::ifstream::in | std::ifstream::binary);
-  // rely on exception for error handling
-  infile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
   infile >> djson;
 
   double unitScalor = djson["geo-tgeo-unit-scalor"];
@@ -184,8 +182,7 @@ ActsExamples::Options::readTGeoLayerBuilderConfigs(const std::string& path) {
   for (const auto& volume : djson["LayerConfigs"]["Volumes"]) {
     Acts::TGeoLayerBuilder::Config layerBuilderConfig;
     // subdetector selection
-    std::string subDetector = volume["geo-tgeo-volume"];
-    layerBuilderConfig.configurationName = subDetector;
+    layerBuilderConfig.configurationName = volume["geo-tgeo-volume"];
     layerBuilderConfig.unit = unitScalor;
 
     // configure surface autobinning

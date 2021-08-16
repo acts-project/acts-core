@@ -96,7 +96,7 @@ ActsExamples::TGeo::buildTGeoDetector(
 
   // Create a beam pipe if configured to do so
   auto beamPipeParameters = 
-      ActsExamples::Options::readBeampipeBuilderParam(jsonFileName);
+      ActsExamples::readBeampipeBuilderParam(jsonFileName);
   if (beamPipeParameters.size() > 0) {
     /// configure the beam pipe layer builder
     Acts::PassiveLayerBuilder::Config bplConfig;
@@ -129,7 +129,7 @@ ActsExamples::TGeo::buildTGeoDetector(
   TGeoManager::Import(rootFileName.c_str());
 
   auto layerBuilderConfigs =
-      ActsExamples::Options::readTGeoLayerBuilderConfigs(jsonFileName);
+      ActsExamples::readTGeoLayerBuilderConfigs(jsonFileName);
 
   // Remember the layer builders to collect the detector elements
   std::vector<std::shared_ptr<const Acts::TGeoLayerBuilder>> tgLayerBuilders;
