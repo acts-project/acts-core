@@ -208,8 +208,7 @@ int runDetectorAlignment(
       digiCfg.outputMeasurementParticlesMap;
   trackStatesWriter.inputMeasurementSimHitsMap =
       digiCfg.outputMeasurementSimHitsMap;
-  trackStatesWriter.outputDir = outputDir;
-  trackStatesWriter.outputFilename = "trackstates_fitter.root";
+  trackStatesWriter.filePath = outputDir + "/trackstates_fitter.root";
   sequencer.addWriter(std::make_shared<RootTrajectoryStatesWriter>(
       trackStatesWriter, logLevel));
 
@@ -219,8 +218,7 @@ int runDetectorAlignment(
   trackSummaryWriter.inputParticles = inputParticles;
   trackSummaryWriter.inputMeasurementParticlesMap =
       digiCfg.outputMeasurementParticlesMap;
-  trackSummaryWriter.outputDir = outputDir;
-  trackSummaryWriter.outputFilename = "tracksummary_fitter.root";
+  trackSummaryWriter.filePath = outputDir + "/tracksummary_fitter.root";
   sequencer.addWriter(std::make_shared<RootTrajectorySummaryWriter>(
       trackSummaryWriter, logLevel));
 
@@ -231,15 +229,16 @@ int runDetectorAlignment(
   perfFinder.inputParticles = inputParticles;
   perfFinder.inputMeasurementParticlesMap =
       digiCfg.outputMeasurementParticlesMap;
-  perfFinder.outputDir = outputDir;
+  perfFinder.filePath = outputDir + "/performance_track_finder.root";
   sequencer.addWriter(
       std::make_shared<TrackFinderPerformanceWriter>(perfFinder, logLevel));
+
   TrackFitterPerformanceWriter::Config perfFitter;
   perfFitter.inputTrajectories = fitter.outputTrajectories;
   perfFitter.inputParticles = inputParticles;
   perfFitter.inputMeasurementParticlesMap =
       digiCfg.outputMeasurementParticlesMap;
-  perfFitter.outputDir = outputDir;
+  perfFitter.filePath = outputDir + "/performance_track_fitter.root";
   sequencer.addWriter(
       std::make_shared<TrackFitterPerformanceWriter>(perfFitter, logLevel));
 
