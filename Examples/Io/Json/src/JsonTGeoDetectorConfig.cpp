@@ -132,8 +132,6 @@ std::vector<double> ActsExamples::readBeampipeBuilderParam(
     return {};
   }
   std::ifstream infile(path, std::ifstream::in | std::ifstream::binary);
-  // rely on exception for error handling
-  infile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
   infile >> djson;
 
   return djson["geo-tgeo-beampipe-parameters"].get<std::vector<double>>();
