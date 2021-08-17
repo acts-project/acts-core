@@ -34,8 +34,8 @@ SeedFinder<external_spacepoint_t>::SeedFinder(
     const SeedFilterConfig& seedFilterConfig,
     const TripletFilterConfig& tripletFilterConfig, int device,
     std::unique_ptr<const Logger> incomingLogger)
-    : m_commonConfig(std::move(commonConfig)),
-      m_seedFilterConfig(seedFilterConfig),
+    : m_commonConfig(commonConfig.toInternalUnits()),
+      m_seedFilterConfig(seedFilterConfig.toInternalUnits()),
       m_tripletFilterConfig(tripletFilterConfig),
       m_device(device),
       m_logger(std::move(incomingLogger)) {

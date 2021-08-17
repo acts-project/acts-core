@@ -11,5 +11,6 @@
 #include "DigitizationExample.hpp"
 
 int main(int argc, char* argv[]) {
-  return runDigitizationExample(argc, argv, std::make_shared<TGeoDetector>());
+  return runDigitizationExample(argc, argv,
+                                std::make_shared<ActsExamples::TGeoDetector>());
 }

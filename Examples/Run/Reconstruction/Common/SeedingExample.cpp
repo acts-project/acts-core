@@ -121,21 +121,21 @@ int runSeedingExample(int argc, char* argv[],
   };
   seedingCfg.outputSeeds = "seeds";
   seedingCfg.outputProtoTracks = "prototracks";
-  seedingCfg.rMax = 100.;
-  seedingCfg.deltaRMax = 60.;
-  seedingCfg.collisionRegionMin = -250;
-  seedingCfg.collisionRegionMax = 250.;
-  seedingCfg.zMin = -2000.;
-  seedingCfg.zMax = 2000.;
+  seedingCfg.rMax = 100._mm;
+  seedingCfg.deltaRMax = 60._mm;
+  seedingCfg.collisionRegionMin = -250_mm;
+  seedingCfg.collisionRegionMax = 250._mm;
+  seedingCfg.zMin = -2000._mm;
+  seedingCfg.zMax = 2000._mm;
   seedingCfg.maxSeedsPerSpM = 1;
   seedingCfg.cotThetaMax = 7.40627;  // 2.7 eta
   seedingCfg.sigmaScattering = 50;
   seedingCfg.radLengthPerSeed = 0.1;
-  seedingCfg.minPt = 500.;
-  seedingCfg.bFieldInZ = 0.00199724;
+  seedingCfg.minPt = 500._MeV;
+  seedingCfg.bFieldInZ = 1.99724_T;
   seedingCfg.beamPosX = 0;
   seedingCfg.beamPosY = 0;
-  seedingCfg.impactMax = 3.;
+  seedingCfg.impactMax = 3._mm;
   sequencer.addAlgorithm(
       std::make_shared<SeedingAlgorithm>(seedingCfg, logLevel));
 

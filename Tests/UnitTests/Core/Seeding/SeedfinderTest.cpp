@@ -26,6 +26,8 @@
 #include "ATLASCuts.hpp"
 #include "SpacePoint.hpp"
 
+using namespace Acts::UnitLiterals;
+
 std::vector<const SpacePoint*> readFile(std::string filename) {
   std::string line;
   int layer;
@@ -114,23 +116,23 @@ int main(int argc, char** argv) {
 
   Acts::SeedfinderConfig<SpacePoint> config;
   // silicon detector max
-  config.rMax = 160.;
-  config.deltaRMin = 5.;
-  config.deltaRMax = 160.;
-  config.collisionRegionMin = -250.;
-  config.collisionRegionMax = 250.;
-  config.zMin = -2800.;
-  config.zMax = 2800.;
+  config.rMax = 160._mm;
+  config.deltaRMin = 5._mm;
+  config.deltaRMax = 160._mm;
+  config.collisionRegionMin = -250._mm;
+  config.collisionRegionMax = 250._mm;
+  config.zMin = -2800._mm;
+  config.zMax = 2800._mm;
   config.maxSeedsPerSpM = 5;
   // 2.7 eta
   config.cotThetaMax = 7.40627;
   config.sigmaScattering = 1.00000;
 
-  config.minPt = 500.;
-  config.bFieldInZ = 0.00199724;
+  config.minPt = 500._MeV;
+  config.bFieldInZ = 1.99724_T;
 
-  config.beamPos = {-.5, -.5};
-  config.impactMax = 10.;
+  config.beamPos = {-.5_mm, -.5_mm};
+  config.impactMax = 10._mm;
 
   auto bottomBinFinder = std::make_shared<Acts::BinFinder<SpacePoint>>(
       Acts::BinFinder<SpacePoint>());

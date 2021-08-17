@@ -209,7 +209,7 @@ namespace PhysicalConstants {
 /// Reduced Planck constant h/2*pi.
 ///
 /// Computed from CODATA 2018 constants to double precision.
-inline constexpr double hbar =
+constexpr double hbar =
     6.582119569509066e-25 * UnitConstants::GeV * UnitConstants::s;
 }  // namespace PhysicalConstants
 

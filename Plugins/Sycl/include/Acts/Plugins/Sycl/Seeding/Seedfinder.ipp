@@ -25,7 +25,7 @@ Seedfinder<external_spacepoint_t>::Seedfinder(
     Acts::SeedfinderConfig<external_spacepoint_t> config,
     const Acts::Sycl::DeviceExperimentCuts& cuts,
     Acts::Sycl::QueueWrapper wrappedQueue)
-    : m_config(config),
+    : m_config(config.toInternalUnits()),
       m_deviceCuts(cuts),
       m_wrappedQueue(std::move(wrappedQueue)) {
   // init m_config

@@ -274,8 +274,12 @@ ActsExamples::ProcessCode ActsExamples::RootVertexPerformanceWriter::writeT(
   }
 
   // Retrieve and set reconstruction time
-  const auto& reconstructionTimeMS = ctx.eventStore.get<int>(m_cfg.inputTime);
-  m_timeMS = reconstructionTimeMS;
+  if (!m_cfg.inputTime.empty()) {
+    const auto& reconstructionTimeMS = ctx.eventStore.get<int>(m_cfg.inputTime);
+    m_timeMS = reconstructionTimeMS;
+  } else {
+    m_timeMS = -1;
+  }
 
   // fill the variables
   m_outputTree->Fill();

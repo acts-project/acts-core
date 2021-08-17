@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include "Acts/Definitions/Units.hpp"
+
 // System include(s).
 #include <cstddef>
 
@@ -16,14 +18,14 @@ namespace Acts {
 struct SeedFilterConfig {
   // the allowed delta between two inverted seed radii for them to be considered
   // compatible.
-  float deltaInvHelixDiameter = 0.00003;
+  float deltaInvHelixDiameter = 0.00003 * 1. / Acts::UnitConstants::mm;
   // the impact parameters (d0) is multiplied by this factor and subtracted from
   // weight
   float impactWeightFactor = 1.;
   // seed weight increased by this value if a compatible seed has been found.
   float compatSeedWeight = 200.;
   // minimum distance between compatible seeds to be considered for weight boost
-  float deltaRMin = 5.;
+  float deltaRMin = 5. * Acts::UnitConstants::mm;
   // in dense environments many seeds may be found per middle space point.
   // only seeds with the highest weight will be kept if this limit is reached.
   unsigned int maxSeedsPerSpM = 10;
@@ -31,6 +33,15 @@ struct SeedFilterConfig {
   // compatible seed?
   size_t compatSeedLimit = 2;
   // Tool to apply experiment specific cuts on collected middle space points
+
+  SeedFilterConfig toInternalUnits() const {
+    using namespace Acts::UnitLiterals;
+    SeedFilterConfig config = *this;
+    config.deltaRMin /= 1_mm;
+    config.deltaInvHelixDiameter /= 1. / 1_mm;
+
+    return config;
+  }
 };
 
 }  // namespace Acts

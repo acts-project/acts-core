@@ -59,13 +59,15 @@ struct GeometryView3D {
   /// @param sensitiveConfig The drawing configuration for sensitive surfaces
   /// @param passiveConfig The drawing configuration for passive surfaces
   /// @param gridConfig The drawing configuraiton for grid
+  /// @param outputDir Directory to write to
   static void drawSurfaceArray(
       IVisualization3D& helper, const SurfaceArray& surfaceArray,
       const GeometryContext& gctx,
       const Transform3& transform = Transform3::Identity(),
       const ViewConfig& sensitiveConfig = s_viewSensitive,
       const ViewConfig& passiveConfig = s_viewPassive,
-      const ViewConfig& gridConfig = s_viewGrid);
+      const ViewConfig& gridConfig = s_viewGrid,
+      const std::string& outputDir = ".");
 
   /// Helper method to draw AbstractVolume objects
   ///
@@ -87,11 +89,13 @@ struct GeometryView3D {
   /// @param layerConfig The drawing configuration for passive surfaces
   /// @param sensitiveConfig The drawing configuration for sensitive surfaces
   /// @param gridConfig The drawing configuraiton for grid display
+  /// @param outputDir Directory to write to
   static void drawLayer(IVisualization3D& helper, const Layer& layer,
                         const GeometryContext& gctx,
                         const ViewConfig& layerConfig = s_viewPassive,
                         const ViewConfig& sensitiveConfig = s_viewSensitive,
-                        const ViewConfig& gridConfig = s_viewGrid);
+                        const ViewConfig& gridConfig = s_viewGrid,
+                        const std::string& outputDir = ".");
 
   /// Helper method to draw AbstractVolume objects
   ///
@@ -106,6 +110,7 @@ struct GeometryView3D {
   /// @param gridView The drawing configuraiton for grid display
   /// @param writeIt The prescription to write it or not
   /// @param tag The (optional) additional output tag
+  /// @param outputDir Directory to write to
   static void drawTrackingVolume(
       IVisualization3D& helper, const TrackingVolume& tVolume,
       const GeometryContext& gctx,
@@ -114,7 +119,7 @@ struct GeometryView3D {
       const ViewConfig& layerView = s_viewPassive,
       const ViewConfig& sensitiveView = s_viewSensitive,
       const ViewConfig& gridView = s_viewGrid, bool writeIt = true,
-      const std::string& tag = "");
+      const std::string& tag = "", const std::string& outputDir = ".");
 
   /// Helper method to draw lines - base for all lines
   ///

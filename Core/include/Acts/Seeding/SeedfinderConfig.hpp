@@ -9,6 +9,7 @@
 #pragma once
 
 #include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Definitions/Units.hpp"
 
 #include <memory>
 
@@ -23,16 +24,15 @@ struct SeedfinderConfig {
   std::shared_ptr<Acts::SeedFilter<SpacePoint>> seedFilter;
 
   // Seed Cuts
-  // lower cutoff for seeds in MeV
-  // FIXME: Acts units
-  float minPt = 400.;
+  // lower cutoff for seeds
+  float minPt = 400. * Acts::UnitConstants::MeV;
   // cot of maximum theta angle
   // equivalent to 2.7 eta (pseudorapidity)
   float cotThetaMax = 7.40627;
-  // minimum distance in mm in r between two measurements within one seed
-  float deltaRMin = 5;
-  // maximum distance in mm in r between two measurements within one seed
-  float deltaRMax = 270;
+  // minimum distance in r between two measurements within one seed
+  float deltaRMin = 5 * Acts::UnitConstants::mm;
+  // maximum distance in r between two measurements within one seed
+  float deltaRMax = 270 * Acts::UnitConstants::mm;
 
   // FIXME: this is not used yet
   //        float upperPtResolutionPerSeed = 20* Acts::GeV;
@@ -42,14 +42,13 @@ struct SeedfinderConfig {
   // leads to this value being the cutoff. unit is 1/mm. default value
   // of 0.00003 leads to all helices with radius>33m to be considered compatible
 
-  // impact parameter in mm
-  // FIXME: Acts units
-  float impactMax = 20.;
+  // impact parameter
+  float impactMax = 20. * Acts::UnitConstants::mm;
 
   // how many sigmas of scattering angle should be considered?
   float sigmaScattering = 5;
   // Upper pt limit for scattering calculation
-  float maxPtScattering = 10000;
+  float maxPtScattering = 10 * Acts::UnitConstants::GeV;
 
   // for how many seeds can one SpacePoint be the middle SpacePoint?
   int maxSeedsPerSpM = 5;
@@ -57,24 +56,23 @@ struct SeedfinderConfig {
   // Geometry Settings
   // Detector ROI
   // limiting location of collision region in z
-  float collisionRegionMin = -150;
-  float collisionRegionMax = +150;
+  float collisionRegionMin = -150 * Acts::UnitConstants::mm;
+  float collisionRegionMax = +150 * Acts::UnitConstants::mm;
   float phiMin = -M_PI;
   float phiMax = M_PI;
   // limiting location of measurements
-  float zMin = -2800;
-  float zMax = 2800;
-  float rMax = 600;
+  float zMin = -2800 * Acts::UnitConstants::mm;
+  float zMax = 2800 * Acts::UnitConstants::mm;
+  float rMax = 600 * Acts::UnitConstants::mm;
   // WARNING: if rMin is smaller than impactMax, the bin size will be 2*pi,
   // which will make seeding very slow!
-  float rMin = 33;
+  float rMin = 33 * Acts::UnitConstants::mm;
 
-  // Unit in kiloTesla
-  // FIXME: Acts units
-  float bFieldInZ = 0.00208;
+  float bFieldInZ = 2.08 * Acts::UnitConstants::T;
   // location of beam in x,y plane.
   // used as offset for Space Points
-  Acts::Vector2 beamPos{0, 0};
+  Acts::Vector2 beamPos{0 * Acts::UnitConstants::mm,
+                        0 * Acts::UnitConstants::mm};
 
   // average radiation lengths of material on the length of a seed. used for
   // scattering.
@@ -87,8 +85,8 @@ struct SeedfinderConfig {
   // will be added to spacepoint measurement uncertainties (and therefore also
   // multiplied by sigmaError)
   // FIXME: call align1 and align2
-  float zAlign = 0;
-  float rAlign = 0;
+  float zAlign = 0 * Acts::UnitConstants::mm;
+  float rAlign = 0 * Acts::UnitConstants::mm;
   // used for measurement (+alignment) uncertainties.
   // find seeds within 5sigma error ellipse
   float sigmaError = 5;
@@ -104,6 +102,31 @@ struct SeedfinderConfig {
   int maxBlockSize = 1024;
   int nTrplPerSpBLimit = 100;
   int nAvgTrplPerSpBLimit = 2;
+
+  SeedfinderConfig toInternalUnits() const {
+    using namespace Acts::UnitLiterals;
+    SeedfinderConfig config = *this;
+    config.minPt /= 1_MeV;
+    config.deltaRMin /= 1_mm;
+    config.deltaRMax /= 1_mm;
+    config.impactMax /= 1_mm;
+    config.maxPtScattering /= 1_MeV;  // correct?
+    config.collisionRegionMin /= 1_MeV;
+    config.collisionRegionMax /= 1_MeV;
+    config.zMin /= 1_mm;
+    config.zMax /= 1_mm;
+    config.rMax /= 1_mm;
+    config.rMin /= 1_mm;
+    config.bFieldInZ /= 1000. * 1_T;
+
+    config.beamPos[0] /= 1_mm;
+    config.beamPos[1] /= 1_mm;
+
+    config.zAlign /= 1_mm;
+    config.rAlign /= 1_mm;
+
+    return config;
+  }
 };
 
 }  // namespace Acts

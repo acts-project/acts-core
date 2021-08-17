@@ -14,6 +14,8 @@
 #include "ActsExamples/Framework/IContextDecorator.hpp"
 #include "ActsExamples/TGeoDetector/BuildTGeoDetector.hpp"
 
+namespace ActsExamples {
+
 void TGeoDetector::addOptions(
     boost::program_options::options_description& opt) const {
   ActsExamples::Options::addTGeoGeometryOptions(opt);
@@ -33,3 +35,5 @@ auto TGeoDetector::finalize(
   return std::make_pair<TrackingGeometryPtr, ContextDecorators>(
       std::move(tgeoTrackingGeometry), std::move(tgeoContextDeocrators));
 }
+
+}  // namespace ActsExamples

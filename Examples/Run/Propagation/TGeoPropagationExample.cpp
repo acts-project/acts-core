@@ -15,7 +15,7 @@
 /// @param argv The argument list
 int main(int argc, char* argv[]) {
   // --------------------------------------------------------------------------------
-  TGeoDetector detector;
+  ActsExamples::TGeoDetector detector;
 
   // now process it
   return propagationExample(argc, argv, detector);

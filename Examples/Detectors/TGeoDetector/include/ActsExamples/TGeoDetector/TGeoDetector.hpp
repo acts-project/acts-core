@@ -18,6 +18,8 @@ namespace Acts {
 class TGeoDetectorElement;
 }
 
+namespace ActsExamples {
+
 struct TGeoDetector : public ActsExamples::IBaseDetector {
   using DetectorElementPtr = std::shared_ptr<const Acts::TGeoDetectorElement>;
   using DetectorStore = std::vector<DetectorElementPtr>;
@@ -32,3 +34,5 @@ struct TGeoDetector : public ActsExamples::IBaseDetector {
   finalize(const boost::program_options::variables_map& vm,
            std::shared_ptr<const Acts::IMaterialDecorator> mdecorator) override;
 };
+
+}  // namespace ActsExamples

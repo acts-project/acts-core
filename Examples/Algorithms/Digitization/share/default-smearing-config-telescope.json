@@ -1,0 +1,18 @@
+{
+  "acts-geometry-hierarchy-map" : {
+    "format-version" : 0,
+    "value-identifier" : "digitization-configuration"
+  },
+                                  "entries"
+      : [
+        {
+          "volume" : 1,
+          "value" : {
+            "smearing" : [
+              {"index" : 0, "mean" : 0.0, "stddev" : 0.025, "type" : "Gauss"},
+              {"index" : 1, "mean" : 0.0, "stddev" : 0.1, "type" : "Gauss"}
+            ]
+          }
+        }
+      ]
+}

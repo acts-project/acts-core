@@ -33,6 +33,8 @@
 #include <iterator>
 #include <memory>
 
+using namespace Acts::UnitLiterals;
+
 int main(int argc, char* argv[]) {
   // Interpret the command line arguments passed to the executable.
   CommandLineArguments cmdl;
@@ -59,21 +61,21 @@ int main(int argc, char* argv[]) {
   // Set up the seedfinder configuration.
   Acts::SeedfinderConfig<TestSpacePoint> sfConfig;
   // silicon detector max
-  sfConfig.rMax = 160.;
-  sfConfig.deltaRMin = 5.;
-  sfConfig.deltaRMax = 160.;
-  sfConfig.collisionRegionMin = -250.;
-  sfConfig.collisionRegionMax = 250.;
-  sfConfig.zMin = -2800.;
-  sfConfig.zMax = 2800.;
+  sfConfig.rMax = 160._mm;
+  sfConfig.deltaRMin = 5._mm;
+  sfConfig.deltaRMax = 160._mm;
+  sfConfig.collisionRegionMin = -250._mm;
+  sfConfig.collisionRegionMax = 250._mm;
+  sfConfig.zMin = -2800._mm;
+  sfConfig.zMax = 2800._mm;
   sfConfig.maxSeedsPerSpM = 5;
   // 2.7 eta
   sfConfig.cotThetaMax = 7.40627;
   sfConfig.sigmaScattering = 1.00000;
-  sfConfig.minPt = 500.;
-  sfConfig.bFieldInZ = 0.00199724;
-  sfConfig.beamPos = {-.5, -.5};
-  sfConfig.impactMax = 10.;
+  sfConfig.minPt = 500._MeV;
+  sfConfig.bFieldInZ = 1.99724_T;
+  sfConfig.beamPos = {-.5_mm, -.5_mm};
+  sfConfig.impactMax = 10._mm;
 
   // Use a size slightly smaller than what modern GPUs are capable of. This is
   // because for debugging we can't use all available threads in a block, and

@@ -13,7 +13,9 @@
 template <typename SpacePoint>
 std::unique_ptr<Acts::SpacePointGrid<SpacePoint>>
 Acts::SpacePointGridCreator::createGrid(
-    const Acts::SpacePointGridConfig& config) {
+    const Acts::SpacePointGridConfig& _config) {
+  Acts::SpacePointGridConfig config = _config.toInternalUnits();
+
   int phiBins;
   // for no magnetic field, create 100 phi-bins
   if (config.bFieldInZ == 0) {

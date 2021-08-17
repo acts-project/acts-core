@@ -11,5 +11,5 @@
 #include "Fatras.hpp"
 
 int main(int argc, char* argv[]) {
-  return runFatras(argc, argv, std::make_shared<TGeoDetector>());
+  return runFatras(argc, argv, std::make_shared<ActsExamples::TGeoDetector>());
 }

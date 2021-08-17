@@ -21,7 +21,7 @@ namespace Acts {
 
 /// Sort function which sorts dd4hep::DetElement by their ID
 /// @param [in,out] det the dd4hep::DetElements to be sorted
-void sortDetElementsByID(std::vector<dd4hep::DetElement>& det) {
+inline void sortDetElementsByID(std::vector<dd4hep::DetElement>& det) {
   sort(det.begin(), det.end(),
        [](const dd4hep::DetElement& a, const dd4hep::DetElement& b) {
          return (a.id() < b.id());

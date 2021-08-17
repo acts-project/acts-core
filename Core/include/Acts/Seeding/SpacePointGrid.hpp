@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "Acts/Definitions/Units.hpp"
 #include "Acts/Seeding/InternalSpacePoint.hpp"
 #include "Acts/Utilities/detail/Axis.hpp"
 #include "Acts/Utilities/detail/Grid.hpp"
@@ -17,24 +18,37 @@
 namespace Acts {
 
 struct SpacePointGridConfig {
-  // magnetic field in kTesla
+  // magnetic field
   float bFieldInZ;
-  // minimum pT to be found by seedfinder in MeV
+  // minimum pT to be found by seedfinder
   float minPt;
   // maximum extension of sensitive detector layer relevant for seeding as
-  // distance from x=y=0 (i.e. in r) in mm
+  // distance from x=y=0 (i.e. in r)
   float rMax;
   // maximum extension of sensitive detector layer relevant for seeding in
-  // positive direction in z in mm
+  // positive direction in z
   float zMax;
   // maximum extension of sensitive detector layer relevant for seeding in
-  // negative direction in z in mm
+  // negative direction in z
   float zMin;
   // maximum distance in r from middle space point to bottom or top spacepoint
-  // in mm
   float deltaRMax;
   // maximum forward direction expressed as cot(theta)
   float cotThetaMax;
+
+  SpacePointGridConfig toInternalUnits() const {
+    using namespace Acts::UnitLiterals;
+    SpacePointGridConfig config = *this;
+
+    config.bFieldInZ /= 1000_T;
+    config.minPt /= 1_MeV;
+    config.rMax /= 1_mm;
+    config.zMax /= 1_mm;
+    config.zMin /= 1_mm;
+    config.deltaRMax /= 1_mm;
+
+    return config;
+  }
 };
 template <typename external_spacepoint_t>
 using SpacePointGrid =
@@ -49,7 +63,7 @@ class SpacePointGridCreator {
  public:
   template <typename external_spacepoint_t>
   static std::unique_ptr<SpacePointGrid<external_spacepoint_t>> createGrid(
-      const Acts::SpacePointGridConfig& config);
+      const Acts::SpacePointGridConfig& _config);
 };
 }  // namespace Acts
 #include "Acts/Seeding/SpacePointGrid.ipp"

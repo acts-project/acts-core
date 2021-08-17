@@ -16,7 +16,8 @@ Acts::BinnedSPGroup<external_spacepoint_t>::BinnedSPGroup(
     std::shared_ptr<Acts::BinFinder<external_spacepoint_t>> botBinFinder,
     std::shared_ptr<Acts::BinFinder<external_spacepoint_t>> tBinFinder,
     std::unique_ptr<SpacePointGrid<external_spacepoint_t>> grid,
-    const SeedfinderConfig<external_spacepoint_t>& config) {
+    const SeedfinderConfig<external_spacepoint_t>& _config) {
+  auto config = _config.toInternalUnits();
   static_assert(
       std::is_same<
           typename std::iterator_traits<spacepoint_iterator_t>::value_type,

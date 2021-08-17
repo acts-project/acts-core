@@ -17,7 +17,7 @@ namespace Acts {
 template <typename external_spacepoint_t, typename platform_t>
 Seedfinder<external_spacepoint_t, platform_t>::Seedfinder(
     Acts::SeedfinderConfig<external_spacepoint_t> config)
-    : m_config(std::move(config)) {
+    : m_config(config.toInternalUnits()) {
   // calculation of scattering using the highland formula
   // convert pT to p once theta angle is known
   m_config.highland = 13.6 * std::sqrt(m_config.radLengthPerSeed) *

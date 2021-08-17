@@ -36,6 +36,8 @@
 #include "CommandLineArguments.h"
 #include "SpacePoint.hpp"
 
+using namespace Acts::UnitLiterals;
+
 auto readFile(const std::string& filename) -> std::vector<const SpacePoint*> {
   std::string line;
   std::vector<const SpacePoint*> readSP;
@@ -83,21 +85,21 @@ auto setupSeedfinderConfiguration()
     -> Acts::SeedfinderConfig<external_spacepoint_t> {
   Acts::SeedfinderConfig<SpacePoint> config;
   // silicon detector max
-  config.rMax = 160.;
-  config.deltaRMin = 5.;
-  config.deltaRMax = 160.;
-  config.collisionRegionMin = -250.;
-  config.collisionRegionMax = 250.;
-  config.zMin = -2800.;
-  config.zMax = 2800.;
+  config.rMax = 160._mm;
+  config.deltaRMin = 5._mm;
+  config.deltaRMax = 160._mm;
+  config.collisionRegionMin = -250._mm;
+  config.collisionRegionMax = 250._mm;
+  config.zMin = -2800._mm;
+  config.zMax = 2800._mm;
   config.maxSeedsPerSpM = 5;
   // 2.7 eta
   config.cotThetaMax = 7.40627;
   config.sigmaScattering = 1.00000;
-  config.minPt = 500.;
-  config.bFieldInZ = 0.00199724;
-  config.beamPos = {-.5, -.5};
-  config.impactMax = 10.;
+  config.minPt = 500._MeV;
+  config.bFieldInZ = 1.99724_T;
+  config.beamPos = {-.5_mm, -.5_mm};
+  config.impactMax = 10._mm;
 
   // for sycl
   config.nTrplPerSpBLimit = 100;
