@@ -11,7 +11,11 @@ target_include_directories(
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 target_link_libraries(
   ActsExamplesIoJson
-  PUBLIC ActsCore ActsPluginJson ActsPluginTGeo ActsExamplesDigitization ActsExamplesFramework ActsExamplesMaterialMapping Boost::program_options)
+  PUBLIC ActsCore ActsPluginJson ActsExamplesDigitization ActsExamplesFramework ActsExamplesMaterialMapping Boost::program_options)
+# Needed to include tgeo plugin specific configs
+if(ACTS_BUILD_PLUGIN_TGEO)
+  target_link_libraries(ActsExamplesIoJson PUBLIC ActsPluginTGeo)
+endif()
 
 install(
   TARGETS ActsExamplesIoJson
