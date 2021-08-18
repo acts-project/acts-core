@@ -1,6 +1,17 @@
 from pathlib import Path
 from typing import Union
 
+try:
+    import ROOT
+except ImportError:
+    print(
+        """
+        For technical reasons, we need to import ROOT
+        at the beginning. It appears PyROOT is not set 
+        up in your shell (source thisroot.sh)
+        """.strip()
+    )
+
 from .ActsPythonBindings import *
 from .ActsPythonBindings import __version__
 from . import ActsPythonBindings
@@ -44,4 +55,4 @@ def _decoratorFromFile(file: Union[str, Path], **kwargs):
         raise ValueError(f"Unknown file type {file.suffix}")
 
 
-ActsPythonBindings.IMaterialDecorator.fromFile = _decoratorFromFile
+# ActsPythonBindings.IMaterialDecorator.fromFile = _decoratorFromFile
