@@ -21,6 +21,7 @@
 #include "ActsExamples/MagneticField/MagneticFieldOptions.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
 #include "ActsExamples/TrackFinding/SeedingAlgorithm.hpp"
+#include "ActsExamples/TrackFinding/SeedingOrthogonalAlgorithm.hpp"
 #include "ActsExamples/TrackFinding/SpacePointMaker.hpp"
 #include "ActsExamples/TrackFinding/SpacePointMakerOptions.hpp"
 #include "ActsExamples/TrackFinding/TrackParamsEstimationAlgorithm.hpp"
@@ -114,30 +115,32 @@ int runSeedingExample(int argc, char* argv[],
   spCfg.trackingGeometry = tGeometry;
   sequencer.addAlgorithm(std::make_shared<SpacePointMaker>(spCfg, logLevel));
 
+  using SeedingAlgorithm_t = SeedingOrthogonalAlgorithm;
+
   // Seeding algorithm
-  SeedingAlgorithm::Config seedingCfg;
+  SeedingAlgorithm_t::Config seedingCfg;
   seedingCfg.inputSpacePoints = {
       spCfg.outputSpacePoints,
   };
   seedingCfg.outputSeeds = "seeds";
   seedingCfg.outputProtoTracks = "prototracks";
-  seedingCfg.rMax = 100._mm;
-  seedingCfg.deltaRMax = 60._mm;
-  seedingCfg.collisionRegionMin = -250_mm;
-  seedingCfg.collisionRegionMax = 250._mm;
-  seedingCfg.zMin = -2000._mm;
-  seedingCfg.zMax = 2000._mm;
-  seedingCfg.maxSeedsPerSpM = 1;
+  seedingCfg.rMax = 200._mm;
+  seedingCfg.deltaRMax = 100._mm;
+  seedingCfg.collisionRegionMin = -100_mm;
+  seedingCfg.collisionRegionMax = 100._mm;
+  seedingCfg.zMin = -3000._mm;
+  seedingCfg.zMax = 3000._mm;
+  seedingCfg.maxSeedsPerSpM = 50;
   seedingCfg.cotThetaMax = 7.40627;  // 2.7 eta
-  seedingCfg.sigmaScattering = 50;
+  seedingCfg.sigmaScattering = 5;
   seedingCfg.radLengthPerSeed = 0.1;
   seedingCfg.minPt = 500._MeV;
   seedingCfg.bFieldInZ = 1.99724_T;
   seedingCfg.beamPosX = 0;
   seedingCfg.beamPosY = 0;
-  seedingCfg.impactMax = 3._mm;
+  seedingCfg.impactMax = 5.;
   sequencer.addAlgorithm(
-      std::make_shared<SeedingAlgorithm>(seedingCfg, logLevel));
+      std::make_shared<SeedingAlgorithm_t>(seedingCfg, logLevel));
 
   // Algorithm estimating track parameter from seed
   TrackParamsEstimationAlgorithm::Config paramsEstimationCfg;
