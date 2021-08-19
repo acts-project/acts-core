@@ -16,6 +16,8 @@
 
 #include <stdexcept>
 #include <unordered_map>
+#include <iostream>
+#include <fstream>
 
 #include <TFile.h>
 
@@ -53,6 +55,11 @@ ActsExamples::SeedingPerformanceWriter::SeedingPerformanceWriter(
   // initialize the plot tools
   m_effPlotTool.book(m_effPlotCache);
   m_duplicationPlotTool.book(m_duplicationPlotCache);
+
+  std::ofstream myfile;
+  myfile.open("eff.csv");
+  myfile << "event,phi,eta,pT,matched\n";
+  myfile.close();
 }
 
 ActsExamples::SeedingPerformanceWriter::~SeedingPerformanceWriter() {
@@ -77,8 +84,8 @@ ActsExamples::ProcessCode ActsExamples::SeedingPerformanceWriter::endRun() {
   ACTS_DEBUG("nTotalMatchedParticles    = " << m_nTotalMatchedParticles);
   ACTS_DEBUG("nTotalDuplicatedParticles = " << m_nTotalDuplicatedParticles);
 
-  ACTS_INFO("Efficiency (nMatchedParticles / nAllParticles) = " << eff);
-  ACTS_INFO("Fake rate (nUnMatchedSeeds / nAllSeeds) = " << fakeRate);
+  ACTS_INFO("Efficiency (nMatchedParticles / nAllParticles) = " << eff << " (" << m_nTotalMatchedParticles << " / " << m_nTotalParticles << ")");
+  ACTS_INFO("Fake rate (nUnMatchedSeeds / nAllSeeds) = " << fakeRate << " (" << (m_nTotalSeeds - m_nTotalMatchedSeeds) << " / " << m_nTotalSeeds << ")");
   ACTS_INFO(
       "Duplication rate (nDuplicatedMatchedParticles / nMatchedParticles) = "
       << duplicationRate);
@@ -125,6 +132,10 @@ ActsExamples::ProcessCode ActsExamples::SeedingPerformanceWriter::writeT(
   int nMatchedParticles = 0;
   int nDuplicatedParticles = 0;
   // Fill the effeciency and fake rate plots
+
+  std::ofstream myfile;
+  myfile.open("eff.csv", std::ios_base::app);
+
   for (const auto& particle : particles) {
     const auto it1 = truthCount.find(particle.particleId());
     bool isMatched = false;
@@ -140,7 +151,19 @@ ActsExamples::ProcessCode ActsExamples::SeedingPerformanceWriter::writeT(
     m_effPlotTool.fill(m_effPlotCache, particle, isMatched);
     m_duplicationPlotTool.fill(m_duplicationPlotCache, particle,
                                nMatchedSeedsForParticle - 1);
+
+    const auto t_phi = Acts::VectorHelpers::phi(particle.unitDirection());
+    const auto t_eta = Acts::VectorHelpers::eta(particle.unitDirection());
+    const auto t_pT = particle.transverseMomentum();
+
+    if (!isMatched) {
+      std::cout << "Particle with ID " << particle.particleId() << " is unmatched!" << std::endl;
+    }
+
+    myfile << ctx.eventNumber << "," << t_phi << "," << t_eta << "," << t_pT << "," << isMatched << std::endl;
   }
+
+  myfile.close();
   ACTS_DEBUG("Number of seeds: " << nSeeds);
   m_nTotalSeeds += nSeeds;
   m_nTotalMatchedSeeds += nMatchedSeeds;
