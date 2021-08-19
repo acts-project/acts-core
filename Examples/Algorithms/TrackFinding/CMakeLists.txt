@@ -1,6 +1,7 @@
 add_library(
   ActsExamplesTrackFinding SHARED
   src/SeedingAlgorithm.cpp
+  src/SeedingOrthogonalAlgorithm.cpp
   src/SpacePointMaker.cpp
   src/SpacePointMakerOptions.cpp
   src/TrackFindingAlgorithm.cpp
