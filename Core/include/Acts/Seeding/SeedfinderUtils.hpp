@@ -63,6 +63,21 @@ Acts::LinCircle lcMidTop(
 }
 
 template<typename SP>
+float maxDeltaR(double r) {
+  if (r <= 60) {
+    return 30;
+  } else if (r <= 100) {
+    return 60;
+  } else if (r <= 150) {
+    return 80;
+  } else if (r <= 220) {
+    return 60;
+  } else {
+    return 1000;
+  }
+}
+
+template<typename SP>
 bool validMiddle(
   const SP & s,
   const Acts::SeedfinderConfig<ActsExamples::SimSpacePoint> & config
@@ -117,7 +132,7 @@ Acts::KDRange<N, double> validTupleOrthoRange(
   Acts::KDRange<N, double> res = validTupleRangeBase<N, SP>(config);
 
   res[1].shrink_min(rL + config.deltaRMin);
-  res[1].shrink_max(rL + config.deltaRMax);
+  res[1].shrink_max(rL + std::min(config.deltaRMax, maxDeltaR<SP>(rL)));
 
   double zMax = (res[1].max() / rL) * (zL - config.collisionRegionMin) + config.collisionRegionMin;
   double zMin = config.collisionRegionMax - (res[1].max() / rL) * (config.collisionRegionMax - zL);
@@ -133,7 +148,10 @@ Acts::KDRange<N, double> validTupleOrthoRange(
   res[2].shrink_min(zL - config.cotThetaMax * (res[1].max() - rL));
   res[2].shrink_max(zL + config.cotThetaMax * (res[1].max() - rL));
 
-  double delta_phi = 0.065;
+  // WARNING: Experimental extra cut.
+  double az = (res[1].max() / low.radius()) * std::max(std::abs(low.z() - config.collisionRegionMin), std::abs(low.z() - config.collisionRegionMax));
+  double p2 = 0.0005 * az;
+  double delta_phi = std::min(0.085, p2);
 
   res[0].shrink_min(pL - delta_phi);
   res[0].shrink_max(pL + delta_phi);
@@ -151,7 +169,7 @@ Acts::KDRange<N, double> validMidToLowOrthoRange(
 
   Acts::KDRange<N, double> res = validTupleRangeBase<N, SP>(config);
 
-  res[1].shrink_min(rM - config.deltaRMax);
+  res[1].shrink_min(rM - std::min(config.deltaRMax, maxDeltaR<SP>(rM)));
   res[1].shrink_max(rM - config.deltaRMin);
 
   double frac_r = res[1].min() / rM;
@@ -162,7 +180,10 @@ Acts::KDRange<N, double> validMidToLowOrthoRange(
   res[2].shrink_min(std::min(zMin, mid.z()));
   res[2].shrink_max(std::max(zMax, mid.z()));
 
-  double delta_phi = 0.065;
+  // WARNING: Experimental extra cuts.
+  double az = std::max(std::abs(mid.z() - config.collisionRegionMin), std::abs(mid.z() - config.collisionRegionMax));
+  double p2 = 0.0005 * az;
+  double delta_phi = std::min(0.085, p2);
 
   res[0].shrink_min(pM - delta_phi);
   res[0].shrink_max(pM + delta_phi);
