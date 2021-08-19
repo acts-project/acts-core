@@ -55,4 +55,4 @@ def _decoratorFromFile(file: Union[str, Path], **kwargs):
         raise ValueError(f"Unknown file type {file.suffix}")
 
 
-# ActsPythonBindings.IMaterialDecorator.fromFile = _decoratorFromFile
+ActsPythonBindings.IMaterialDecorator.fromFile = _decoratorFromFile
