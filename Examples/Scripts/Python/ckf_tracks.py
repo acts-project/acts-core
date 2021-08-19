@@ -177,22 +177,6 @@ def runCKFTracks(
                 inputSpacePoints=[spAlg.config.outputSpacePoints],
                 outputSeeds="seeds",
                 outputProtoTracks="prototracks",
-                # Units ?
-                rMax=200.0,
-                deltaRMax=60.0,
-                collisionRegionMin=-250,
-                collisionRegionMax=250.0,
-                zMin=-2000.0,
-                zMax=2000.0,
-                maxSeedsPerSpM=1,
-                cotThetaMax=7.40627,  # 2.7 eta
-                sigmaScattering=50,
-                radLengthPerSeed=0.1,
-                minPt=500.0,
-                bFieldInZ=0.00199724,
-                beamPosX=0,
-                beamPosY=0,
-                impactMax=3.0,
             )
             s.addAlgorithm(seeding)
             inputProtoTracks = seeding.config.outputProtoTracks
