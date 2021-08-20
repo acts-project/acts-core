@@ -162,7 +162,7 @@ def runVertexFitting(
     if outputRoot:
         if inputTrackSummary is None:
             warnings.warn(
-                "This combination is not necessarily supported. Please get in touch with us"
+                "Using inputTrackSummary == None with outputRoot: This combination is not necessarily supported. Please get in touch with us"
             )
         s.addWriter(
             RootVertexPerformanceWriter(

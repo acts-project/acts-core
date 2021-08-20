@@ -644,7 +644,7 @@ def test_ckf_tracks_example_truth_smeared(tmp_path):
 
     root_files = [
         ("performance_ckf.root", None, None),
-        ("trackstates_ckf.root", "trackstates", 82),
+        ("trackstates_ckf.root", "trackstates", 81),
         ("tracksummary_ckf.root", "tracksummary", 10),
     ]
 
@@ -689,6 +689,7 @@ def test_ckf_tracks_example_truth_smeared(tmp_path):
 
 @pytest.mark.skipif(not dd4hepEnabled, reason="DD4hep not set up")
 @pytest.mark.slow
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_vertex_fitting(tmp_path):
     detector, trackingGeometry, decorators = getOpenDataDetector()
 
@@ -727,6 +728,7 @@ import itertools
         ("AMVF", True, 10),
     ],
 )
+@pytest.mark.filterwarnings("ignore::UserWarning")
 def test_vertex_fitting_reading(tmp_path, ptcl_gun, rng, finder, inputTracks, entries):
 
     ptcl_file = tmp_path / "particles.root"

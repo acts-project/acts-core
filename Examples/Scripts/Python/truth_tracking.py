@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-from Examples.Scripts.Python.common import getOpenDataDetector
 import os
 from pathlib import Path
 
 import acts
 import acts.examples
-import acts.examples.dd4hep
 
 u = acts.UnitConstants
 
