@@ -30,7 +30,14 @@ class PyIAlgorithm : public IAlgorithm {
 
   std::string name() const override {
     py::gil_scoped_acquire acquire{};
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+#endif
     PYBIND11_OVERRIDE_PURE(std::string, IAlgorithm, name);
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
   }
 
   ProcessCode execute(const AlgorithmContext& ctx) const override {
