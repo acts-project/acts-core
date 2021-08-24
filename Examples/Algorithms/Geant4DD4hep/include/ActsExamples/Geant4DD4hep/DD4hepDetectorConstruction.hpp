@@ -26,10 +26,16 @@ class DD4hepDetectorConstruction final : public G4VUserDetectorConstruction {
   ///
   /// Transfers ownership of the created object as all volumes (including world)
   /// are deleted in ~G4PhysicalVolumeStore().
+  ///
+  /// @note for facilitating configuration within the ACTS framework the world
+  /// volume is cached
   G4VPhysicalVolume* Construct() final override;
 
  private:
+  /// The DD4hep detector instrance
   dd4hep::Detector& m_detector;
+  /// The world volume
+  G4VPhysicalVolume* m_world = nullptr;
 };
 
 class DD4hepDetectorConstructionFactory : public G4DetectorConstructionFactory {

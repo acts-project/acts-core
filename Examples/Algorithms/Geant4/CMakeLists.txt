@@ -1,9 +1,11 @@
 add_library(
   ActsExamplesGeant4 SHARED
+  src/EventStoreRegistry.cpp
   src/EventAction.cpp
   src/GdmlDetectorConstruction.cpp
   src/GeantinoRecording.cpp
   src/Geant4Options.cpp
+  src/Geant4Simulation.cpp
   src/PrimaryGeneratorAction.cpp
   src/RunAction.cpp
   src/SteppingAction.cpp)
