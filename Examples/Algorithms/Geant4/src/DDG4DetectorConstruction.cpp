@@ -6,7 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ActsExamples/Geant4DD4hep/DD4hepDetectorConstruction.hpp"
+#include "ActsExamples/DDG4/DDG4DetectorConstruction.hpp"
 
 #include <stdexcept>
 
@@ -16,14 +16,12 @@
 #include <DDG4/Geant4Converter.h>
 #include <DDG4/Geant4GeometryInfo.h>
 
-using namespace ActsExamples;
-
-DD4hepDetectorConstruction::DD4hepDetectorConstruction(
+ActsExamples::DDG4DetectorConstruction::DDG4DetectorConstruction(
     dd4hep::Detector& detector)
     : G4VUserDetectorConstruction(), m_detector(detector) {}
 
 // See DD4hep::Simulation::Geant4DetectorConstruction::Construct()
-G4VPhysicalVolume* DD4hepDetectorConstruction::Construct() {
+G4VPhysicalVolume* ActsExamples::DDG4DetectorConstruction::Construct() {
   if (m_world == nullptr) {
     dd4hep::sim::Geant4Mapping& g4map = dd4hep::sim::Geant4Mapping::instance();
     dd4hep::DetElement world = m_detector.world();
@@ -39,12 +37,11 @@ G4VPhysicalVolume* DD4hepDetectorConstruction::Construct() {
   return m_world;
 }
 
-DD4hepDetectorConstructionFactory::DD4hepDetectorConstructionFactory(
+ActsExamples::DDG4DetectorConstructionFactory::DDG4DetectorConstructionFactory(
     dd4hep::Detector& detector)
     : m_detector{detector} {}
 
 std::unique_ptr<G4VUserDetectorConstruction>
-
-DD4hepDetectorConstructionFactory::operator()() const {
-  return std::make_unique<DD4hepDetectorConstruction>(m_detector);
+ActsExamples::DDG4DetectorConstructionFactory::operator()() const {
+  return std::make_unique<ActsExamples::DDG4DetectorConstruction>(m_detector);
 }

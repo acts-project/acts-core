@@ -9,9 +9,9 @@
 #include "Acts/Geometry/GeometryContext.hpp"
 #include "ActsExamples/DD4hepDetector/DD4hepDetectorOptions.hpp"
 #include "ActsExamples/DD4hepDetector/DD4hepGeometryService.hpp"
+#include "ActsExamples/DDG4/DDG4DetectorConstruction.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
 #include "ActsExamples/Geant4/Geant4Options.hpp"
-#include "ActsExamples/Geant4DD4hep/DD4hepDetectorConstruction.hpp"
 #include "ActsExamples/Geant4HepMC/EventRecording.hpp"
 #include "ActsExamples/Geometry/CommonGeometry.hpp"
 #include "ActsExamples/Io/Csv/CsvOptionsReader.hpp"
@@ -65,7 +65,7 @@ int main(int argc, char* argv[]) {
   erConfig.inputParticles = particleReader.outputParticles;
   erConfig.outputHepMcTracks = "geant-event";
   erConfig.detectorConstructionFactory =
-      std::make_unique<ActsExamples::DD4hepDetectorConstructionFactory>(
+      std::make_unique<ActsExamples::DDG4DetectorConstructionFactory>(
           *geometrySvc->lcdd());
   erConfig.seed1 = vm["g4-rnd-seed1"].as<unsigned int>();
   erConfig.seed2 = vm["g4-rnd-seed2"].as<unsigned int>();

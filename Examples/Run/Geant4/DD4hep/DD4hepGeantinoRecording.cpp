@@ -8,7 +8,7 @@
 
 #include "ActsExamples/DD4hepDetector/DD4hepDetectorOptions.hpp"
 #include "ActsExamples/DD4hepDetector/DD4hepGeometryService.hpp"
-#include "ActsExamples/Geant4DD4hep/DD4hepDetectorConstruction.hpp"
+#include "ActsExamples/DDG4/DDG4DetectorConstruction.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
 
 #include <boost/program_options.hpp>
@@ -34,6 +34,6 @@ int main(int argc, char* argv[]) {
   auto geometrySvc = std::make_shared<DD4hep::DD4hepGeometryService>(dd4hepCfg);
 
   return runGeantinoRecording(
-      vm, std::make_unique<DD4hepDetectorConstructionFactory>(
-              *geometrySvc->lcdd()));
+      vm,
+      std::make_unique<DDG4DetectorConstructionFactory>(*geometrySvc->lcdd()));
 }
