@@ -13,6 +13,7 @@
 #include "ActsExamples/Detector/IBaseDetector.hpp"
 #include "ActsExamples/Framework/IContextDecorator.hpp"
 #include "ActsExamples/GenericDetector/GenericDetector.hpp"
+#include "ActsExamples/TGeoDetector/TGeoDetector.hpp"
 
 #include <memory>
 
@@ -76,6 +77,73 @@ void addDetector(Context& ctx) {
     ACTS_PYTHON_MEMBER(sigmaInRot);
     ACTS_PYTHON_MEMBER(sigmaOutRot);
     ACTS_PYTHON_MEMBER(firstIovNominal);
+    ACTS_PYTHON_STRUCT_END();
+  }
+
+  {
+    using Config = TGeoDetector::Config;
+
+    auto d = py::class_<TGeoDetector, std::shared_ptr<TGeoDetector>>(
+                 mex, "TGeoDetector")
+                 .def(py::init<>())
+                 .def("finalize",
+                      py::overload_cast<
+                          const Config&,
+                          std::shared_ptr<const Acts::IMaterialDecorator>>(
+                          &TGeoDetector::finalize));
+
+    py::class_<Options::Interval>(mex, "Interval")
+        .def(py::init<>())
+        .def_readwrite("lower", &Options::Interval::lower)
+        .def_readwrite("upper", &Options::Interval::upper);
+
+    auto c = py::class_<Config>(d, "Config").def(py::init<>());
+
+    py::enum_<Config::SubVolume>(c, "SubVolume")
+        .value("Negative", Config::SubVolume::Negative)
+        .value("Central", Config::SubVolume::Central)
+        .value("Positive", Config::SubVolume::Positive);
+
+    auto volume = py::class_<Config::Volume>(c, "Volume").def(py::init<>());
+    ACTS_PYTHON_STRUCT_BEGIN(volume, Config::Volume);
+    ACTS_PYTHON_MEMBER(binToleranceR);
+    ACTS_PYTHON_MEMBER(binTolerancePhi);
+    ACTS_PYTHON_MEMBER(binToleranceZ);
+    ACTS_PYTHON_MEMBER(cylinderDiscSplit);
+    ACTS_PYTHON_MEMBER(cylinderNZSegments);
+    ACTS_PYTHON_MEMBER(cylinderNPhiSegments);
+    ACTS_PYTHON_MEMBER(discNRSegments);
+    ACTS_PYTHON_MEMBER(discNPhiSegments);
+    ACTS_PYTHON_STRUCT_END();
+
+    auto regTriplet = [&c](const std::string& name, auto v) {
+      using type = decltype(v);
+      py::class_<Config::LayerTriplet<type>>(c, name.c_str())
+          .def(py::init<>())
+          .def(py::init<type>())
+          .def_readwrite("negative", &Config::LayerTriplet<type>::negative)
+          .def_readwrite("central", &Config::LayerTriplet<type>::central)
+          .def_readwrite("positive", &Config::LayerTriplet<type>::positive)
+          .def("at", py::overload_cast<Config::SubVolume>(
+                         &Config::LayerTriplet<type>::at));
+    };
+
+    regTriplet("LayerTripletBool", true);
+    regTriplet("LayerTripletString", std::string{""});
+    regTriplet("LayerTripletVectorString", std::vector<std::string>{});
+    regTriplet("LayerTripletInterval", Options::Interval{});
+    regTriplet("LayerTripletDouble", double{5.5});
+
+    ACTS_PYTHON_STRUCT_BEGIN(c, Config);
+    ACTS_PYTHON_MEMBER(surfaceLogLevel);
+    ACTS_PYTHON_MEMBER(layerLogLevel);
+    ACTS_PYTHON_MEMBER(volumeLogLevel);
+    ACTS_PYTHON_MEMBER(fileName);
+    ACTS_PYTHON_MEMBER(buildBeamPipe);
+    ACTS_PYTHON_MEMBER(beamPipeRadius);
+    ACTS_PYTHON_MEMBER(beamPipeHalflengthZ);
+    ACTS_PYTHON_MEMBER(beamPipeLayerThickness);
+    ACTS_PYTHON_MEMBER(unitScalor);
     ACTS_PYTHON_STRUCT_END();
   }
 }
