@@ -9,7 +9,7 @@
 #include "Fatras.hpp"
 
 #include "ActsExamples/Detector/IBaseDetector.hpp"
-#include "ActsExamples/Fatras/FatrasAlgorithm.hpp"
+#include "ActsExamples/Fatras/FatrasSimulation.hpp"
 #include "ActsExamples/Framework/RandomNumbers.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
 #include "ActsExamples/Generators/EventGenerator.hpp"
@@ -165,7 +165,7 @@ void setupSimulation(
     std::shared_ptr<const ActsExamples::RandomNumbers> randomNumbers,
     std::shared_ptr<const Acts::TrackingGeometry> trackingGeometry) {
   auto logLevel = Options::readLogLevel(vars);
-  auto fatrasCfg = FatrasAlgorithm::readConfig(vars);
+  auto fatrasCfg = FatrasSimulation::readConfig(vars);
   fatrasCfg.inputParticles = kParticlesSelection;
   fatrasCfg.outputParticlesInitial = kParticlesInitial;
   fatrasCfg.outputParticlesFinal = kParticlesFinal;
@@ -175,7 +175,7 @@ void setupSimulation(
   fatrasCfg.magneticField = ActsExamples::Options::readMagneticField(vars);
 
   sequencer.addAlgorithm(
-      std::make_shared<FatrasAlgorithm>(std::move(fatrasCfg), logLevel));
+      std::make_shared<FatrasSimulation>(std::move(fatrasCfg), logLevel));
 }
 
 }  // namespace
@@ -198,7 +198,7 @@ int runFatras(int argc, char* argv[],
   Options::addMaterialOptions(desc);
   Options::addMagneticFieldOptions(desc);
   // algorithm-specific options
-  FatrasAlgorithm::addOptions(desc);
+  FatrasSimulation::addOptions(desc);
 
   auto vars = Options::parse(desc, argc, argv);
   if (vars.empty()) {

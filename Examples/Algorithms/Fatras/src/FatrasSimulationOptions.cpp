@@ -7,13 +7,13 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Definitions/Units.hpp"
-#include "ActsExamples/Fatras/FatrasAlgorithm.hpp"
+#include "ActsExamples/Fatras/FatrasSimulation.hpp"
 
 #include <stdexcept>
 
 #include "boost/program_options.hpp"
 
-void ActsExamples::FatrasAlgorithm::addOptions(Options::Description& desc) {
+void ActsExamples::FatrasSimulation::addOptions(Options::Description& desc) {
   using boost::program_options::bool_switch;
   using boost::program_options::value;
 
@@ -35,11 +35,11 @@ void ActsExamples::FatrasAlgorithm::addOptions(Options::Description& desc) {
       "Which surfaces should record charged particle hits");
 }
 
-ActsExamples::FatrasAlgorithm::Config ActsExamples::FatrasAlgorithm::readConfig(
-    const Options::Variables& vars) {
+ActsExamples::FatrasSimulation::Config
+ActsExamples::FatrasSimulation::readConfig(const Options::Variables& vars) {
   using namespace Acts::UnitLiterals;
 
-  ActsExamples::FatrasAlgorithm::Config cfg;
+  ActsExamples::FatrasSimulation::Config cfg;
 
   cfg.pMin = vars["fatras-pmin-gev"].as<double>() * 1_GeV;
 

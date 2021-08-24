@@ -6,7 +6,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#include "ActsExamples/Fatras/FatrasAlgorithm.hpp"
+#include "ActsExamples/Fatras/FatrasSimulation.hpp"
 
 #include "Acts/MagneticField/SharedBField.hpp"
 #include "Acts/Propagator/EigenStepper.hpp"
@@ -52,8 +52,8 @@ struct HitSurfaceSelector {
 }  // namespace
 
 // Same interface as `ActsFatras::Simulation` but with concrete types.
-struct ActsExamples::detail::FatrasAlgorithmSimulation {
-  virtual ~FatrasAlgorithmSimulation() = default;
+struct ActsExamples::detail::FatrasSimulationSimulation {
+  virtual ~FatrasSimulationSimulation() = default;
   virtual Acts::Result<std::vector<ActsFatras::FailedParticle>> simulate(
       const Acts::GeometryContext &, const Acts::MagneticFieldContext &,
       ActsExamples::RandomEngine &, const ActsExamples::SimParticleContainer &,
@@ -70,8 +70,8 @@ namespace {
 // particle propagation and is thus limited to propagation in vacuum at the
 // moment.
 // @TODO: Remove this, unneeded after #675
-struct FatrasAlgorithmSimulationT final
-    : ActsExamples::detail::FatrasAlgorithmSimulation {
+struct FatrasSimulationSimulationT final
+    : ActsExamples::detail::FatrasSimulationSimulation {
   using CutPMin = ActsFatras::Min<ActsFatras::Casts::P>;
 
   // typedefs for charge particle simulation
@@ -102,8 +102,8 @@ struct FatrasAlgorithmSimulationT final
 
   Simulation simulation;
 
-  FatrasAlgorithmSimulationT(const ActsExamples::FatrasAlgorithm::Config &cfg,
-                             Acts::Logging::Level lvl)
+  FatrasSimulationSimulationT(const ActsExamples::FatrasSimulation::Config &cfg,
+                              Acts::Logging::Level lvl)
       : simulation(
             ChargedSimulation(
                 ChargedPropagator(ChargedStepper(cfg.magneticField),
@@ -142,7 +142,7 @@ struct FatrasAlgorithmSimulationT final
     simulation.charged.selectHitSurface.material = cfg.generateHitsOnMaterial;
     simulation.charged.selectHitSurface.passive = cfg.generateHitsOnPassive;
   }
-  ~FatrasAlgorithmSimulationT() final override = default;
+  ~FatrasSimulationSimulationT() final override = default;
 
   Acts::Result<std::vector<ActsFatras::FailedParticle>> simulate(
       const Acts::GeometryContext &geoCtx,
@@ -162,9 +162,9 @@ struct FatrasAlgorithmSimulationT final
 
 }  // namespace
 
-ActsExamples::FatrasAlgorithm::FatrasAlgorithm(Config cfg,
-                                               Acts::Logging::Level lvl)
-    : ActsExamples::BareAlgorithm("FatrasAlgorithm", lvl),
+ActsExamples::FatrasSimulation::FatrasSimulation(Config cfg,
+                                                 Acts::Logging::Level lvl)
+    : ActsExamples::BareAlgorithm("FatrasSimulation", lvl),
       m_cfg(std::move(cfg)) {
   ACTS_DEBUG("hits on sensitive surfaces: " << m_cfg.generateHitsOnSensitive);
   ACTS_DEBUG("hits on material surfaces: " << m_cfg.generateHitsOnMaterial);
@@ -172,7 +172,7 @@ ActsExamples::FatrasAlgorithm::FatrasAlgorithm(Config cfg,
 
   if (!m_cfg.generateHitsOnSensitive && !m_cfg.generateHitsOnMaterial &&
       !m_cfg.generateHitsOnPassive) {
-    ACTS_WARNING("FatrasAlgorithm not configured to generate any hits!");
+    ACTS_WARNING("FatrasSimulation not configured to generate any hits!");
   }
 
   if (!m_cfg.trackingGeometry) {
@@ -186,13 +186,13 @@ ActsExamples::FatrasAlgorithm::FatrasAlgorithm(Config cfg,
   }
 
   // construct the simulation for the specific magnetic field
-  m_sim = std::make_unique<FatrasAlgorithmSimulationT>(m_cfg, lvl);
+  m_sim = std::make_unique<FatrasSimulationSimulationT>(m_cfg, lvl);
 }
 
 // explicit destructor needed for the PIMPL implementation to work
-ActsExamples::FatrasAlgorithm::~FatrasAlgorithm() {}
+ActsExamples::FatrasSimulation::~FatrasSimulation() {}
 
-ActsExamples::ProcessCode ActsExamples::FatrasAlgorithm::execute(
+ActsExamples::ProcessCode ActsExamples::FatrasSimulation::execute(
     const AlgorithmContext &ctx) const {
   // read input containers
   const auto &inputParticles =

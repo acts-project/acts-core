@@ -21,11 +21,11 @@
 
 namespace ActsExamples {
 namespace detail {
-struct FatrasAlgorithmSimulation;
+struct FatrasSimulationSimulation;
 }
 
 /// Fast track simulation using the Acts propagation and navigation.
-class FatrasAlgorithm final : public BareAlgorithm {
+class FatrasSimulation final : public BareAlgorithm {
  public:
   struct Config {
     /// The particles input collection.
@@ -82,8 +82,8 @@ class FatrasAlgorithm final : public BareAlgorithm {
   ///
   /// @param cfg is the configuration struct
   /// @param lvl is the logging level
-  FatrasAlgorithm(Config cfg, Acts::Logging::Level lvl);
-  ~FatrasAlgorithm() final override;
+  FatrasSimulation(Config cfg, Acts::Logging::Level lvl);
+  ~FatrasSimulation() final override;
 
   /// Run the simulation for a single event.
   ///
@@ -96,7 +96,7 @@ class FatrasAlgorithm final : public BareAlgorithm {
 
  private:
   Config m_cfg;
-  std::unique_ptr<detail::FatrasAlgorithmSimulation> m_sim;
+  std::unique_ptr<detail::FatrasSimulationSimulation> m_sim;
 };
 
 }  // namespace ActsExamples
