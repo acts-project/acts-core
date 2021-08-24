@@ -8,7 +8,8 @@ add_library(
   src/Geant4Simulation.cpp
   src/PrimaryGeneratorAction.cpp
   src/RunAction.cpp
-  src/SteppingAction.cpp)
+  src/SteppingAction.cpp
+  src/SimParticleTranslation.cpp)
 target_compile_definitions(
   ActsExamplesGeant4
   PUBLIC ${Geant4_DEFINITIONS})
