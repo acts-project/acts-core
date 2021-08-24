@@ -6,6 +6,7 @@ add_library(
   src/GeantinoRecording.cpp
   src/Geant4Options.cpp
   src/Geant4Simulation.cpp
+  src/MaterialSteppingAction.cpp
   src/PrimaryGeneratorAction.cpp
   src/RunAction.cpp
   src/SteppingAction.cpp

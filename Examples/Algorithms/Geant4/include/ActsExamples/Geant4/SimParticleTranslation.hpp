@@ -13,10 +13,7 @@
 #include <memory>
 #include <string>
 
-#include <G4SystemOfUnits.hh>
-#include <G4ThreeVector.hh>
 #include <G4VUserPrimaryGeneratorAction.hh>
-#include <globals.hh>
 
 class G4Event;
 
@@ -63,7 +60,7 @@ class SimParticleTranslation final : public G4VUserPrimaryGeneratorAction {
   Config m_cfg;
 
  private:
-  /// Event number logger
+  /// Event number cache for EventStoreRegistry harmonization
   unsigned int m_eventNr = 0;
 
   /// Private access method to the logging instance
