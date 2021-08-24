@@ -65,15 +65,11 @@ Acts::LinCircle lcMidTop(
 template<typename SP>
 float maxDeltaR(double r) {
   if (r <= 60) {
-    return 30;
-  } else if (r <= 100) {
-    return 60;
-  } else if (r <= 150) {
-    return 80;
+    return 40;
   } else if (r <= 220) {
-    return 60;
+    return 70;
   } else {
-    return 1000;
+    return 100;
   }
 }
 
@@ -151,7 +147,8 @@ Acts::KDRange<N, double> validTupleOrthoRange(
   // WARNING: Experimental extra cut.
   double az = (res[1].max() / low.radius()) * std::max(std::abs(low.z() - config.collisionRegionMin), std::abs(low.z() - config.collisionRegionMax));
   double p2 = 0.0005 * az;
-  double delta_phi = std::min(0.085, p2);
+  double p3 = 0.0001 * std::sqrt(az);
+  double delta_phi = std::min(0.085, std::min(p2, p3));
 
   res[0].shrink_min(pL - delta_phi);
   res[0].shrink_max(pL + delta_phi);
@@ -183,7 +180,8 @@ Acts::KDRange<N, double> validMidToLowOrthoRange(
   // WARNING: Experimental extra cuts.
   double az = std::max(std::abs(mid.z() - config.collisionRegionMin), std::abs(mid.z() - config.collisionRegionMax));
   double p2 = 0.0005 * az;
-  double delta_phi = std::min(0.085, p2);
+  double p3 = 0.0002 * std::sqrt(az);
+  double delta_phi = std::min(0.085, std::min(p2, p3));
 
   res[0].shrink_min(pM - delta_phi);
   res[0].shrink_max(pM + delta_phi);
