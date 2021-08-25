@@ -94,6 +94,7 @@ void addDetector(Context& ctx) {
 
     py::class_<Options::Interval>(mex, "Interval")
         .def(py::init<>())
+        .def(py::init<std::optional<double>, std::optional<double>>())
         .def_readwrite("lower", &Options::Interval::lower)
         .def_readwrite("upper", &Options::Interval::upper);
 
@@ -106,6 +107,7 @@ void addDetector(Context& ctx) {
 
     auto volume = py::class_<Config::Volume>(c, "Volume").def(py::init<>());
     ACTS_PYTHON_STRUCT_BEGIN(volume, Config::Volume);
+    ACTS_PYTHON_MEMBER(name);
     ACTS_PYTHON_MEMBER(binToleranceR);
     ACTS_PYTHON_MEMBER(binTolerancePhi);
     ACTS_PYTHON_MEMBER(binToleranceZ);
@@ -114,6 +116,15 @@ void addDetector(Context& ctx) {
     ACTS_PYTHON_MEMBER(cylinderNPhiSegments);
     ACTS_PYTHON_MEMBER(discNRSegments);
     ACTS_PYTHON_MEMBER(discNPhiSegments);
+
+    ACTS_PYTHON_MEMBER(layers);
+    ACTS_PYTHON_MEMBER(subVolumeName);
+    ACTS_PYTHON_MEMBER(sensitiveNames);
+    ACTS_PYTHON_MEMBER(sensitiveAxes);
+    ACTS_PYTHON_MEMBER(rRange);
+    ACTS_PYTHON_MEMBER(zRange);
+    ACTS_PYTHON_MEMBER(splitTolR);
+    ACTS_PYTHON_MEMBER(splitTolZ);
     ACTS_PYTHON_STRUCT_END();
 
     auto regTriplet = [&c](const std::string& name, auto v) {
@@ -121,6 +132,7 @@ void addDetector(Context& ctx) {
       py::class_<Config::LayerTriplet<type>>(c, name.c_str())
           .def(py::init<>())
           .def(py::init<type>())
+          .def(py::init<type, type, type>())
           .def_readwrite("negative", &Config::LayerTriplet<type>::negative)
           .def_readwrite("central", &Config::LayerTriplet<type>::central)
           .def_readwrite("positive", &Config::LayerTriplet<type>::positive)
@@ -144,7 +156,10 @@ void addDetector(Context& ctx) {
     ACTS_PYTHON_MEMBER(beamPipeHalflengthZ);
     ACTS_PYTHON_MEMBER(beamPipeLayerThickness);
     ACTS_PYTHON_MEMBER(unitScalor);
+    ACTS_PYTHON_MEMBER(volumes);
     ACTS_PYTHON_STRUCT_END();
+
+    patchKwargsConstructor(c);
   }
 }
 }  // namespace Acts::Python

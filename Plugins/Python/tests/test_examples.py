@@ -102,8 +102,8 @@ def test_seeding(tmp_path, trk_geo, field):
     seq = Sequencer(events=10, numThreads=1)
 
     root_files = [
-        ("estimatedparams.root", "estimatedparams", 326),
-        ("performance_seeding_trees.root", "track_finder_tracks", 326),
+        ("estimatedparams.root", "estimatedparams", 363),
+        ("performance_seeding_trees.root", "track_finder_tracks", 363),
         ("performance_seeding_hists.root", None, 0),
         ("evgen_particles.root", "particles", seq.config.events),
         ("fatras_particles_final.root", "particles", seq.config.events),
@@ -534,9 +534,9 @@ def test_ckf_tracks_example_full_seeding(tmp_path):
 
     root_files = [
         ("performance_ckf.root", None, None),
-        ("performance_seeding_trees.root", "track_finder_tracks", 328),
+        ("performance_seeding_trees.root", "track_finder_tracks", 369),
         ("performance_seeding_trees.root", "track_finder_particles", 80),
-        ("trackstates_ckf.root", "trackstates", 328),
+        ("trackstates_ckf.root", "trackstates", 369),
         ("tracksummary_ckf.root", "tracksummary", 10),
     ]
 

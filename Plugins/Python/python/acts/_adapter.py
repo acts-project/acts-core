@@ -1,5 +1,6 @@
 import inspect
 import functools
+from typing import Optional, Callable, Dict, Any
 
 import acts
 
@@ -31,7 +32,9 @@ def _make_config_adapter(fn):
     return wrapped
 
 
-def _make_config_constructor(cls):
+def _make_config_constructor(
+    cls, proc: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None
+):
     fn = cls.__init__
 
     @functools.wraps(fn)
@@ -43,14 +46,18 @@ def _make_config_constructor(cls):
 
         fn(self, *args, **kwargs)
 
+        if proc is not None:
+            _kwargs = proc(_kwargs)
         for k, v in _kwargs.items():
             setattr(self, k, v)
 
     return wrapped
 
 
-def _patchKwargsConstructor(cls):
-    cls.__init__ = _make_config_constructor(cls)
+def _patchKwargsConstructor(
+    cls, proc: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None
+):
+    cls.__init__ = _make_config_constructor(cls, proc)
 
 
 def _patch_config(m):
