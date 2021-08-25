@@ -29,6 +29,20 @@
 #include <G4UserTrackingAction.hh>
 #include <G4VUserDetectorConstruction.hh>
 
+namespace {
+/// Helper method to add the user actions
+/// @tparam manager_t the run manager type
+/// @tparam actions_t the actions iterable list
+template <typename manager_t, typename actions_t>
+void setUserActions(manager_t& manager, actions_t& actions) {
+  for (const auto& action : actions) {
+    if (action != nullptr) {
+      manager.SetUserAction(action);
+    }
+  }
+}
+}  // namespace
+
 ActsExamples::Geant4Simulation::Geant4Simulation(
     const ActsExamples::Geant4Simulation::Config& config,
     Acts::Logging::Level level)
@@ -43,25 +57,17 @@ ActsExamples::Geant4Simulation::Geant4Simulation(
     throw std::invalid_argument("Missing G4 PrimaryGeneratorAction object");
   }
 
+  // Set the detector construction
   m_cfg.runManager->SetUserInitialization(m_cfg.detectorConstruction);
+
   // Set the primary generator action
   m_cfg.runManager->SetUserAction(m_cfg.primaryGeneratorAction);
-  if (m_cfg.runAction != nullptr) {
-    m_cfg.runManager->SetUserAction(m_cfg.runAction);
-  }
-  // Set the user actions
-  if (m_cfg.runAction != nullptr) {
-    m_cfg.runManager->SetUserAction(m_cfg.runAction);
-  }
-  if (m_cfg.eventAction != nullptr) {
-    m_cfg.runManager->SetUserAction(m_cfg.eventAction);
-  }
-  if (m_cfg.trackingAction != nullptr) {
-    m_cfg.runManager->SetUserAction(m_cfg.trackingAction);
-  }
-  if (m_cfg.steppingAction != nullptr) {
-    m_cfg.runManager->SetUserAction(m_cfg.steppingAction);
-  }
+
+  // Set the configured user actions
+  setUserActions(*m_cfg.runManager, m_cfg.runActions);
+  setUserActions(*m_cfg.runManager, m_cfg.eventActions);
+  setUserActions(*m_cfg.runManager, m_cfg.trackingActions);
+  setUserActions(*m_cfg.runManager, m_cfg.steppingActions);
 
   // Initialize the Geant4 run manager
   m_cfg.runManager->Initialize();

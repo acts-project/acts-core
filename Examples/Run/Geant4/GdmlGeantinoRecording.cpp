@@ -7,13 +7,14 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "ActsExamples/Geant4/GdmlDetectorConstruction.hpp"
+#include "ActsExamples/Geant4/Geant4Options.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
+#include "ActsExamples/Options/ParticleGunOptions.hpp"
 
 #include <boost/program_options.hpp>
 
-#include "GeantinoRecordingBase.hpp"
+#include "Geant4.hpp"
 
-using namespace ActsExamples;
 using namespace ActsExamples;
 
 int main(int argc, char* argv[]) {
@@ -22,6 +23,7 @@ int main(int argc, char* argv[]) {
   Options::addSequencerOptions(desc);
   Options::addOutputOptions(desc, OutputFormat::Root);
   Options::addGeant4Options(desc);
+  Options::addParticleGunOptions(desc);
   desc.add_options()(
       "gdml-file",
       boost::program_options::value<std::string>()->default_value(""),

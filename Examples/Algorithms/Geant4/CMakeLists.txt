@@ -1,14 +1,9 @@
 set(ACTS_EXAMPLES_G4SOURCES
     src/EventStoreRegistry.cpp
-    src/EventAction.cpp
     src/GdmlDetectorConstruction.cpp
-    src/GeantinoRecording.cpp
     src/Geant4Options.cpp
     src/Geant4Simulation.cpp
     src/MaterialSteppingAction.cpp
-    src/PrimaryGeneratorAction.cpp
-    src/RunAction.cpp
-    src/SteppingAction.cpp
     src/SimParticleTranslation.cpp)
 
 if (ACTS_BUILD_EXAMPLES_DD4HEP)

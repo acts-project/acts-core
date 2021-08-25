@@ -14,6 +14,7 @@
 #include <string>
 
 #include <G4VUserPrimaryGeneratorAction.hh>
+#include <globals.hh>
 
 class G4Event;
 
@@ -34,6 +35,11 @@ class SimParticleTranslation final : public G4VUserPrimaryGeneratorAction {
   struct Config {
     /// The input particle collection
     std::string inputParticles = "";
+
+    /// Force pdgCode & mass (this is needed for Geantino simulation)
+    bool forceParticle = false;
+    G4int forcedPdgCode = 998;
+    G4double forcedMass = 0.;
 
     /// The number of hits per particle to be expected
     /// @note best to include secondaries for that

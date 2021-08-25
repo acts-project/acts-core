@@ -62,17 +62,17 @@ class Geant4Simulation final : public BareAlgorithm {
     /// User Action: Primary generator action of the simulation
     G4VUserPrimaryGeneratorAction* primaryGeneratorAction = nullptr;
 
-    /// User Action: Run
-    G4UserRunAction* runAction = nullptr;
+    /// User Actions: Run
+    std::vector<G4UserRunAction*> runActions = {};
 
-    /// User Action: Event
-    G4UserEventAction* eventAction = nullptr;
+    /// User Actions: Event
+    std::vector<G4UserEventAction*> eventActions = {};
 
-    /// User Action: Tracking
-    G4UserTrackingAction* trackingAction = nullptr;
+    /// User Actions: Tracking
+    std::vector<G4UserTrackingAction*> trackingActions = {};
 
-    /// User Action: Stepping Action
-    G4UserSteppingAction* steppingAction = nullptr;
+    /// User Actions: Stepping
+    std::vector<G4UserSteppingAction*> steppingActions = {};
 
     /// Detector construction object.
     G4VUserDetectorConstruction* detectorConstruction = nullptr;

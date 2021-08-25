@@ -1,3 +1,5 @@
+add_subdirectory(Common)
+
 add_executable(
   ActsExampleGeantinoRecordingGdml
   GdmlGeantinoRecording.cpp)
@@ -7,6 +9,7 @@ target_link_libraries(
     ActsExamplesCommon
     ActsExamplesFramework
     ActsExamplesGeant4
+    ActsExamplesGeant4Common
     ActsExamplesIoRoot
     Boost::program_options)
 

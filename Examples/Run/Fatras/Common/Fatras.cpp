@@ -66,18 +66,18 @@ int runFatras(int argc, char* argv[],
               std::shared_ptr<ActsExamples::IBaseDetector> detector) {
   using namespace ActsExamples;
 
-  // setup and parse options
+  // Setup and parse options
   auto desc = Options::makeDefaultOptions();
   Options::addSequencerOptions(desc);
   Options::addRandomNumbersOptions(desc);
   Simulation::addInputOptions(desc);
   Options::addOutputOptions(desc, OutputFormat::Root | OutputFormat::Csv);
-  // add general and detector-specific geometry options
+  // Add general and detector-specific geometry options
   Options::addGeometryOptions(desc);
   detector->addOptions(desc);
   Options::addMaterialOptions(desc);
   Options::addMagneticFieldOptions(desc);
-  // algorithm-specific options
+  // Algorithm-specific options
   FatrasSimulation::addOptions(desc);
 
   auto vars = Options::parse(desc, argc, argv);
@@ -85,22 +85,22 @@ int runFatras(int argc, char* argv[],
     return EXIT_FAILURE;
   }
 
-  // basic services
+  // Basic services
   auto randomNumbers =
       std::make_shared<RandomNumbers>(Options::readRandomNumbersConfig(vars));
 
-  // setup sequencer
+  // Setup sequencer
   Sequencer sequencer(Options::readSequencerConfig(vars));
-  // setup detector geometry and material and the magnetic field
+  // Setup detector geometry and material and the magnetic field
   auto [trackingGeometry, contextDecorators] = Geometry::build(vars, *detector);
   for (auto cdr : contextDecorators) {
     sequencer.addContextDecorator(cdr);
   }
-  // setup algorithm chain
+  // Setup algorithm chain
   Simulation::setupInput(vars, sequencer, randomNumbers);
   setupFatrasSimulation(vars, sequencer, randomNumbers, trackingGeometry);
   Simulation::setupOutput(vars, sequencer);
 
-  // run the simulation
+  // Run the simulation
   return sequencer.run();
 }

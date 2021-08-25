@@ -9,11 +9,13 @@
 #include "ActsExamples/DD4hepDetector/DD4hepDetectorOptions.hpp"
 #include "ActsExamples/DD4hepDetector/DD4hepGeometryService.hpp"
 #include "ActsExamples/DDG4/DDG4DetectorConstruction.hpp"
+#include "ActsExamples/Geant4/Geant4Options.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
+#include "ActsExamples/Options/ParticleGunOptions.hpp"
 
 #include <boost/program_options.hpp>
 
-#include "../GeantinoRecordingBase.hpp"
+#include "../Common/Geant4.hpp"
 
 using namespace ActsExamples;
 
@@ -24,6 +26,7 @@ int main(int argc, char* argv[]) {
   Options::addOutputOptions(desc, OutputFormat::Root);
   Options::addDD4hepOptions(desc);
   Options::addGeant4Options(desc);
+  Options::addParticleGunOptions(desc);
   auto vm = Options::parse(desc, argc, argv);
   if (vm.empty()) {
     return EXIT_FAILURE;

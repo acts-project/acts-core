@@ -89,12 +89,17 @@ void ActsExamples::SimParticleTranslation::GeneratePrimaries(G4Event* anEvent) {
     // Add a new primary to the vertex
     auto mom4 = part.fourMomentum() * convertEnergy;
 
-    // Particle properties
+    // Particle properties, may be forced to specific value
+    G4int particlePdgCode =
+        m_cfg.forceParticle ? m_cfg.forcedPdgCode : part.pdg();
+    G4double particleMass =
+        m_cfg.forceParticle ? part.mass() * convertEnergy : 0.;
+
     G4ParticleDefinition* particleDefinition =
-        particleTable->FindParticle(part.pdg());
+        particleTable->FindParticle(particlePdgCode);
     G4PrimaryParticle* particle = new G4PrimaryParticle(particleDefinition);
 
-    particle->SetMass(part.mass() * convertEnergy);
+    particle->SetMass(particleMass);
     particle->Set4Momentum(mom4[0], mom4[1], mom4[2], mom4[3]);
     particle->SetCharge(part.charge());
     particle->SetTrackID(pCounter);
