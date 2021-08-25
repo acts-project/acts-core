@@ -53,4 +53,4 @@ Alignment can be run to estimate the misalignment, which can then be further use
        --output-dir=data/reco_misalignedTrackML_aligned/single_muon
 
 
- The ``--reco-with-misalignment-correction`` must be true to turn on the alignment, and the ``--alignment-geo-config-file`` is a jason file to specify which detector objects are to be aligned. Currently, only module level alignment is possible. 
+The ``--reco-with-misalignment-correction`` must be true to turn on the alignment, and the ``--alignment-geo-config-file`` is a jason file to specify which detector objects are to be aligned. Currently, only module level alignment is possible. 
