@@ -2,6 +2,7 @@ add_library(
   ActsExamplesCommon SHARED
   src/CommonGeometry.cpp
   src/CommonOptions.cpp
+  src/CommonSimulation.cpp
   src/GeometryExampleBase.cpp
   src/MaterialMappingBase.cpp
   src/MaterialValidationBase.cpp
@@ -14,7 +15,7 @@ target_link_libraries(
   PUBLIC
     ActsCore
     ActsExamplesFramework ActsExamplesMagneticField
-    ActsExamplesDetectorsCommon ActsExamplesPropagation
+    ActsExamplesDetectorsCommon ActsExamplesPropagation ActsExamplesGenerators
     ActsExamplesMaterialMapping ActsExamplesIoCsv ActsExamplesIoJson
     ActsExamplesIoRoot ActsExamplesIoObj ActsExamplesIoPerformance)
 
