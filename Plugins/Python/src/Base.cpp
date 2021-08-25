@@ -198,6 +198,15 @@ void addPdgParticle(Acts::Python::Context& ctx) {
 
 void addAlgebra(Acts::Python::Context& ctx) {
   auto& m = ctx.get("main");
+
+  py::class_<Acts::Vector2>(m, "Vector2")
+      .def(py::init<double, double>())
+      .def(py::init([](std::array<double, 2> a) {
+        Acts::Vector2 v;
+        v << a[0], a[1];
+        return v;
+      }));
+
   py::class_<Acts::Vector3>(m, "Vector3")
       .def(py::init<double, double, double>())
       .def(py::init([](std::array<double, 3> a) {

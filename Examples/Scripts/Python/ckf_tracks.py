@@ -172,11 +172,45 @@ def runCKFTracks(
         else:
             logger.info("Using seeding")
             # Use seeding
+            gridConfig = acts.SpacePointGridConfig(
+                bFieldInZ=1.99724 * u.T,
+                minPt=500 * u.MeV,
+                rMax=200 * u.mm,
+                zMax=2000 * u.mm,
+                zMin=-2000 * u.mm,
+                deltaRMax=60 * u.mm,
+                cotThetaMax=7.40627,  # 2.7 eta
+            )
+
+            seedFilterConfig = acts.SeedFilterConfig(
+                maxSeedsPerSpM=1, deltaRMin=1 * u.mm
+            )
+
+            seedFinderConfig = acts.SeedfinderConfig(
+                rMax=gridConfig.rMax,
+                deltaRMin=seedFilterConfig.deltaRMin,
+                deltaRMax=gridConfig.deltaRMax,
+                collisionRegionMin=-250 * u.mm,
+                collisionRegionMax=250 * u.mm,
+                zMin=gridConfig.zMin,
+                zMax=gridConfig.zMax,
+                maxSeedsPerSpM=seedFilterConfig.maxSeedsPerSpM,
+                cotThetaMax=gridConfig.cotThetaMax,
+                sigmaScattering=50,
+                radLengthPerSeed=0.1,
+                minPt=gridConfig.minPt,
+                bFieldInZ=gridConfig.bFieldInZ,
+                beamPos=acts.Vector2(0 * u.mm, 0 * u.mm),
+                impactMax=3 * u.mm,
+            )
             seeding = acts.examples.SeedingAlgorithm(
                 level=acts.logging.INFO,
                 inputSpacePoints=[spAlg.config.outputSpacePoints],
                 outputSeeds="seeds",
                 outputProtoTracks="prototracks",
+                gridConfig=gridConfig,
+                seedFilterConfig=seedFilterConfig,
+                seedFinderConfig=seedFinderConfig,
             )
             s.addAlgorithm(seeding)
             inputProtoTracks = seeding.config.outputProtoTracks
