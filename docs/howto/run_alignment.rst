@@ -36,6 +36,7 @@ Run detector alignment and refit with misalignment corrected
 ----------------------
 
 Alignment can be run to estimate the misalignment, which can then be further used to correct the alignment parameters of the detector elements. To run track fitting with some misalignment decorated as above and also corrected by runing alignment prior to it:
+
 .. code-block:: console
 
    $ <build>/bin/ActsExampleDetectorAlignContextual \
