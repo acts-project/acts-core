@@ -23,7 +23,7 @@ information to group simulated hits into tracks) and fits them.
 
    $ <build>/bin/ActsExampleTruthTracksGeneric \
        --input-dir=data/sim_trackML/ttbar_mu200 \
-       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json
+       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json \
        --bf-constant-tesla=0:0:2 \
        --output-dir=data/reco_trackML/ttbar_mu200
 

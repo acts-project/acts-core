@@ -19,13 +19,14 @@ The effects of misalignment on the track parameters estimation can be mimicked b
 
    $ <build>/bin/ActsExampleDetectorAlignContextual \
        --input-dir=data/sim_trackML/single_muon \
-       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json
+       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json \
        --bf-constant-tesla=0:0:2 \
        --align-sigma-iplane 100 \ 
        --align-sigma-oplane 0 \
        --align-sigma-irot 10 \
        --align-sigma-orot 0 \
        --output-dir=data/reco_misalignedTrackML_nonaligned/single_muon
+
 
 The ``--digi-config-file`` specifies the path for the digitization configuration file. The magnetic field setup should be consistent between simulation and the track fitting. 
 The ``--align-sigma-iplane`` and ``--align-sigma-oplane`` specifies the standard deviation of the shifts of the detector element in um within the plane and out of plane, respectively. 
@@ -41,14 +42,15 @@ Alignment can be run to estimate the misalignment, which can then be further use
 
    $ <build>/bin/ActsExampleDetectorAlignContextual \
        --input-dir=data/sim_trackML/single_muon \
-       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json
+       --digi-config-file <source>/Examples/Algorithms/Digitization/share/default-smearing-config-generic.json \
        --bf-constant-tesla=0:0:2 \
        --align-sigma-iplane 100 \
        --align-sigma-oplane 0 \
        --align-sigma-irot 10 \
        --align-sigma-orot 0 \
-       --reco-with-misalignment-correction true
-       --alignment-geo-config-file <source>/Examples/Algorithms/Alignment/share/alignment-geo-contextualDetector.json
+       --reco-with-misalignment-correction true \
+       --alignment-geo-config-file <source>/Examples/Algorithms/Alignment/share/alignment-geo-contextualDetector.json \
        --output-dir=data/reco_misalignedTrackML_aligned/single_muon
+
 
  The ``--reco-with-misalignment-correction`` must be true to turn on the alignment, and the ``--alignment-geo-config-file`` is a jason file to specify which detector objects are to be aligned. Currently, only module level alignment is possible. 
