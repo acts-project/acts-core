@@ -1,3 +1,5 @@
+.. _truth-fit-TrackML:
+
 Run the truth tracking examples
 ===============================
 
