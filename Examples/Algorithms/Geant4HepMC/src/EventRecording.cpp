@@ -134,12 +134,24 @@ ActsExamples::ProcessCode ActsExamples::EventRecording::execute(
       }
       // Store the result
       if (storeEvent) {
-        // Remove vertices without outgoing particles
-        for (auto it = event.vertices().crbegin();
-             it != event.vertices().crend(); it++) {
-          if ((*it)->particles_out().empty()) {
-            event.remove_vertex(*it);
+      // Remove vertices w/o outgoing particles and particles w/o production vertices
+        while (true) {
+          bool sane = true;
+          for (auto v: event.vertices()) {
+            if (!v) continue;
+            if (v->particles_out().empty()) {
+              event.remove_vertex(v);
+              sane = false;
+            }
           }
+          for (auto p: event.particles()) {
+            if (!p) continue;
+            if (!p->production_vertex()) {
+              event.remove_particle(p);
+              sane = false;
+            }
+          }
+          if (sane) break;
         }
         events.push_back(std::move(event));
       }
