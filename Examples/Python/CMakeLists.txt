@@ -1,10 +1,3 @@
-add_library(ActsPluginPython INTERFACE)
-
-install(
-  TARGETS ActsPluginPython
-  EXPORT ActsPluginPythonTargets
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
 add_library(ActsPythonUtilities INTERFACE)
 target_include_directories(ActsPythonUtilities INTERFACE include)
 

@@ -36,7 +36,6 @@ option(ACTS_BUILD_PLUGIN_JSON "Build json plugin" OFF)
 option(ACTS_USE_SYSTEM_NLOHMANN_JSON "Use nlohmann::json provided by the system instead of the bundled version" OFF)
 option(ACTS_BUILD_PLUGIN_LEGACY "Build legacy plugin" OFF)
 option(ACTS_BUILD_PLUGIN_ONNX "Build ONNX plugin" OFF)
-option(ACTS_BUILD_PLUGIN_PYTHON "Build python plugin" OFF)
 option(ACTS_BUILD_PLUGIN_SYCL "Build SYCL plugin" OFF)
 option(ACTS_BUILD_PLUGIN_TGEO "Build TGeo plugin" OFF)
 # fatras related options
@@ -49,6 +48,7 @@ option(ACTS_BUILD_EXAMPLES_GEANT4 "Build Geant4-based code in the examples" OFF)
 option(ACTS_BUILD_EXAMPLES_HEPMC3 "Build HepMC3-based code in the examples" OFF)
 option(ACTS_BUILD_EXAMPLES_PYTHIA8 "Build Pythia8-based code in the examples" OFF)
 option(ACTS_BUILD_EXAMPLES_SCRIPTS "Build Analysis applications in the examples" OFF)
+option(ACTS_BUILD_EXAMPLES_PYTHON_BINDINGS "Build python bindings for the examples" OFF)
 # test related options
 option(ACTS_BUILD_BENCHMARKS "Build benchmarks" OFF)
 option(ACTS_BUILD_INTEGRATIONTESTS "Build integration tests" OFF)
@@ -170,7 +170,7 @@ endmacro()
 # the same package twice. This avoids having complex if/else trees to sort out
 # when a particular package is actually needed.
 # plugin dependencies
-if(ACTS_BUILD_PLUGIN_PYTHON)
+if(ACTS_BUILD_EXAMPLES_PYTHON_BINDINGS)
     add_subdirectory(thirdparty/pybind11)
 endif()
 if(ACTS_BUILD_PLUGIN_AUTODIFF)
