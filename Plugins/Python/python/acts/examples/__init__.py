@@ -83,9 +83,9 @@ def _makeLayerTriplet(*args, **kwargs):
             for vv in (negative, central, positive)
             if vv is not None
         ):
-            negative = Interval(*negative)
-            central = Interval(*central)
-            positive = Interval(*positive)
+            negative = Interval(*negative) if negative is not None else None
+            central = Interval(*central) if central is not None else None
+            positive = Interval(*positive) if positive is not None else None
             return fill(TGeoDetector.Config.LayerTripletInterval())
         else:
             raise TypeError("Invalid types for tuple input")

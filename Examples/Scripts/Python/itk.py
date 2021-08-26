@@ -82,7 +82,9 @@ if "__main__" == __name__:
         beamPipeLayerThickness=0.8 * u.mm,
         volumes=[
             Volume(
-                name="Pixel::Pixel",
+                name="InnerPixels",
+                layers=LayerTriplet(True),
+                subVolumeName=LayerTriplet("Pixel::Pixel"),
                 binToleranceR=(5 * u.mm, 5 * u.mm),
                 binToleranceZ=(5 * u.mm, 5 * u.mm),
                 binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
@@ -98,6 +100,75 @@ if "__main__" == __name__:
                 splitTolZ=LayerTriplet(
                     negative=10 * u.mm, central=-1.0, positive=10 * u.mm
                 ),
-            )
+            ),
+            Volume(
+                name="OuterPixels",
+                layers=LayerTriplet(True),
+                subVolumeName=LayerTriplet("Pixel::Pixel"),
+                binToleranceR=(5 * u.mm, 5 * u.mm),
+                binToleranceZ=(5 * u.mm, 5 * u.mm),
+                binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
+                sensitiveNames=LayerTriplet(["Pixel::siLog"]),
+                sensitiveAxes=LayerTriplet("YZX"),
+                rRange=LayerTriplet((135 * u.mm, 350 * u.mm)),
+                zRange=LayerTriplet(
+                    negative=(-3000 * u.mm, -377 * u.mm),
+                    central=(-377 * u.mm, 377 * u.mm),
+                    positive=(3000 * u.mm, 377 * u.mm),
+                ),
+                splitTolR=LayerTriplet(
+                    negative=15 * u.mm, central=5 * u.mm, positive=15 * u.mm
+                ),
+                splitTolZ=LayerTriplet(
+                    negative=20 * u.mm, central=-1.0, positive=20 * u.mm
+                ),
+            ),
+            Volume(
+                name="Strips",
+                subVolumeName=LayerTriplet("*"),
+                binToleranceR=(5 * u.mm, 5 * u.mm),
+                binToleranceZ=(5 * u.mm, 5 * u.mm),
+                binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
+                sensitiveNames=LayerTriplet(["SCT::ECSensor*"]),
+                sensitiveAxes=LayerTriplet("XYZ"),
+                rRange=LayerTriplet(
+                    negative=(-1.0, 1050 * u.mm),
+                    central=(380 * u.mm, 1050 * u.mm),
+                    positive=(-1.0, 1050 * u.mm),
+                ),
+                zRange=LayerTriplet(
+                    negative=(-3000 * u.mm, -1400 * u.mm),
+                    central=(-1400 * u.mm, 1400 * u.mm),
+                    positive=(1400 * u.mm, 3000 * u.mm),
+                ),
+                splitTolR=LayerTriplet(
+                    negative=-1.0,
+                    central=35 * u.mm,
+                    positive=-1.0,
+                ),
+                splitTolZ=LayerTriplet(
+                    negative=35 * u.mm, central=-1.0, positive=35 * u.mm
+                ),
+            ),
+            Volume(
+                name="HGTD",
+                layers=LayerTriplet(positive=True, central=False, negative=True),
+                subVolumeName=LayerTriplet("HGTD::HGTD"),
+                binToleranceR=(15 * u.mm, 15 * u.mm),
+                binToleranceZ=(15 * u.mm, 15 * u.mm),
+                binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
+                sensitiveNames=LayerTriplet(["HGTD:HGTDSiSensor*"]),
+                sensitiveAxes=LayerTriplet("XYZ"),
+                rRange=LayerTriplet(
+                    negative=(0 * u.mm, 1050 * u.mm),
+                    positive=(0 * u.mm, 1050 * u.mm),
+                ),
+                zRange=LayerTriplet(
+                    negative=(-4000 * u.mm, -3000 * u.mm),
+                    postive=(3000 * u.mm, 4000 * u.mm),
+                ),
+                splitTolR=LayerTriplet(-1.0),
+                splitTolZ=LayerTriplet(negative=10 * u.mm, positive=10 * u.mm),
+            ),
         ],
     )
