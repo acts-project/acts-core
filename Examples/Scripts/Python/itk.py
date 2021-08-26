@@ -23,7 +23,7 @@ from acts import MaterialMapJsonConverter, UnitConstants as u
 def runITk(
     trackingGeometry,
     decorators,
-    outputDir,
+    outputDir: Path,
     events=1,
     outputObj=True,
     outputCsv=False,
@@ -44,37 +44,30 @@ def runITk(
             writer = CsvTrackingGeometryWriter(
                 level=acts.logging.INFO,
                 trackingGeometry=trackingGeometry,
-                outputDir=os.path.join(outputDir, "csv"),
+                outputDir=str(outputDir / "csv"),
                 writePerEvent=True,
             )
             writer.write(context)
 
         if outputObj:
             writer = ObjTrackingGeometryWriter(
-                level=acts.logging.INFO, outputDir=os.path.join(outputDir, "obj")
+                level=acts.logging.INFO,
+                outputDir=str(outputDir / "obj"),
             )
             writer.write(context, trackingGeometry)
 
 
-if "__main__" == __name__:
-    # detector, trackingGeometry, decorators = AlignedDetector.create()
-    # detector, trackingGeometry, decorators = GenericDetector.create()
-    # detector, trackingGeometry, decorators = getOpenDataDetector()
-
-    # runGeometry(trackingGeometry, decorators, outputDir=os.getcwd())
-
-    geo_example_dir = Path.cwd() / "../acts-detector-example"
-    assert geo_example_dir.exists(), "Detector example input directory missing"
-
-    # detector, trackingGeometry, decorators = TGeoDetector.create(
-    #     fileName=str(geo_example_dir / "atlas/itk-hgtd/ATLAS-ITk-HGTD.tgeo.root")
-    # )
-
+def buildITkGeometry(geo_dir: Path):
     Volume = TGeoDetector.Config.Volume
     LayerTriplet = TGeoDetector.Config.LayerTriplet
 
-    detector, trackingGeometry, decorators = TGeoDetector.create(
-        fileName=str(geo_example_dir / "atlas/itk-hgtd/ATLAS-ITk-HGTD.tgeo.root"),
+    matDeco = acts.IMaterialDecorator.fromFile(
+        geo_dir / "atlas/itk-hgtd/material-maps-ITk-HGTD.cbor",
+    )
+
+    return TGeoDetector.create(
+        fileName=str(geo_dir / "atlas/itk-hgtd/ATLAS-ITk-HGTD.tgeo.root"),
+        mdecorator=matDeco,
         buildBeamPipe=True,
         unitScalor=1.0,  # explicit units
         beamPipeRadius=29.0 * u.mm,
@@ -181,4 +174,18 @@ if "__main__" == __name__:
         ],
     )
 
-    print("done")
+
+if "__main__" == __name__:
+
+    geo_example_dir = Path.cwd() / "../acts-detector-example"
+    assert geo_example_dir.exists(), "Detector example input directory missing"
+
+    detector, trackingGeometry, decorators = buildITkGeometry(geo_example_dir)
+
+    runITk(
+        trackingGeometry=trackingGeometry,
+        decorators=decorators,
+        outputDir=Path.cwd(),
+        outputCsv=False,
+        outputObj=True,
+    )

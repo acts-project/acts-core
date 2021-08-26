@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from helpers import dd4hepEnabled
@@ -153,3 +155,22 @@ def test_tgeo_config_volume(monkeypatch):
 
         v = Volume(**{key: (4, None)})
         assert getattr(v, key) == Interval(4, None)
+
+
+@pytest.mark.slow
+def test_tgeo_itk_hgtd():
+    geo_dir = (Path.cwd() / "acts-detector-example").resolve()
+
+    if not geo_dir.exists() or not geo_dir.is_dir():
+        pytest.skip("ITk HGTD geometry not available")
+        return
+
+    from itk import buildITkGeometry
+
+    detector, geo, deco = buildITkGeometry(geo_dir)
+
+    assert detector is not None
+    assert geo is not None
+    assert deco is not None
+
+    assert count_surfaces(geo) == 36880
