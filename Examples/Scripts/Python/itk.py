@@ -73,13 +73,16 @@ if "__main__" == __name__:
     Volume = TGeoDetector.Config.Volume
     LayerTriplet = TGeoDetector.Config.LayerTriplet
 
-    itkConfig = TGeoDetector.Config(
+    detector, trackingGeometry, decorators = TGeoDetector.create(
         fileName=str(geo_example_dir / "atlas/itk-hgtd/ATLAS-ITk-HGTD.tgeo.root"),
         buildBeamPipe=True,
         unitScalor=1.0,  # explicit units
         beamPipeRadius=29.0 * u.mm,
         beamPipeHalflengthZ=3000.0 * u.mm,
         beamPipeLayerThickness=0.8 * u.mm,
+        surfaceLogLevel=acts.logging.WARNING,
+        layerLogLevel=acts.logging.WARNING,
+        volumeLogLevel=acts.logging.WARNING,
         volumes=[
             Volume(
                 name="InnerPixels",
@@ -125,11 +128,16 @@ if "__main__" == __name__:
             ),
             Volume(
                 name="Strips",
+                layers=LayerTriplet(True),
                 subVolumeName=LayerTriplet("*"),
                 binToleranceR=(5 * u.mm, 5 * u.mm),
                 binToleranceZ=(5 * u.mm, 5 * u.mm),
                 binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
-                sensitiveNames=LayerTriplet(["SCT::ECSensor*"]),
+                sensitiveNames=LayerTriplet(
+                    negative=["SCT::ECSensor*"],
+                    central=["SCT::BRLSensor*"],
+                    positive=["SCT::ECSensor*"],
+                ),
                 sensitiveAxes=LayerTriplet("XYZ"),
                 rRange=LayerTriplet(
                     negative=(-1.0, 1050 * u.mm),
@@ -157,7 +165,7 @@ if "__main__" == __name__:
                 binToleranceR=(15 * u.mm, 15 * u.mm),
                 binToleranceZ=(15 * u.mm, 15 * u.mm),
                 binTolerancePhi=(0.025 * u.mm, 0.025 * u.mm),
-                sensitiveNames=LayerTriplet(["HGTD:HGTDSiSensor*"]),
+                sensitiveNames=LayerTriplet(["HGTD::HGTDSiSensor*"]),
                 sensitiveAxes=LayerTriplet("XYZ"),
                 rRange=LayerTriplet(
                     negative=(0 * u.mm, 1050 * u.mm),
@@ -172,3 +180,5 @@ if "__main__" == __name__:
             ),
         ],
     )
+
+    print("done")
