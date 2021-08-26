@@ -63,6 +63,7 @@ def buildITkGeometry(geo_dir: Path):
 
     matDeco = acts.IMaterialDecorator.fromFile(
         geo_dir / "atlas/itk-hgtd/material-maps-ITk-HGTD.cbor",
+        level=acts.logging.VERBOSE,
     )
 
     return TGeoDetector.create(
