@@ -290,7 +290,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/acts-project/ubuntu2004:v9
     env:
-        DOXYGEN_WARN_AS_ERROR=YES
+        DOXYGEN_WARN_AS_ERROR: YES
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies

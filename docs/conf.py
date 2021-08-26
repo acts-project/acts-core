@@ -106,7 +106,7 @@ if on_readthedocs or tags.has("run_doxygen"):
 if on_readthedocs or tags.has("run_apidoc"):
     print("Executing breathe apidoc in", cwd)
     subprocess.check_call(
-        ["python", "-m", "breathe.apidoc", "_build/doxygen-xml", "-o", "api"],
+        [sys.executable, "-m", "breathe.apidoc", "_build/doxygen-xml", "-o", "api"],
         stdout=subprocess.PIPE,
         cwd=cwd,
         env=env,
