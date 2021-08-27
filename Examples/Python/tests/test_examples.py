@@ -644,7 +644,7 @@ def test_ckf_tracks_example_truth_smeared(tmp_path):
 
     root_files = [
         ("performance_ckf.root", None, None),
-        ("trackstates_ckf.root", "trackstates", 81),
+        ("trackstates_ckf.root", "trackstates", 82),
         ("tracksummary_ckf.root", "tracksummary", 10),
     ]
 
