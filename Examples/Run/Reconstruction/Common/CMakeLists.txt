@@ -1,6 +1,5 @@
 add_library(
   ActsExamplesRecTracksCommon SHARED
-  RecInput.cpp 
   RecTruthTracks.cpp
   RecCKFTracks.cpp
   SeedingExample.cpp)
@@ -12,12 +11,7 @@ target_link_libraries(
   PUBLIC
     ActsExamplesFramework
     ActsExamplesCommon
-    ActsExamplesDigitization
-    ActsExamplesTrackFitting
-    ActsExamplesTrackFinding
     ActsExamplesMagneticField
-    ActsExamplesTruthTracking
-    ActsExamplesIoCsv
     ActsExamplesIoPerformance)
 if(ACTS_BUILD_PLUGIN_ONNX)
   target_compile_definitions(

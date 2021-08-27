@@ -41,6 +41,8 @@ option(ACTS_BUILD_PLUGIN_TGEO "Build TGeo plugin" OFF)
 # fatras related options
 option(ACTS_BUILD_FATRAS "Build FAst TRAcking Simulation package" OFF)
 option(ACTS_BUILD_FATRAS_GEANT4 "Build Geant4 Fatras package" OFF)
+# alignment related options
+option(ACTS_BUILD_ALIGNMENT "Build Alignment package" OFF)
 # examples related options
 option(ACTS_BUILD_EXAMPLES "Build standalone examples" OFF)
 option(ACTS_BUILD_EXAMPLES_DD4HEP "Build DD4hep-based code in the examples" OFF)
@@ -70,6 +72,7 @@ set_option_if(ACTS_BUILD_EXAMPLES_HEPMC3 ACTS_BUILD_EVERYTHING)
 set_option_if(ACTS_BUILD_EXAMPLES_PYTHIA8 ACTS_BUILD_EVERYTHING)
 set_option_if(ACTS_BUILD_FATRAS_GEANT4 ACTS_BUILD_EVERYTHING)
 set_option_if(ACTS_BUILD_FATRAS ACTS_BUILD_FATRAS_GEANT4)
+set_option_if(ACTS_BUILD_ALIGNMENT ACTS_BUILD_EVERYTHING)
 # any examples component activates the general examples option
 set_option_if(
   ACTS_BUILD_EXAMPLES
@@ -256,6 +259,7 @@ endif()
 add_component(Core Core)
 add_subdirectory(Plugins)
 add_component_if(Fatras Fatras ACTS_BUILD_FATRAS)
+add_component_if(Alignment Alignment ACTS_BUILD_ALIGNMENT)
 
 # examples
 add_subdirectory_if(Examples ACTS_BUILD_EXAMPLES)

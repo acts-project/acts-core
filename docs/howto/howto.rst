@@ -11,3 +11,4 @@ How-to guides
    run_truth_tracking
    run_ckf_tracking
    setup_and_run_vertexing
+   run_alignment

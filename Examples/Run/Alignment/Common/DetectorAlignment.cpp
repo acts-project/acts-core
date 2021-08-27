@@ -1,12 +1,13 @@
 // This file is part of the Acts project.
 //
-// Copyright (C) 2019-2021 CERN for the benefit of the Acts project
+// Copyright (C) 2021 CERN for the benefit of the Acts project
 //
 // This Source Code Form is subject to the terms of the Mozilla Public
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "Acts/Definitions/Units.hpp"
+#include "ActsExamples/Alignment/AlignmentAlgorithm.hpp"
 #include "ActsExamples/Detector/IBaseDetector.hpp"
 #include "ActsExamples/Digitization/DigitizationOptions.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
@@ -15,6 +16,7 @@
 #include "ActsExamples/Io/Csv/CsvOptionsReader.hpp"
 #include "ActsExamples/Io/Csv/CsvParticleReader.hpp"
 #include "ActsExamples/Io/Csv/CsvSimHitReader.hpp"
+#include "ActsExamples/Io/Json/JsonGeometryList.hpp"
 #include "ActsExamples/Io/Performance/TrackFinderPerformanceWriter.hpp"
 #include "ActsExamples/Io/Performance/TrackFitterPerformanceWriter.hpp"
 #include "ActsExamples/Io/Root/RootTrajectoryStatesWriter.hpp"
@@ -34,10 +36,26 @@
 
 using namespace Acts::UnitLiterals;
 using namespace ActsExamples;
+using namespace boost::filesystem;
 
-int runRecTruthTracks(int argc, char* argv[],
-                      std::shared_ptr<ActsExamples::IBaseDetector> detector) {
+void addAlignmentOptions(ActsExamples::Options::Description& desc) {
   using boost::program_options::value;
+  auto opt = desc.add_options();
+  opt("reco-with-misalignment-correction", value<bool>()->default_value(false),
+      "Correct for detector misalignment effects.");
+  opt("alignment-geo-config-file", value<std::string>()->default_value(""),
+      "Json file for alignment geometry elements selection");
+}
+
+int runDetectorAlignment(
+    int argc, char* argv[],
+    std::shared_ptr<ActsExamples::IBaseDetector> detector,
+    ActsAlignment::AlignedTransformUpdater alignedTransformUpdater,
+    std::function<std::vector<Acts::DetectorElementBase*>(
+        const std::shared_ptr<ActsExamples::IBaseDetector>&,
+        const std::vector<Acts::GeometryIdentifier>&)>
+        alignedDetElementsGetter) {
+  // using boost::program_options::value;
 
   // setup and parse options
   auto desc = Options::makeDefaultOptions();
@@ -52,6 +70,7 @@ int runRecTruthTracks(int argc, char* argv[],
   Options::addFittingOptions(desc);
   Options::addDigitizationOptions(desc);
   TruthSeedSelector::addOptions(desc);
+  addAlignmentOptions(desc);
 
   auto vm = Options::parse(desc, argc, argv);
   if (vm.empty()) {
@@ -128,6 +147,33 @@ int runRecTruthTracks(int argc, char* argv[],
   if (dirNav) {
     sequencer.addAlgorithm(
         std::make_shared<SurfaceSortingAlgorithm>(sorterCfg, logLevel));
+  }
+
+  if (vm["reco-with-misalignment-correction"].as<bool>()) {
+    // setup the alignment (which will update the aligned transforms of the
+    // detector elements)
+    AlignmentAlgorithm::Config alignment;
+    alignment.inputSourceLinks = digiCfg.outputSourceLinks;
+    alignment.inputMeasurements = digiCfg.outputMeasurements;
+    alignment.inputProtoTracks = trackFinderCfg.outputProtoTracks;
+    alignment.inputInitialTrackParameters =
+        particleSmearingCfg.outputTrackParameters;
+    alignment.outputAlignmentParameters = "alignment-parameters";
+    alignment.alignedTransformUpdater = alignedTransformUpdater;
+    std::string path = vm["alignment-geo-config-file"].as<std::string>();
+    if (not path.empty()) {
+      alignment.alignedDetElements = alignedDetElementsGetter(
+          detector, ActsExamples::readJsonGeometryList(path));
+    }
+
+    // The criteria to determine if the iteration has converged.
+    alignment.deltaChi2ONdfCutOff = {10, 0.00005};
+    alignment.chi2ONdfCutOff = 0.01;
+    alignment.maxNumIterations = 60;
+    alignment.align = AlignmentAlgorithm::makeAlignmentFunction(
+        trackingGeometry, magneticField);
+    sequencer.addAlgorithm(
+        std::make_shared<AlignmentAlgorithm>(alignment, logLevel));
   }
 
   // setup the fitter

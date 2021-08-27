@@ -9,8 +9,7 @@ target_link_libraries(
   ActsExampleTruthTracksGeneric
   PRIVATE
     ActsExamplesRecTracksCommon 
-    ActsExamplesDetectorGeneric)
-
+    ActsExamplesDetectorGeneric) 
 # Truth fitting for TGeo detector 
 add_executable(
   ActsExampleTruthTracksTGeo
