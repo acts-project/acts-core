@@ -4,4 +4,4 @@ add_subdirectory(Framework)
 add_subdirectory(Io)
 add_subdirectory(Run)
 add_subdirectory_if(Scripts ACTS_BUILD_EXAMPLES_SCRIPTS)
-
+add_subdirectory_if(Python ACTS_BUILD_EXAMPLES_PYTHON_BINDINGS)

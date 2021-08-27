@@ -49,6 +49,9 @@ struct TGeoDetector : public ActsExamples::IBaseDetector {
       LayerTriplet(T value)
           : negative{value}, central{value}, positive{value} {}
 
+      LayerTriplet(T _negative, T _central, T _positive)
+          : negative{_negative}, central{_central}, positive{_positive} {}
+
       T negative;
       T central;
       T positive;

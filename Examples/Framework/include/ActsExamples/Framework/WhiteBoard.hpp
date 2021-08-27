@@ -51,6 +51,8 @@ class WhiteBoard {
   template <typename T>
   const T& get(const std::string& name) const;
 
+  bool exists(const std::string& name) const;
+
  private:
   // type-erased value holder for move-constructible types
   struct IHolder {
@@ -103,4 +105,8 @@ inline const T& ActsExamples::WhiteBoard::get(const std::string& name) const {
   }
   ACTS_VERBOSE("Retrieved object '" << name << "'");
   return reinterpret_cast<const HolderT<T>*>(holder)->value;
+}
+
+inline bool ActsExamples::WhiteBoard::exists(const std::string& name) const {
+  return m_store.find(name) != m_store.end();
 }
