@@ -60,7 +60,7 @@ jobs:
         if: contains(matrix.image, 'ubuntu')
         run: >
           ${SETUP} 
-          && source build/python/setup.sh 
+          && . build/python/setup.sh 
           && pip install pytest
           && pytest -rFs
       - name: Install
