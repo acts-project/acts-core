@@ -20,4 +20,4 @@ class IBaseDetector;
 /// @param detector the detector instance
 ///
 int runMaterialMapping(int argc, char* argv[],
-                           ActsExamples::IBaseDetector& detector);
+                       ActsExamples::IBaseDetector& detector);

@@ -8,44 +8,43 @@
 
 #pragma once
 
-#include "ActsExamples/Utilities/OptionsFwd.hpp"
 #include "ActsExamples/Framework/RandomNumbers.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
+#include "ActsExamples/Utilities/OptionsFwd.hpp"
 
 namespace ActsExamples {
 namespace Simulation {
 
-    /// Collection names
-    static constexpr const char* kParticlesInput = "particles_input";
-    static constexpr const char* kParticlesSelection = "particles_selection";
-    static constexpr const char* kParticlesInitial = "particles_initial";
-    static constexpr const char* kParticlesFinal = "particles_final";
-    static constexpr const char* kSimHits = "simhits";
-    static constexpr const char* kMaterialTracks = "material_tracks";
+/// Collection names
+static constexpr const char* kParticlesInput = "particles_input";
+static constexpr const char* kParticlesSelection = "particles_selection";
+static constexpr const char* kParticlesInitial = "particles_initial";
+static constexpr const char* kParticlesFinal = "particles_final";
+static constexpr const char* kSimHits = "simhits";
+static constexpr const char* kMaterialTracks = "material_tracks";
 
-    /// Add input options 
-    ///
-    /// @param desc is the boost options descr format
-    void addInputOptions(ActsExamples::Options::Description& desc);
+/// Add input options
+///
+/// @param desc is the boost options descr format
+void addInputOptions(ActsExamples::Options::Description& desc);
 
-    /// Setup the input from the provided options
-    ///
-    /// @param vars the parsed variables from the boost options
-    /// @param sequencer the non-const sequencer
-    /// @param randomNumbers the randomNumbers shared pointer
-    /// 
-    void setupInput(
+/// Setup the input from the provided options
+///
+/// @param vars the parsed variables from the boost options
+/// @param sequencer the non-const sequencer
+/// @param randomNumbers the randomNumbers shared pointer
+///
+void setupInput(
     const ActsExamples::Options::Variables& vars,
     ActsExamples::Sequencer& sequencer,
     std::shared_ptr<const ActsExamples::RandomNumbers> randomNumbers);
 
-    /// Setup the output from the provided options
-    ///
-    /// @param vars the parsed variables from the boost options
-    /// @param sequencer the non-const sequencer
-    void setupOutput(const ActsExamples::Options::Variables& vars,
+/// Setup the output from the provided options
+///
+/// @param vars the parsed variables from the boost options
+/// @param sequencer the non-const sequencer
+void setupOutput(const ActsExamples::Options::Variables& vars,
                  ActsExamples::Sequencer& sequencer);
 
-
-} // namespace Simulation
-} // namespace ActsExamples
+}  // namespace Simulation
+}  // namespace ActsExamples

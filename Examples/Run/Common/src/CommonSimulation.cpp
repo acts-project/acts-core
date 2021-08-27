@@ -13,8 +13,8 @@
 #include "ActsExamples/Io/Csv/CsvSimHitWriter.hpp"
 #include "ActsExamples/Io/Root/RootParticleWriter.hpp"
 #include "ActsExamples/Io/Root/RootSimHitWriter.hpp"
-#include "ActsExamples/Options/ParticleGunOptions.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
+#include "ActsExamples/Options/ParticleGunOptions.hpp"
 #include "ActsExamples/TruthTracking/ParticleSelector.hpp"
 #include "ActsExamples/Utilities/Paths.hpp"
 
@@ -137,5 +137,5 @@ void setupOutput(const ActsExamples::Options::Variables& vars,
   }
 }
 
-} // namespace Simulation
+}  // namespace Simulation
 }  // namespace ActsExamples

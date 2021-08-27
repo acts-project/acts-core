@@ -6,6 +6,14 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/MagneticField/MagneticFieldContext.hpp"
+#include "Acts/Material/SurfaceMaterialMapper.hpp"
+#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "Acts/Propagator/Navigator.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/StraightLineStepper.hpp"
 #include "ActsExamples/Detector/IBaseDetector.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
 #include "ActsExamples/Geometry/CommonGeometry.hpp"
@@ -17,16 +25,8 @@
 #include "ActsExamples/MaterialMapping/MaterialMappingOptions.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
 #include "ActsExamples/Propagation/PropagationOptions.hpp"
-#include "ActsExamples/Utilities/Paths.hpp"
 #include "ActsExamples/Simulation/CommonSimulation.hpp"
-#include "Acts/Geometry/GeometryContext.hpp"
-#include "Acts/Geometry/TrackingGeometry.hpp"
-#include "Acts/MagneticField/MagneticFieldContext.hpp"
-#include "Acts/Material/SurfaceMaterialMapper.hpp"
-#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
-#include "Acts/Propagator/Navigator.hpp"
-#include "Acts/Propagator/Propagator.hpp"
-#include "Acts/Propagator/StraightLineStepper.hpp"
+#include "ActsExamples/Utilities/Paths.hpp"
 
 #include <memory>
 
@@ -35,7 +35,7 @@
 namespace po = boost::program_options;
 
 int runMaterialMapping(int argc, char* argv[],
-                           ActsExamples::IBaseDetector& detector) {
+                       ActsExamples::IBaseDetector& detector) {
   // Setup and parse options
   auto desc = ActsExamples::Options::makeDefaultOptions();
   ActsExamples::Options::addSequencerOptions(desc);
@@ -104,7 +104,8 @@ int runMaterialMapping(int argc, char* argv[],
   if (vm["input-root"].template as<bool>()) {
     // Read the material step information from a ROOT TTree
     ActsExamples::RootMaterialTrackReader::Config matTrackReaderRootConfig;
-    matTrackReaderRootConfig.collection = ActsExamples::Simulation::kMaterialTracks;
+    matTrackReaderRootConfig.collection =
+        ActsExamples::Simulation::kMaterialTracks;
     matTrackReaderRootConfig.fileList = intputFiles;
     auto matTrackReaderRoot =
         std::make_shared<ActsExamples::RootMaterialTrackReader>(

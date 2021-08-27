@@ -57,11 +57,12 @@ void ActsExamples::Options::addGeometryOptions(
   opt.add_options()("geo-surface-loglevel", value<size_t>()->default_value(3),
                     "The outoput log level for the surface building.")(
       "geo-layer-loglevel", value<size_t>()->default_value(3),
-      "The output log level for the layer building.")(
-      "geo-volume-loglevel", value<size_t>()->default_value(3),
-      "The output log level "
-      "for the volume "
-      "building.");
+      "The output log level for the layer building.")("geo-volume-loglevel",
+                                                      value<size_t>()
+                                                          ->default_value(3),
+                                                      "The output log level "
+                                                      "for the volume "
+                                                      "building.");
 }
 
 void ActsExamples::Options::addMaterialOptions(
