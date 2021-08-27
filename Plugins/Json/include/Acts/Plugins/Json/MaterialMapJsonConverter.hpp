@@ -22,9 +22,10 @@
 
 namespace Acts {
 
-using SurfaceAndMaterial =
-    std::pair<std::shared_ptr<const Acts::Surface>,
-              std::shared_ptr<const Acts::ISurfaceMaterial>>;
+using SurfaceAndMaterialWithContext =
+    std::tuple<std::shared_ptr<const Acts::Surface>,
+               std::shared_ptr<const Acts::ISurfaceMaterial>,
+               Acts::GeometryContext>;
 using TrackingVolumeAndMaterial =
     std::pair<const Acts::TrackingVolume*,
               std::shared_ptr<const Acts::IVolumeMaterial>>;
@@ -98,7 +99,8 @@ class MaterialMapJsonConverter {
   void convertToHierarchy(
       std::vector<std::pair<GeometryIdentifier,
                             Acts::TrackingVolumeAndMaterial>>& volumeHierarchy,
-      std::vector<std::pair<GeometryIdentifier, Acts::SurfaceAndMaterial>>&
+      std::vector<
+          std::pair<GeometryIdentifier, Acts::SurfaceAndMaterialWithContext>>&
           surfaceHierarchy,
       const Acts::TrackingVolume* tVolume);
 
@@ -124,7 +126,7 @@ class MaterialMapJsonConverter {
   Acts::GeometryHierarchyMapJsonConverter<const ISurfaceMaterial*>
       m_surfaceMaterialConverter;
   /// Geometry hierarchy writer for surface.
-  Acts::GeometryHierarchyMapJsonConverter<Acts::SurfaceAndMaterial>
+  Acts::GeometryHierarchyMapJsonConverter<Acts::SurfaceAndMaterialWithContext>
       m_surfaceConverter;
 
   /// Private access to the logging instance

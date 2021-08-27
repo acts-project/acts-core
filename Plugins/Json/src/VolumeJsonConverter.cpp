@@ -13,7 +13,7 @@
 
 void Acts::to_json(nlohmann::json& j,
                    const Acts::TrackingVolumeAndMaterial& volume) {
-  to_json(j, volume.first);
+  j[Acts::jsonKey().namekey] = volume.first->volumeName();
   to_json(j, volume.second.get());
 }
 

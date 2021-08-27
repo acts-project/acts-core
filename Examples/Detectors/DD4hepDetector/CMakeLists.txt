@@ -21,7 +21,7 @@ add_library(
   src/DetUtils.cpp)
 
 file(GLOB _odd "${CMAKE_SOURCE_DIR}/thirdparty/OpenDataDetector/factory/*")
-if(NOT "${_odd}")
+if(NOT _odd)
     message(WARNING "The ODD directory seems not to be present. Did you run init the submodule?")
 endif()
 target_sources(ActsExamplesDetectorDD4hep PUBLIC ${_odd})

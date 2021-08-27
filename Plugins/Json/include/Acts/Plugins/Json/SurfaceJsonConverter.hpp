@@ -21,16 +21,17 @@
 // can not match our naming guidelines.
 namespace Acts {
 
-using SurfaceAndMaterial =
-    std::pair<std::shared_ptr<const Acts::Surface>,
-              std::shared_ptr<const Acts::ISurfaceMaterial>>;
+using SurfaceAndMaterialWithContext =
+    std::tuple<std::shared_ptr<const Acts::Surface>,
+               std::shared_ptr<const Acts::ISurfaceMaterial>,
+               Acts::GeometryContext>;
 
 static std::vector<std::string> surfaceTypes = {
     "ConeSurface",  "CylinderSurface", "DiscSurface",       "PerigeeSurface",
     "PlaneSurface", "StrawSurface",    "CurvilinearSurface"};
 
 /// Conversion of a pair of surface and material used for the material mapping
-void to_json(nlohmann::json& j, const SurfaceAndMaterial& surface);
+void to_json(nlohmann::json& j, const SurfaceAndMaterialWithContext& surface);
 
 /// Non-contextual conversion of a surface
 ///

@@ -27,9 +27,10 @@
 #include "Acts/Surfaces/StrawSurface.hpp"
 #include "Acts/Surfaces/TrapezoidBounds.hpp"
 
-void Acts::to_json(nlohmann::json& j, const Acts::SurfaceAndMaterial& surface) {
-  to_json(j, surface.first);
-  to_json(j, surface.second.get());
+void Acts::to_json(nlohmann::json& j,
+                   const Acts::SurfaceAndMaterialWithContext& surface) {
+  toJson(j, std::get<0>(surface), std::get<2>(surface));
+  to_json(j, std::get<1>(surface).get());
 }
 
 void Acts::to_json(nlohmann::json& j, const Acts::Surface& surface) {

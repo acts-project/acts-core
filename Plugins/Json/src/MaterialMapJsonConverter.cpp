@@ -23,16 +23,18 @@
 #include <Acts/Surfaces/CylinderBounds.hpp>
 #include <Acts/Surfaces/RadialBounds.hpp>
 #include <Acts/Surfaces/SurfaceBounds.hpp>
+#include <Acts/Surfaces/TrapezoidBounds.hpp>
 
 #include <algorithm>
 #include <map>
 
 namespace {
 
-Acts::SurfaceAndMaterial defaultSurfaceMaterial(
-    std::shared_ptr<const Acts::Surface> surface) {
+Acts::SurfaceAndMaterialWithContext defaultSurfaceMaterial(
+    std::shared_ptr<const Acts::Surface> surface,
+    const Acts::GeometryContext& context) {
   if (surface->surfaceMaterialSharedPtr() != nullptr) {
-    return {surface, surface->surfaceMaterialSharedPtr()};
+    return {surface, surface->surfaceMaterialSharedPtr(), context};
   }
   Acts::BinUtility bUtility;
   // Check which type of bounds is associated to the surface
@@ -45,6 +47,8 @@ Acts::SurfaceAndMaterial defaultSurfaceMaterial(
       dynamic_cast<const Acts::AnnulusBounds*>(&surfaceBounds);
   const Acts::RectangleBounds* rectangleBounds =
       dynamic_cast<const Acts::RectangleBounds*>(&surfaceBounds);
+  const Acts::TrapezoidBounds* trapezoidBounds =
+      dynamic_cast<const Acts::TrapezoidBounds*>(&surfaceBounds);
 
   if (radialBounds != nullptr) {
     bUtility += Acts::BinUtility(
@@ -96,7 +100,19 @@ Acts::SurfaceAndMaterial defaultSurfaceMaterial(
                          rectangleBounds->get(Acts::RectangleBounds::eMaxY),
                          Acts::open, Acts::binY);
   }
-  return {surface, std::make_shared<Acts::ProtoSurfaceMaterial>(bUtility)};
+  if (trapezoidBounds != nullptr) {
+    double halfLengthX =
+        std::max(trapezoidBounds->get(Acts::TrapezoidBounds::eHalfLengthXnegY),
+                 trapezoidBounds->get(Acts::TrapezoidBounds::eHalfLengthXposY));
+    bUtility += Acts::BinUtility(1, -1 * halfLengthX, halfLengthX, Acts::open,
+                                 Acts::binX);
+    bUtility += Acts::BinUtility(
+        1, -1 * trapezoidBounds->get(Acts::TrapezoidBounds::eHalfLengthY),
+        trapezoidBounds->get(Acts::TrapezoidBounds::eHalfLengthY), Acts::open,
+        Acts::binY);
+  }
+  return {surface, std::make_shared<Acts::ProtoSurfaceMaterial>(bUtility),
+          context};
 }
 
 Acts::TrackingVolumeAndMaterial defaultVolumeMaterial(
@@ -232,14 +248,15 @@ nlohmann::json Acts::MaterialMapJsonConverter::trackingGeometryToJson(
     const Acts::TrackingGeometry& tGeometry) {
   std::vector<std::pair<GeometryIdentifier, Acts::TrackingVolumeAndMaterial>>
       volumeHierarchy;
-  std::vector<std::pair<GeometryIdentifier, Acts::SurfaceAndMaterial>>
+  std::vector<
+      std::pair<GeometryIdentifier, Acts::SurfaceAndMaterialWithContext>>
       surfaceHierarchy;
   convertToHierarchy(volumeHierarchy, surfaceHierarchy,
                      tGeometry.highestTrackingVolume());
   GeometryHierarchyMap<Acts::TrackingVolumeAndMaterial> hierarchyVolumeMap(
       volumeHierarchy);
   nlohmann::json jsonVolumes = m_volumeConverter.toJson(hierarchyVolumeMap);
-  GeometryHierarchyMap<Acts::SurfaceAndMaterial> hierarchySurfaceMap(
+  GeometryHierarchyMap<Acts::SurfaceAndMaterialWithContext> hierarchySurfaceMap(
       surfaceHierarchy);
   nlohmann::json jsonSurfaces = m_surfaceConverter.toJson(hierarchySurfaceMap);
   nlohmann::json hierarchyMap;
@@ -251,7 +268,8 @@ nlohmann::json Acts::MaterialMapJsonConverter::trackingGeometryToJson(
 void Acts::MaterialMapJsonConverter::convertToHierarchy(
     std::vector<std::pair<GeometryIdentifier, Acts::TrackingVolumeAndMaterial>>&
         volumeHierarchy,
-    std::vector<std::pair<GeometryIdentifier, Acts::SurfaceAndMaterial>>&
+    std::vector<
+        std::pair<GeometryIdentifier, Acts::SurfaceAndMaterialWithContext>>&
         surfaceHierarchy,
     const Acts::TrackingVolume* tVolume) {
   auto sameId =
@@ -300,7 +318,7 @@ void Acts::MaterialMapJsonConverter::convertToHierarchy(
             layRep.geometryId() != GeometryIdentifier()) {
           surfaceHierarchy.push_back(
               {layRep.geometryId(),
-               defaultSurfaceMaterial(layRep.getSharedPtr())});
+               defaultSurfaceMaterial(layRep.getSharedPtr(), m_cfg.context)});
         }
       }
       if (lay->approachDescriptor() != nullptr &&
@@ -310,7 +328,7 @@ void Acts::MaterialMapJsonConverter::convertToHierarchy(
               m_cfg.processNonMaterial == true) {
             surfaceHierarchy.push_back(
                 {asf->geometryId(),
-                 defaultSurfaceMaterial(asf->getSharedPtr())});
+                 defaultSurfaceMaterial(asf->getSharedPtr(), m_cfg.context)});
           }
         }
       }
@@ -319,7 +337,7 @@ void Acts::MaterialMapJsonConverter::convertToHierarchy(
           if (ssf->surfaceMaterial() != nullptr ||
               m_cfg.processNonMaterial == true) {
             auto sp = ssf->getSharedPtr();
-            auto sm = defaultSurfaceMaterial(sp);
+            auto sm = defaultSurfaceMaterial(sp, m_cfg.context);
             auto id = ssf->geometryId();
 
             std::pair p{id, sm};
@@ -339,7 +357,7 @@ void Acts::MaterialMapJsonConverter::convertToHierarchy(
           m_cfg.processNonMaterial == true) {
         surfaceHierarchy.push_back(
             {bssfRep.geometryId(),
-             defaultSurfaceMaterial(bssfRep.getSharedPtr())});
+             defaultSurfaceMaterial(bssfRep.getSharedPtr(), m_cfg.context)});
       }
     }
   }
