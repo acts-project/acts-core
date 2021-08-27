@@ -64,7 +64,7 @@ void setupGeant4Simulation(const ActsExamples::Options::Variables& vars,
   if (materialRecording) {
     g4PrCfg.forceParticle = true;
     g4PrCfg.forcedMass = 0.;
-    g4PrCfg.forcedPdgCode = 999; 
+    g4PrCfg.forcedPdgCode = 999;
     // Set the material tracks at output
     g4Cfg.outputMaterialTracks = Simulation::kMaterialTracks;
   }
@@ -111,7 +111,7 @@ int runMaterialRecording(
 
   // The Genat4 run manager instance
   G4RunManager* runManager = new G4RunManager();
-  //runManager->SetUserInitialization(new FTFP_BERT);
+  // runManager->SetUserInitialization(new FTFP_BERT);
   runManager->SetUserInitialization(new MaterialPhysicsList(
       Acts::getDefaultLogger("MaterialPhysicsList", g4loglevel)));
 
@@ -142,7 +142,8 @@ int runMaterialRecording(
     materialTrackWriter.recalculateTotals = true;
     materialTrackWriter.collection = Simulation::kMaterialTracks;
     materialTrackWriter.filePath = joinPaths(
-        outputDir, "geant4_" + std::string(Simulation::kMaterialTracks) + ".root");
+        outputDir,
+        "geant4_" + std::string(Simulation::kMaterialTracks) + ".root");
     sequencer.addWriter(std::make_shared<RootMaterialTrackWriter>(
         materialTrackWriter, logLevel));
   }

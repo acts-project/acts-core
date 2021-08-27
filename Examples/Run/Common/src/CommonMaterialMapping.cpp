@@ -34,7 +34,7 @@
 
 namespace po = boost::program_options;
 
-int materialMappingExample(int argc, char* argv[],
+int runMaterialMapping(int argc, char* argv[],
                            ActsExamples::IBaseDetector& detector) {
   // Setup and parse options
   auto desc = ActsExamples::Options::makeDefaultOptions();

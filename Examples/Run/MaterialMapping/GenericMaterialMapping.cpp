@@ -17,5 +17,5 @@ int main(int argc, char* argv[]) {
   // --------------------------------------------------------------------------------
   GenericDetector detector;
   // now process it
-  return materialMappingExample(argc, argv, detector);
+  return runMaterialMapping(argc, argv, detector);
 }

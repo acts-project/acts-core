@@ -42,7 +42,6 @@ class EventStoreRegistry {
   ///
   /// @param event is the event number to be cleared
   static void clearEvent(size_t event);
-
 };
 
 }  // namespace ActsExamples
