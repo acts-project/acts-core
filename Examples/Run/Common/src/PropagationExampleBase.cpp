@@ -17,6 +17,7 @@
 #include "ActsExamples/Framework/RandomNumbers.hpp"
 #include "ActsExamples/Framework/Sequencer.hpp"
 #include "ActsExamples/Geometry/CommonGeometry.hpp"
+#include "ActsExamples/Io/Csv/CsvPropagationStepsWriter.hpp"
 #include "ActsExamples/Io/Root/RootPropagationStepsWriter.hpp"
 #include "ActsExamples/MagneticField/MagneticFieldOptions.hpp"
 #include "ActsExamples/Options/CommonOptions.hpp"
@@ -41,7 +42,8 @@ int propagationExample(int argc, char* argv[],
   ActsExamples::Options::addRandomNumbersOptions(desc);
   ActsExamples::Options::addPropagationOptions(desc);
   ActsExamples::Options::addOutputOptions(
-      desc, ActsExamples::OutputFormat::Root | ActsExamples::OutputFormat::Obj);
+      desc, ActsExamples::OutputFormat::Root | ActsExamples::OutputFormat::Obj |
+                ActsExamples::OutputFormat::Csv);
 
   // Add specific options for this geometry
   detector.addOptions(desc);
@@ -75,8 +77,9 @@ int propagationExample(int argc, char* argv[],
 
   // Check what output exists, if none exists, the SteppingLogger
   // will switch to sterile.
-  bool rootOutput = vm["output-root"].template as<bool>();
-  bool objOutput = vm["output-obj"].template as<bool>();
+  const bool rootOutput = vm["output-root"].template as<bool>();
+  const bool objOutput = vm["output-obj"].template as<bool>();
+  const bool csvOutput = vm["output-csv"].template as<bool>();
 
   auto setupPropagator = [&](auto&& stepper) {
     using Stepper = std::decay_t<decltype(stepper)>;
@@ -92,7 +95,7 @@ int propagationExample(int argc, char* argv[],
     // Read the propagation config and create the algorithms
     auto pAlgConfig = ActsExamples::Options::readPropagationConfig(vm);
     pAlgConfig.randomNumberSvc = randomNumberSvc;
-    pAlgConfig.sterileLogger = not rootOutput and not objOutput;
+    pAlgConfig.sterileLogger = not rootOutput and not objOutput and not csvOutput;
 
     pAlgConfig.propagatorImpl =
         std::make_shared<ActsExamples::ConcretePropagator<Propagator>>(
@@ -116,6 +119,17 @@ int propagationExample(int argc, char* argv[],
   std::string outputDir = vm["output-dir"].template as<std::string>();
   auto psCollection = vm["prop-step-collection"].as<std::string>();
 
+  // Csv Writer
+  if (vm["output-csv"].template as<bool>()) {
+    using Writer = ActsExamples::CsvPropagationStepsWriter;
+
+    Writer::Config config;
+    config.collection = psCollection;
+    config.outputDir = outputDir;
+
+    sequencer.addWriter(std::make_shared<Writer>(config));
+  }
+
   if (rootOutput) {
     // Write the propagation steps as ROOT TTree
     ActsExamples::RootPropagationStepsWriter::Config pstepWriterRootConfig;
@@ -138,6 +152,16 @@ int propagationExample(int argc, char* argv[],
     pstepWriterObjConfig.outputDir = outputDir;
     sequencer.addWriter(
         std::make_shared<ObjPropagationStepsWriter>(pstepWriterObjConfig));
+  }
+
+  if (csvOutput) {
+    using Writer = ActsExamples::CsvPropagationStepsWriter;
+
+    Writer::Config config;
+    config.collection = psCollection;
+    config.outputDir = outputDir;
+
+    sequencer.addWriter(std::make_shared<Writer>(config));
   }
 
   return sequencer.run();

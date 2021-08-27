@@ -62,8 +62,8 @@ std::false_type test_action_without_result(...);
 template <typename T, typename propagator_state_t, typename stepper_t,
           bool has_result = false>
 struct action_signature_check_impl
-    : decltype(
-          test_action_without_result<T, propagator_state_t, stepper_t>(0)) {};
+    : decltype(test_action_without_result<T, propagator_state_t, stepper_t>(
+          0)) {};
 
 template <typename T, typename propagator_state_t, typename stepper_t>
 struct action_signature_check_impl<T, propagator_state_t, stepper_t, true>

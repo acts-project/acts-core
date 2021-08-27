@@ -1146,7 +1146,7 @@ class KalmanFitter {
     using KalmanActor =
         Actor<source_link_t, parameters_t, calibrator_t, outlier_finder_t>;
     using KalmanResult = typename KalmanActor::result_type;
-    using Actors = ActionList<DirectNavigator::Initializer, KalmanActor>;
+    using Actors = ActionList<DirectNavigatorInitializer, KalmanActor>;
     using Aborters = AbortList<KalmanAborter>;
 
     // Create relevant options for the propagation options
@@ -1169,7 +1169,7 @@ class KalmanFitter {
 
     // Set the surface sequence
     auto& dInitializer =
-        kalmanOptions.actionList.template get<DirectNavigator::Initializer>();
+        kalmanOptions.actionList.template get<DirectNavigatorInitializer>();
     dInitializer.navSurfaces = sSequence;
 
     // Run the fitter

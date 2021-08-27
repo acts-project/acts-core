@@ -49,13 +49,4 @@ target_link_libraries(
   ActsExamplePropagationTGeo
   PRIVATE ${_common_libraries} ActsExamplesDetectorTGeo)
 
-install(
-  TARGETS
-    ActsExamplePropagationEmpty
-    ActsExamplePropagationGeneric
-    ActsExamplePropagationAligned
-    ActsExamplePropagationPayload
-    ActsExamplePropagationTGeo
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-
 add_subdirectory_if(DD4hep ACTS_BUILD_EXAMPLES_DD4HEP)
