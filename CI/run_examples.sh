@@ -107,7 +107,7 @@ run_example ActsExamplePythia8 \
 #        mutex-protected region of the code. See issue #207 .
 #
 run_geantino_example() {
-    timed_run ActsExampleGeantinoRecording$* \
+    timed_run ActsExampleMaterialRecording$* \
                   -n1000 \
                   -j1 \
                   --g4-material-tracks=geant4-material-tracks-$1 \

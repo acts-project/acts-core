@@ -62,10 +62,10 @@ class MaterialMapping : public ActsExamples::BareAlgorithm {
     std::reference_wrapper<const Acts::MagneticFieldContext> magFieldContext;
 
     /// Input collection
-    std::string collection = "material-tracks";
+    std::string collection = "material_tracks";
 
     /// The material collection to be stored
-    std::string mappingMaterialCollection = "MappedMaterialTracks";
+    std::string mappingMaterialCollection = "mapped_material_tracks";
 
     /// The ACTS surface material mapper
     std::shared_ptr<Acts::SurfaceMaterialMapper> materialSurfaceMapper =

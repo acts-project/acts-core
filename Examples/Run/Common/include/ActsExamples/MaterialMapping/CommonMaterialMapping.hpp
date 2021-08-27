@@ -19,5 +19,5 @@ class IBaseDetector;
 /// @param atgv the argument list
 /// @param detector the detector instance
 ///
-int materialMappingExample(int argc, char* argv[],
-                           ActsExamples::IBaseDetector& detector);
+int runMaterialMapping(int argc, char* argv[],
+                       ActsExamples::IBaseDetector& detector);

@@ -9,7 +9,6 @@ target_link_libraries(
     ActsExamplesEventRecording
     ActsExamplesFramework
     ActsExamplesGeant4
-    ActsExamplesGeant4DD4hep
     ActsExamplesIoHepMC3
     Boost::program_options)
     

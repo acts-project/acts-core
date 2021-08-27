@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "ActsExamples/GenericDetector/GenericDetector.hpp"
-#include "ActsExamples/MaterialMapping/MaterialMappingBase.hpp"
+#include "ActsExamples/MaterialMapping/CommonMaterialMapping.hpp"
 
 /// @brief main executable
 ///
@@ -17,5 +17,5 @@ int main(int argc, char* argv[]) {
   // --------------------------------------------------------------------------------
   GenericDetector detector;
   // now process it
-  return materialMappingExample(argc, argv, detector);
+  return runMaterialMapping(argc, argv, detector);
 }

@@ -18,26 +18,32 @@ class Detector;
 namespace ActsExamples {
 
 /// Construct the Geant4 detector from a DD4hep description.
-class DD4hepDetectorConstruction final : public G4VUserDetectorConstruction {
+class DDG4DetectorConstruction final : public G4VUserDetectorConstruction {
  public:
-  DD4hepDetectorConstruction(dd4hep::Detector& detector);
+  DDG4DetectorConstruction(dd4hep::Detector& detector);
 
   /// Convert the stored DD4hep detector to a Geant4 description.
   ///
   /// Transfers ownership of the created object as all volumes (including world)
   /// are deleted in ~G4PhysicalVolumeStore().
+  ///
+  /// @note for facilitating configuration within the ACTS framework the world
+  /// volume is cached
   G4VPhysicalVolume* Construct() final override;
 
  private:
+  /// The DD4hep detector instrance
   dd4hep::Detector& m_detector;
+  /// The world volume
+  G4VPhysicalVolume* m_world = nullptr;
 };
 
-class DD4hepDetectorConstructionFactory : public G4DetectorConstructionFactory {
+class DDG4DetectorConstructionFactory : public G4DetectorConstructionFactory {
  public:
-  /// @brief Construct a new DD4hep detector factory
+  /// @brief Construct a new DD4hep-Geant4 detector factory
   ///
   /// @param detector DD4hep detector instance to construct G4 geometry from
-  DD4hepDetectorConstructionFactory(dd4hep::Detector& detector);
+  DDG4DetectorConstructionFactory(dd4hep::Detector& detector);
 
   /// @brief Main factory method
   ///

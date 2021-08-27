@@ -11,7 +11,6 @@
 #include "ActsExamples/Geant4/G4DetectorConstructionFactory.hpp"
 
 #include <G4VUserDetectorConstruction.hh>
-#include <globals.hh>
 
 namespace ActsExamples {
 
@@ -21,11 +20,17 @@ class GdmlDetectorConstruction final : public G4VUserDetectorConstruction {
   /// @param path is the path to the Gdml file
   GdmlDetectorConstruction(std::string path);
 
-  /// Read the file and parse it to construct the Geant4 description.
+  /// Read the file and parse it to construct the Geant4 description
+  ///
+  /// @note to simplify further setup withiin the ACTS framework
+  /// the world is cached when first constructed
   G4VPhysicalVolume* Construct() final override;
 
  private:
+  /// Path to the Gdml file
   std::string m_path;
+  /// Cached worled volume
+  G4VPhysicalVolume* m_world;
 };
 
 class GdmlDetectorConstructionFactory : public G4DetectorConstructionFactory {

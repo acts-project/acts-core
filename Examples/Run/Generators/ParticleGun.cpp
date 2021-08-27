@@ -22,7 +22,7 @@
 using namespace ActsExamples;
 
 int main(int argc, char* argv[]) {
-  // setup and parse options
+  // Setup and parse options
   auto desc = Options::makeDefaultOptions();
   Options::addSequencerOptions(desc);
   Options::addRandomNumbersOptions(desc);
@@ -37,17 +37,17 @@ int main(int argc, char* argv[]) {
 
   Acts::Logging::Level logLevel = Options::readLogLevel(vm);
 
-  // basic services
+  // Basic services
   auto rnd =
       std::make_shared<RandomNumbers>(Options::readRandomNumbersConfig(vm));
 
-  // event generation w/ particle gun
+  // Event generation w/ particle gun
   EventGenerator::Config evgen = Options::readParticleGunOptions(vm);
   evgen.outputParticles = "particles";
   evgen.randomNumbers = rnd;
   sequencer.addReader(std::make_shared<EventGenerator>(evgen, logLevel));
 
-  // print generated particles
+  // Print generated particles
   if ((logLevel == Acts::Logging::VERBOSE) or
       (logLevel == Acts::Logging::DEBUG)) {
     ParticlesPrinter::Config print;
@@ -55,7 +55,7 @@ int main(int argc, char* argv[]) {
     sequencer.addAlgorithm(std::make_shared<ParticlesPrinter>(print, logLevel));
   }
 
-  // different output modes
+  // Different output modes
   auto outputDir = ensureWritableDirectory(vm["output-dir"].as<std::string>());
   if (vm["output-csv"].as<bool>()) {
     CsvParticleWriter::Config csvWriter;

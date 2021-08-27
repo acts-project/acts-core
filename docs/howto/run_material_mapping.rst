@@ -54,11 +54,11 @@ Then edit the config-map.json file
 Geantino scan
 -------------
 
-The next step is to do a geantino scan of our detector. For this we will use the ``GeantinoRecording`` algorithm :
+The next step is to do a geantino scan of our detector. For this we will use the ``MaterialRecording`` application :
 
 .. code-block:: console
 
-  ./../build/bin/ActsExampleGeantinoRecordingDD4hep -j1 --dd4hep-input ../thirdparty/OpenDataDetector/xml/OpenDataDetector.xml --output-root -n10000
+  ./../build/bin/ActsExampleMaterialRecordingDD4hep -j1 --dd4hep-input ../thirdparty/OpenDataDetector/xml/OpenDataDetector.xml --output-root -n10000
 
 
 The result of the geantino scan will be a root file containing material tracks. Those contain the direction and production vertex of the geantino, the total material accumulated and all the interaction points in the detector.
@@ -66,11 +66,11 @@ The result of the geantino scan will be a root file containing material tracks. 
 Material Mapping
 ----------------
 
-With the surfaces map and the material track we can finally do the material mapping using the ``MaterialMapping`` algorithm :
+With the surfaces map and the material track we can finally do the material mapping using the ``MaterialMapping`` application :
 
 .. code-block:: console
 
-  ./../build/bin/ActsExampleMaterialMappingDD4hep -j1 --input-root true --input-files geant4-material-tracks.root --mat-input-type file --mat-input-file geometry-map.json --output-root --output-json --output-cbor --mat-mapping-collection material-tracks --mat-output-file material-maps --mat-mapping-surfaces true --mat-mapping-volumes true --mat-mapping-volume-stepsize 1 --dd4hep-input ../thirdparty/OpenDataDetector/xml/OpenDataDetector.xml
+  ./../build/bin/ActsExampleMaterialMappingDD4hep -j1 --input-root true --input-files geant4_material_tracks.root --mat-input-type file --mat-input-file geometry-map.json --output-root --output-json --output-cbor --mat-mapping-collection material-tracks --mat-output-file material-maps --mat-mapping-surfaces true --mat-mapping-volumes true --mat-mapping-volume-stepsize 1 --dd4hep-input ../thirdparty/OpenDataDetector/xml/OpenDataDetector.xml
 
 
 As an output you will obtain the material map as a root and JSON file and a new material track collection in a root file. This new collection adds to each material interaction the associated surface during the mapping. This can be used for the control plots.

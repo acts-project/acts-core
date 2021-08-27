@@ -12,8 +12,6 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsExamples/Utilities/OptionsFwd.hpp"
 
-#include "GeantinoRecording.hpp"
-
 namespace ActsExamples {
 
 namespace Options {
@@ -22,16 +20,6 @@ namespace Options {
 ///
 /// @param desc The option descrion forward
 void addGeant4Options(Description& desc);
-
-/// Read the Geatn4 options and @return a GeantinoRecording::Config
-///
-/// @tparam vmap_t is the Type of the Parameter map to be read out
-///
-/// @param variables is the parameter map for the options
-///
-/// @returns a Config object for the GeantinoRecording
-GeantinoRecording::Config readGeantinoRecordingConfig(
-    const Variables& variables);
 
 }  // namespace Options
 }  // namespace ActsExamples

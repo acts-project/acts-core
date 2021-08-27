@@ -16,10 +16,13 @@ GdmlDetectorConstruction::GdmlDetectorConstruction(std::string path)
     : G4VUserDetectorConstruction(), m_path(std::move(path)) {}
 
 G4VPhysicalVolume* GdmlDetectorConstruction::Construct() {
-  G4GDMLParser parser;
-  // TODO how to handle errors
-  parser.Read(m_path);
-  return parser.GetWorldVolume();
+  if (m_world == nullptr) {
+    G4GDMLParser parser;
+    // TODO how to handle errors
+    parser.Read(m_path);
+    m_world = parser.GetWorldVolume();
+  }
+  return m_world;
 }
 
 GdmlDetectorConstructionFactory::GdmlDetectorConstructionFactory(
