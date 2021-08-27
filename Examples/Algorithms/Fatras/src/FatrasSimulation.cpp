@@ -52,8 +52,8 @@ struct HitSurfaceSelector {
 }  // namespace
 
 // Same interface as `ActsFatras::Simulation` but with concrete types.
-struct ActsExamples::detail::FatrasSimulationSimulation {
-  virtual ~FatrasSimulationSimulation() = default;
+struct ActsExamples::detail::FatrasSimulation {
+  virtual ~FatrasSimulation() = default;
   virtual Acts::Result<std::vector<ActsFatras::FailedParticle>> simulate(
       const Acts::GeometryContext &, const Acts::MagneticFieldContext &,
       ActsExamples::RandomEngine &, const ActsExamples::SimParticleContainer &,
@@ -70,8 +70,7 @@ namespace {
 // particle propagation and is thus limited to propagation in vacuum at the
 // moment.
 // @TODO: Remove this, unneeded after #675
-struct FatrasSimulationSimulationT final
-    : ActsExamples::detail::FatrasSimulationSimulation {
+struct FatrasSimulationT final : ActsExamples::detail::FatrasSimulation {
   using CutPMin = ActsFatras::Min<ActsFatras::Casts::P>;
 
   // typedefs for charge particle simulation
@@ -102,8 +101,8 @@ struct FatrasSimulationSimulationT final
 
   Simulation simulation;
 
-  FatrasSimulationSimulationT(const ActsExamples::FatrasSimulation::Config &cfg,
-                              Acts::Logging::Level lvl)
+  FatrasSimulationT(const ActsExamples::FatrasSimulation::Config &cfg,
+                    Acts::Logging::Level lvl)
       : simulation(
             ChargedSimulation(
                 ChargedPropagator(ChargedStepper(cfg.magneticField),
@@ -142,7 +141,7 @@ struct FatrasSimulationSimulationT final
     simulation.charged.selectHitSurface.material = cfg.generateHitsOnMaterial;
     simulation.charged.selectHitSurface.passive = cfg.generateHitsOnPassive;
   }
-  ~FatrasSimulationSimulationT() final override = default;
+  ~FatrasSimulationT() final override = default;
 
   Acts::Result<std::vector<ActsFatras::FailedParticle>> simulate(
       const Acts::GeometryContext &geoCtx,
@@ -186,7 +185,7 @@ ActsExamples::FatrasSimulation::FatrasSimulation(Config cfg,
   }
 
   // construct the simulation for the specific magnetic field
-  m_sim = std::make_unique<FatrasSimulationSimulationT>(m_cfg, lvl);
+  m_sim = std::make_unique<FatrasSimulationT>(m_cfg, lvl);
 }
 
 // explicit destructor needed for the PIMPL implementation to work
