@@ -12,6 +12,7 @@
 #include "Acts/Utilities/PdgParticle.hpp"
 #include "ActsExamples/EventData/SimParticle.hpp"
 #include "ActsExamples/Framework/RandomNumbers.hpp"
+#include "ActsExamples/Generators/EventGenerator.hpp"
 
 #include <array>
 #include <cmath>
@@ -24,7 +25,7 @@ namespace ActsExamples {
 /// direction is drawn from a uniform distribution on the unit sphere (within
 /// the given limits). Its absolute momentum is drawn from a uniform
 /// distribution. Position and time are always set to zero.
-class ParametricParticleGenerator {
+class ParametricParticleGenerator : public EventGenerator::ParticlesGenerator {
  public:
   struct Config {
     /// Low, high (exclusive) for the transverse direction angle.
@@ -52,7 +53,7 @@ class ParametricParticleGenerator {
   ParametricParticleGenerator(const Config& cfg);
 
   /// Generate a single primary vertex with the given number of particles.
-  SimParticleContainer operator()(RandomEngine& rng) const;
+  SimParticleContainer operator()(RandomEngine& rng) override;
 
  private:
   Config m_cfg;

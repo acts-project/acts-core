@@ -62,11 +62,11 @@ ActsExamples::Options::readParticleGunOptions(const Variables& vars) {
     upper = interval.upper.value() * unit;
   };
 
-  GaussianVertexGenerator vertexGen;
-  vertexGen.stddev[Acts::ePos0] = getValue("gen-vertex-xy-std-mm", 1_mm);
-  vertexGen.stddev[Acts::ePos1] = getValue("gen-vertex-xy-std-mm", 1_mm);
-  vertexGen.stddev[Acts::ePos2] = getValue("gen-vertex-z-std-mm", 1_mm);
-  vertexGen.stddev[Acts::eTime] = getValue("gen-vertex-t-std-ns", 1_ns);
+  auto vertexGen = std::make_shared<GaussianVertexGenerator>();
+  vertexGen->stddev[Acts::ePos0] = getValue("gen-vertex-xy-std-mm", 1_mm);
+  vertexGen->stddev[Acts::ePos1] = getValue("gen-vertex-xy-std-mm", 1_mm);
+  vertexGen->stddev[Acts::ePos2] = getValue("gen-vertex-z-std-mm", 1_mm);
+  vertexGen->stddev[Acts::eTime] = getValue("gen-vertex-t-std-ns", 1_ns);
 
   ParametricParticleGenerator::Config pgCfg;
   getRange("gen-phi-degree", 1_degree, pgCfg.phiMin, pgCfg.phiMax);
@@ -93,10 +93,13 @@ ActsExamples::Options::readParticleGunOptions(const Variables& vars) {
     throw std::runtime_error{"Too many vertices requested for Fatras Barcode"};
   }
 
+  auto mGen = std::make_shared<FixedMultiplicityGenerator>();
+  mGen->n = nVertices;
+
   EventGenerator::Config cfg;
   cfg.generators = {
-      {FixedMultiplicityGenerator{nVertices}, std::move(vertexGen),
-       ParametricParticleGenerator(pgCfg)},
+      {std::move(mGen), std::move(vertexGen),
+       std::make_shared<ParametricParticleGenerator>(pgCfg)},
   };
 
   return cfg;

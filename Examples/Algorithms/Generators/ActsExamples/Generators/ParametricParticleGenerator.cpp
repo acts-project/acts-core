@@ -28,7 +28,7 @@ ActsExamples::ParametricParticleGenerator::ParametricParticleGenerator(
                                    std::numeric_limits<double>::max())) {}
 
 ActsExamples::SimParticleContainer
-ActsExamples::ParametricParticleGenerator::operator()(RandomEngine& rng) const {
+ActsExamples::ParametricParticleGenerator::operator()(RandomEngine& rng) {
   using UniformIndex = std::uniform_int_distribution<unsigned int>;
   using UniformReal = std::uniform_real_distribution<double>;
 
