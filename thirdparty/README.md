@@ -56,3 +56,11 @@ ACTS libraries, with a version suffix. This location may be known to the system 
 For convenience, it's possible to use the ACTS build system to build
 the minimum required version of [Eigen](https://eigen.tuxfamily.org)
 (currently 3.3.7), with "-DACTS_USE_SYSTEM_EIGEN3=OFF".
+
+## pybind11
+
+[Pybind11](https://github.com/pybind/pybind11) is used to create python bindings for 
+the examples. The following files/directories are removed:
+-   docs
+-   tests
+-   .github
