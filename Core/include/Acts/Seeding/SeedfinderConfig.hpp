@@ -111,8 +111,8 @@ struct SeedfinderConfig {
     config.deltaRMax /= 1_mm;
     config.impactMax /= 1_mm;
     config.maxPtScattering /= 1_MeV;  // correct?
-    config.collisionRegionMin /= 1_MeV;
-    config.collisionRegionMax /= 1_MeV;
+    config.collisionRegionMin /= 1_mm;
+    config.collisionRegionMax /= 1_mm;
     config.zMin /= 1_mm;
     config.zMax /= 1_mm;
     config.rMax /= 1_mm;
