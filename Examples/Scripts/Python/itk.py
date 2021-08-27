@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os
+import sys
 from pathlib import Path
 
 from acts.examples import (
@@ -178,7 +178,8 @@ def buildITkGeometry(geo_dir: Path):
 
 if "__main__" == __name__:
 
-    geo_example_dir = Path.cwd() / "../acts-detector-example"
+    assert len(sys.argv == 1), "Please provide the detector example input directory"
+    geo_example_dir = Path(sys.argv[0])
     assert geo_example_dir.exists(), "Detector example input directory missing"
 
     detector, trackingGeometry, decorators = buildITkGeometry(geo_example_dir)
