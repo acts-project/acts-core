@@ -66,14 +66,14 @@ ActsExamples::EventGenerator::Config ActsExamples::Options::readPythia8Options(
       vars["gen-pdg-beam1"].template as<int32_t>());
   const auto cmsEnergy = vars["gen-cms-energy-gev"].as<double>() * 1_GeV;
 
-  GaussianVertexGenerator vertexGen;
-  vertexGen.stddev[Acts::ePos0] =
+  auto vertexGen = std::make_shared<GaussianVertexGenerator>();
+  vertexGen->stddev[Acts::ePos0] =
       vars["gen-vertex-xy-std-mm"].as<double>() * 1_mm;
-  vertexGen.stddev[Acts::ePos1] =
+  vertexGen->stddev[Acts::ePos1] =
       vars["gen-vertex-xy-std-mm"].as<double>() * 1_mm;
-  vertexGen.stddev[Acts::ePos2] =
+  vertexGen->stddev[Acts::ePos2] =
       vars["gen-vertex-z-std-mm"].as<double>() * 1_mm;
-  vertexGen.stddev[Acts::eTime] =
+  vertexGen->stddev[Acts::eTime] =
       vars["gen-vertex-t-std-ns"].as<double>() * 1_ns;
 
   EventGenerator::Config cfg;
@@ -84,8 +84,9 @@ ActsExamples::EventGenerator::Config ActsExamples::Options::readPythia8Options(
     hard.cmsEnergy = cmsEnergy;
     hard.settings = vars["gen-hard-process"].as<std::vector<std::string>>();
 
-    cfg.generators.push_back({FixedMultiplicityGenerator{nhard}, vertexGen,
-                              Pythia8Generator::makeFunction(hard, lvl)});
+    cfg.generators.push_back(
+        {std::make_shared<FixedMultiplicityGenerator>(nhard), vertexGen,
+         std::make_shared<Pythia8Generator>(hard, lvl)});
   }
   if (0.0 < npileup) {
     Pythia8Generator::Config pileup;
@@ -94,8 +95,9 @@ ActsExamples::EventGenerator::Config ActsExamples::Options::readPythia8Options(
     pileup.cmsEnergy = cmsEnergy;
     pileup.settings = vars["gen-pileup-process"].as<std::vector<std::string>>();
 
-    cfg.generators.push_back({PoissonMultiplicityGenerator{npileup}, vertexGen,
-                              Pythia8Generator::makeFunction(pileup, lvl)});
+    cfg.generators.push_back(
+        {std::make_shared<PoissonMultiplicityGenerator>(npileup), vertexGen,
+         std::make_shared<Pythia8Generator>(pileup, lvl)});
   }
 
   return cfg;

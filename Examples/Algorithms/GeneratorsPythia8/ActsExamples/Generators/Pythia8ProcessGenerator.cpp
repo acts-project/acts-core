@@ -25,13 +25,6 @@ struct FrameworkRndmEngine : public Pythia8::RndmEngine {
 };
 }  // namespace
 
-std::function<ActsExamples::SimParticleContainer(ActsExamples::RandomEngine&)>
-ActsExamples::Pythia8Generator::makeFunction(const Config& cfg,
-                                             Acts::Logging::Level lvl) {
-  auto gen = std::make_shared<Pythia8Generator>(cfg, lvl);
-  return [=](RandomEngine& rng) { return (*gen)(rng); };
-}
-
 ActsExamples::Pythia8Generator::Pythia8Generator(const Config& cfg,
                                                  Acts::Logging::Level lvl)
     : m_cfg(cfg),

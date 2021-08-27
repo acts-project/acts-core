@@ -44,13 +44,47 @@ class EventGenerator final : public ActsExamples::IReader {
   /// The process generator is responsible for defining all components of the
   /// particle barcode except the primary vertex. The primary vertex will be
   /// set/overwritten by the event generator.
-  using MultiplicityGenerator = std::function<size_t(RandomEngine&)>;
-  using VertexGenerator = std::function<Acts::Vector4(RandomEngine&)>;
-  using ParticlesGenerator = std::function<SimParticleContainer(RandomEngine&)>;
+
+  /// @brief Generator interface for event multiplicity of vertices
+  struct MultiplicityGenerator {
+    /// @brief Virtual destructor required
+    virtual ~MultiplicityGenerator() = default;
+    /// @brief Generate the multiplicity of vertices
+    ///
+    /// @param rng Shared random number generator instance
+    /// @return size_t The multiplicity for the event
+    virtual size_t operator()(RandomEngine& rng) const = 0;
+  };
+
+  /// @brief Generator interface for a vertex position
+  struct VertexGenerator {
+    /// @brief Virtual destructor required
+    virtual ~VertexGenerator() = default;
+    /// @brief Generate a vertex position
+    ///
+    /// @param rng Shared random number generator instance
+    /// @return Acts::Vector4 The vertex position
+    virtual Acts::Vector4 operator()(RandomEngine& rng) const = 0;
+  };
+
+  /// @brief Generator interface particles for a vertex
+  struct ParticlesGenerator {
+    /// @brief Virtual destructor required
+    virtual ~ParticlesGenerator() = default;
+    /// @brief Generate particles for a vertex
+    /// @note This method cannot be `const` because the Pythia8 generator
+    ///       uses the Pythia8 interfaces, which is non-const
+    ///
+    /// @param rng Shared random number generator instance
+    /// @return SimParticleContainer The populated particle container for the vertex
+    virtual SimParticleContainer operator()(RandomEngine& rng) = 0;
+  };
+
+  /// @brief Combined struct which contains all generator components
   struct Generator {
-    MultiplicityGenerator multiplicity = nullptr;
-    VertexGenerator vertex = nullptr;
-    ParticlesGenerator particles = nullptr;
+    std::shared_ptr<MultiplicityGenerator> multiplicity = nullptr;
+    std::shared_ptr<VertexGenerator> vertex = nullptr;
+    std::shared_ptr<ParticlesGenerator> particles = nullptr;
   };
 
   struct Config {
