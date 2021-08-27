@@ -62,7 +62,7 @@ def buildITkGeometry(geo_dir: Path):
     LayerTriplet = TGeoDetector.Config.LayerTriplet
 
     matDeco = acts.IMaterialDecorator.fromFile(
-        geo_dir / "atlas/itk-hgtd/material-maps-ITk-HGTD.cbor",
+        geo_dir / "atlas/itk-hgtd/material-maps-ITk-HGTD.json",
         level=acts.logging.VERBOSE,
     )
 

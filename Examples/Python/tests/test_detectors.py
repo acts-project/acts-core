@@ -159,7 +159,7 @@ def test_tgeo_config_volume(monkeypatch):
 
 @pytest.mark.slow
 def test_tgeo_itk_hgtd():
-    geo_dir = (Path.cwd() / "acts-detector-example").resolve()
+    geo_dir = (Path.cwd() / "acts-detector-examples").resolve()
 
     if not geo_dir.exists() or not geo_dir.is_dir():
         pytest.skip("ITk HGTD geometry not available")
