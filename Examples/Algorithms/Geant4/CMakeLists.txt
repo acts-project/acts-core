@@ -3,6 +3,7 @@ set(ACTS_EXAMPLES_G4SOURCES
     src/GdmlDetectorConstruction.cpp
     src/Geant4Options.cpp
     src/Geant4Simulation.cpp
+    src/MaterialPhysicsList.cpp
     src/MaterialSteppingAction.cpp
     src/SimParticleTranslation.cpp)
 

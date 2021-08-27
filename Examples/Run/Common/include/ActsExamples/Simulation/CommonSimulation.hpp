@@ -21,6 +21,7 @@ namespace Simulation {
     static constexpr const char* kParticlesInitial = "particles_initial";
     static constexpr const char* kParticlesFinal = "particles_final";
     static constexpr const char* kSimHits = "simhits";
+    static constexpr const char* kMaterialTracks = "material_tracks";
 
     /// Add input options 
     ///

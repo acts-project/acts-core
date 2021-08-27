@@ -16,7 +16,9 @@
 #include "ActsExamples/Geant4/EventStoreRegistry.hpp"
 #include "ActsFatras/EventData/Barcode.hpp"
 
+#include <G4ChargedGeantino.hh>
 #include <G4Event.hh>
+#include <G4Geantino.hh>
 #include <G4ParticleDefinition.hh>
 #include <G4ParticleTable.hh>
 #include <G4PrimaryParticle.hh>
@@ -95,8 +97,32 @@ void ActsExamples::SimParticleTranslation::GeneratePrimaries(G4Event* anEvent) {
     G4double particleMass =
         m_cfg.forceParticle ? part.mass() * convertEnergy : 0.;
 
+    // Check if it is a Geantino / ChargedGeantino
     G4ParticleDefinition* particleDefinition =
         particleTable->FindParticle(particlePdgCode);
+    if (particleDefinition == nullptr) {
+      switch (particlePdgCode) {
+        case 999: {
+          particleDefinition = G4Geantino::Definition();
+        } break;
+        case 998: {
+          particleDefinition = G4ChargedGeantino::Definition();
+        } break;
+        default:
+          break;
+      }
+    }
+
+    // Skip if tranlation failed
+    if (particleDefinition == nullptr) {
+      ACTS_VERBOSE(
+          "Could not translate particle with PDG code : " << particlePdgCode);
+      continue;
+    }
+
+    ACTS_VERBOSE("Adding particle with name '"
+                 << particleDefinition->GetParticleName() << "'.");
+
     G4PrimaryParticle* particle = new G4PrimaryParticle(particleDefinition);
 
     particle->SetMass(particleMass);

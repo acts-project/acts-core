@@ -7,7 +7,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 #include "ActsExamples/DD4hepDetector/DD4hepDetector.hpp"
-#include "ActsExamples/MaterialMapping/MaterialMappingBase.hpp"
+#include "ActsExamples/MaterialMapping/CommonMaterialMapping.hpp"
 
 /// @brief main executable
 ///

@@ -24,6 +24,10 @@ std::vector<ActsExamples::SimParticleContainer::sequence_type>
     ActsExamples::EventStoreRegistry::particlesFinal =
         std::vector<ActsExamples::SimParticleContainer::sequence_type>();
 
+std::vector<std::vector<Acts::RecordedMaterialTrack>>
+    ActsExamples::EventStoreRegistry::recordedMaterial =
+        std::vector<std::vector<Acts::RecordedMaterialTrack>>();
+
 ActsExamples::EventStoreRegistry::EventStoreRegistry(size_t nevents) {
   boards = std::vector<WhiteBoard*>(nevents, nullptr);
   hits = std::vector<SimHitContainer::sequence_type>(
@@ -34,4 +38,13 @@ ActsExamples::EventStoreRegistry::EventStoreRegistry(size_t nevents) {
   particlesFinal =
       std::vector<ActsExamples::SimParticleContainer::sequence_type>(
           nevents, ActsExamples::SimParticleContainer::sequence_type());
+  recordedMaterial = std::vector<std::vector<Acts::RecordedMaterialTrack>>(
+      nevents, std::vector<Acts::RecordedMaterialTrack>());
+}
+
+void ActsExamples::EventStoreRegistry::clearEvent(size_t event) {
+  hits[event].clear();
+  particlesInitial[event].clear();
+  particlesFinal[event].clear();
+  recordedMaterial[event].clear();
 }

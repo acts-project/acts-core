@@ -8,6 +8,7 @@
 
 #pragma once
 
+#include "Acts/Material/MaterialInteraction.hpp"
 #include "ActsExamples/EventData/SimHit.hpp"
 #include "ActsExamples/EventData/SimParticle.hpp"
 
@@ -34,6 +35,14 @@ class EventStoreRegistry {
   static std::vector<SimHitContainer::sequence_type> hits;
   static std::vector<SimParticleContainer::sequence_type> particlesInitial;
   static std::vector<SimParticleContainer::sequence_type> particlesFinal;
+
+  static std::vector<std::vector<Acts::RecordedMaterialTrack>> recordedMaterial;
+
+  /// Static method to clear a specific event
+  ///
+  /// @param event is the event number to be cleared
+  static void clearEvent(size_t event);
+
 };
 
 }  // namespace ActsExamples

@@ -1,8 +1,8 @@
 add_executable(
-  ActsExampleGeantinoRecordingDD4hep
-  DD4hepGeantinoRecording.cpp)
+  ActsExampleMaterialRecordingDD4hep
+  DD4hepMaterialRecording.cpp)
 target_link_libraries(
-  ActsExampleGeantinoRecordingDD4hep
+  ActsExampleMaterialRecordingDD4hep
   PRIVATE
     ActsExamplesCommon
     ActsExamplesDetectorDD4hep
@@ -13,5 +13,5 @@ target_link_libraries(
     Boost::program_options)
 
 install(
-  TARGETS ActsExampleGeantinoRecordingDD4hep
+  TARGETS ActsExampleMaterialRecordingDD4hep
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

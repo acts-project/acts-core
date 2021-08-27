@@ -4,7 +4,7 @@ add_library(
   src/CommonOptions.cpp
   src/CommonSimulation.cpp
   src/GeometryExampleBase.cpp
-  src/MaterialMappingBase.cpp
+  src/CommonMaterialMapping.cpp
   src/MaterialValidationBase.cpp
   src/PropagationExampleBase.cpp)
 target_include_directories(

@@ -29,9 +29,7 @@ namespace Options {
 /// options are attached to
 template <typename aopt_t>
 void addMaterialMappingOptions(aopt_t& opt) {
-  opt.add_options()("mat-mapping-collection",
-                    po::value<std::string>()->default_value("material-tracks"),
-                    "Collection name of the material tracks for reading.")(
+  opt.add_options()(
       "mat-mapping-emptybins", po::value<bool>()->default_value(true),
       "Empty bin correction (recommended). Corrects for vaccuum/emtpy "
       "assigments.")("mat-mapping-surfaces",

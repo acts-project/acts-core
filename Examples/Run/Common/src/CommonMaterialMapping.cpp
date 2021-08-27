@@ -18,14 +18,15 @@
 #include "ActsExamples/Options/CommonOptions.hpp"
 #include "ActsExamples/Propagation/PropagationOptions.hpp"
 #include "ActsExamples/Utilities/Paths.hpp"
-#include <Acts/Geometry/GeometryContext.hpp>
-#include <Acts/Geometry/TrackingGeometry.hpp>
-#include <Acts/MagneticField/MagneticFieldContext.hpp>
-#include <Acts/Material/SurfaceMaterialMapper.hpp>
-#include <Acts/Plugins/Json/MaterialMapJsonConverter.hpp>
-#include <Acts/Propagator/Navigator.hpp>
-#include <Acts/Propagator/Propagator.hpp>
-#include <Acts/Propagator/StraightLineStepper.hpp>
+#include "ActsExamples/Simulation/CommonSimulation.hpp"
+#include "Acts/Geometry/GeometryContext.hpp"
+#include "Acts/Geometry/TrackingGeometry.hpp"
+#include "Acts/MagneticField/MagneticFieldContext.hpp"
+#include "Acts/Material/SurfaceMaterialMapper.hpp"
+#include "Acts/Plugins/Json/MaterialMapJsonConverter.hpp"
+#include "Acts/Propagator/Navigator.hpp"
+#include "Acts/Propagator/Propagator.hpp"
+#include "Acts/Propagator/StraightLineStepper.hpp"
 
 #include <memory>
 
@@ -89,7 +90,6 @@ int materialMappingExample(int argc, char* argv[],
   using SlStepper = Acts::StraightLineStepper;
   using Propagator = Acts::Propagator<SlStepper, Acts::Navigator>;
 
-  auto matCollection = vm["mat-mapping-collection"].template as<std::string>();
   auto mapSurface = vm["mat-mapping-surfaces"].template as<bool>();
   auto mapVolume = vm["mat-mapping-volumes"].template as<bool>();
   auto volumeStep = vm["mat-mapping-volume-stepsize"].template as<float>();
@@ -104,9 +104,7 @@ int materialMappingExample(int argc, char* argv[],
   if (vm["input-root"].template as<bool>()) {
     // Read the material step information from a ROOT TTree
     ActsExamples::RootMaterialTrackReader::Config matTrackReaderRootConfig;
-    if (not matCollection.empty()) {
-      matTrackReaderRootConfig.collection = matCollection;
-    }
+    matTrackReaderRootConfig.collection = ActsExamples::Simulation::kMaterialTracks;
     matTrackReaderRootConfig.fileList = intputFiles;
     auto matTrackReaderRoot =
         std::make_shared<ActsExamples::RootMaterialTrackReader>(
@@ -116,6 +114,7 @@ int materialMappingExample(int argc, char* argv[],
 
   /// The material mapping algorithm
   ActsExamples::MaterialMapping::Config mmAlgConfig{geoContext, mfContext};
+  mmAlgConfig.collection = ActsExamples::Simulation::kMaterialTracks;
   if (mapSurface) {
     // Get a Navigator
     Acts::Navigator navigator({tGeometry, true, true, true});
@@ -148,7 +147,7 @@ int materialMappingExample(int argc, char* argv[],
   // Get the file name from the options
   std::string materialFileName = vm["mat-output-file"].as<std::string>();
 
-  if (!materialFileName.empty() and vm["output-root"].template as<bool>()) {
+  if (not materialFileName.empty() and vm["output-root"].template as<bool>()) {
     // The writer of the indexed material
     ActsExamples::RootMaterialWriter::Config rmwConfig;
     rmwConfig.filePath = materialFileName + ".root";

@@ -56,6 +56,9 @@ class Geant4Simulation final : public BareAlgorithm {
     // Name of the output collection : final particles
     std::string outputParticlesFinal = "";
 
+    // Name of the output collection: material tracks
+    std::string outputMaterialTracks = "";
+
     /// The G4 run manager
     G4RunManager* runManager = nullptr;
 

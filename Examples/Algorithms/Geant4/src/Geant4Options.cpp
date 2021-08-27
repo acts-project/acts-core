@@ -21,7 +21,9 @@ void ActsExamples::Options::addGeant4Options(
 
   auto opt = desc.add_options();
   opt("g4-rnd-seed1", value<unsigned int>()->default_value(287362910),
-      "The first seed of the G4 random number generation");
+      "The first seed of the Geant4 random number generation");
   opt("g4-rnd-seed2", value<unsigned int>()->default_value(730284537),
-      "The second seed of the G4 random number generation");
+      "The second seed of the Geant4 random number generation");
+  opt("g4-loglevel", value<unsigned int>()->default_value(2),
+      "Screen output log level for Geant4 actions.");
 }

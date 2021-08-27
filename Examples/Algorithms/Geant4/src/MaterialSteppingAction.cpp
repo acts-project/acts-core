@@ -10,10 +10,13 @@
 
 #include "Acts/Definitions/Units.hpp"
 #include "Acts/Material/Material.hpp"
+#include "Acts/Material/MaterialInteraction.hpp"
 #include "Acts/Material/MaterialSlab.hpp"
 #include "Acts/Propagator/MaterialInteractor.hpp"
+#include "ActsExamples/Geant4/EventStoreRegistry.hpp"
 
 #include <G4Material.hh>
+#include <G4RunManager.hh>
 #include <G4Step.hh>
 
 ActsExamples::MaterialSteppingAction::MaterialSteppingAction(
@@ -24,6 +27,9 @@ ActsExamples::MaterialSteppingAction::~MaterialSteppingAction() {}
 
 void ActsExamples::MaterialSteppingAction::UserSteppingAction(
     const G4Step* step) {
+  auto g4RunManager = G4RunManager::GetRunManager();
+  unsigned int eventNr = g4RunManager->GetCurrentEvent()->GetEventID();
+
   // Get the material & check if it is present
   G4Material* material = step->GetPreStepPoint()->GetMaterial();
   if (material == nullptr) {
@@ -43,6 +49,9 @@ void ActsExamples::MaterialSteppingAction::UserSteppingAction(
   constexpr double convertDensity =
       (Acts::UnitConstants::g / Acts::UnitConstants::mm3) /
       (CLHEP::gram / CLHEP::mm3);
+
+  ACTS_VERBOSE("Performing a step with step size = "
+               << convertLength * step->GetStepLength());
 
   // Quantities valid for elemental materials and mixtures
   double X0 = convertLength * material->GetRadlen();
@@ -82,4 +91,15 @@ void ActsExamples::MaterialSteppingAction::UserSteppingAction(
   mInteraction.direction.normalized();
   mInteraction.materialSlab = slab;
   mInteraction.pathCorrection = (step->GetStepLength() / CLHEP::mm);
+
+  size_t trackID = step->GetTrack()->GetTrackID();
+  auto& recordedMaterial = EventStoreRegistry::recordedMaterial[eventNr];
+  if (recordedMaterial.size() < trackID) {
+    Acts::RecordedMaterialTrack rmTrack;
+    rmTrack.second.materialInteractions.push_back(mInteraction);
+    recordedMaterial.push_back(rmTrack);
+  } else {
+    recordedMaterial[trackID - 1].second.materialInteractions.push_back(
+        mInteraction);
+  }
 }

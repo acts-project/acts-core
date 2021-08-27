@@ -1,10 +1,10 @@
 add_subdirectory(Common)
 
 add_executable(
-  ActsExampleGeantinoRecordingGdml
-  GdmlGeantinoRecording.cpp)
+  ActsExampleMaterialRecordingGdml
+  GdmlMaterialRecording.cpp)
 target_link_libraries(
-  ActsExampleGeantinoRecordingGdml
+  ActsExampleMaterialRecordingGdml
   PRIVATE
     ActsExamplesCommon
     ActsExamplesFramework
@@ -15,7 +15,7 @@ target_link_libraries(
 
 install(
   TARGETS 
-    ActsExampleGeantinoRecordingGdml 
+    ActsExampleMaterialRecordingGdml 
   RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_subdirectory_if(DD4hep ACTS_BUILD_EXAMPLES_DD4HEP)

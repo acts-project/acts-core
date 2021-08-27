@@ -102,6 +102,7 @@ ActsExamples::ProcessCode ActsExamples::Geant4Simulation::execute(
   // this will allow access from the User*Actions
   EventStoreRegistry::boards[ctx.eventNumber] = &(ctx.eventStore);
 
+  ACTS_DEBUG("Sending Geant RunManager the BeamOn() command.");
   // Start simulation. each track is simulated as a separate Geant4 event.
   m_cfg.runManager->BeamOn(1);
 
@@ -137,6 +138,16 @@ ActsExamples::ProcessCode ActsExamples::Geant4Simulation::execute(
     // Register to the event store
     ctx.eventStore.add(m_cfg.outputSimHits, std::move(simHits));
   }
+
+  // Output handling: Material tracks
+  if (not m_cfg.outputMaterialTracks.empty()) {
+    ctx.eventStore.add(
+        m_cfg.outputMaterialTracks,
+        std::move(EventStoreRegistry::recordedMaterial[ctx.eventNumber]));
+  }
+
+  // Clear the EventStoreRegistry
+  EventStoreRegistry::clearEvent(ctx.eventNumber);
 
   return ActsExamples::ProcessCode::SUCCESS;
 }
