@@ -82,3 +82,7 @@ The Acts project contains copies of the following external packages:
     under the MIT license.
 -   [OpenDataDetector](https://github.com/acts-project/OpenDataDetector)
     licensed under the MPLv2 license.
+-   [boost](https://www.boost.org/) 
+    licensed under the Boost Software License.
+-   [eigen3](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+    licensed under the MPLv2 license.
