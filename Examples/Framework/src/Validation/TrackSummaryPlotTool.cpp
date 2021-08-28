@@ -34,6 +34,9 @@ void ActsExamples::TrackSummaryPlotTool::book(
   // number of outliers versus eta
   trackSummaryPlotCache.nOutliers_vs_eta = PlotHelpers::bookProf(
       "nOutliers_vs_eta", "Number of outliers vs. #eta", bEta, bNum);
+  // number of Shared Hits versus eta
+  trackSummaryPlotCache.nSharedHits_vs_eta = PlotHelpers::bookProf(
+      "nSharedHits_vs_eta", "Number of Shared Hits vs. #eta", bEta, bNum);
   // number of track states versus pt
   trackSummaryPlotCache.nStates_vs_pt = PlotHelpers::bookProf(
       "nStates_vs_pT", "Number of total states vs. pT", bPt, bNum);
@@ -46,6 +49,9 @@ void ActsExamples::TrackSummaryPlotTool::book(
   // number of outliers versus pt
   trackSummaryPlotCache.nOutliers_vs_pt = PlotHelpers::bookProf(
       "nOutliers_vs_pT", "Number of outliers vs. pT", bPt, bNum);
+  // number of Shared Hits versus pt
+  trackSummaryPlotCache.nSharedHits_vs_pt = PlotHelpers::bookProf(
+      "nSharedHits_vs_pT", "Number of Shared Hits vs. pT", bPt, bNum);
 }
 
 void ActsExamples::TrackSummaryPlotTool::clear(
@@ -54,10 +60,12 @@ void ActsExamples::TrackSummaryPlotTool::clear(
   delete trackSummaryPlotCache.nMeasurements_vs_eta;
   delete trackSummaryPlotCache.nOutliers_vs_eta;
   delete trackSummaryPlotCache.nHoles_vs_eta;
+  delete trackSummaryPlotCache.nSharedHits_vs_eta;
   delete trackSummaryPlotCache.nStates_vs_pt;
   delete trackSummaryPlotCache.nMeasurements_vs_pt;
   delete trackSummaryPlotCache.nOutliers_vs_pt;
   delete trackSummaryPlotCache.nHoles_vs_pt;
+  delete trackSummaryPlotCache.nSharedHits_vs_pt;
 }
 
 void ActsExamples::TrackSummaryPlotTool::write(
@@ -68,16 +76,19 @@ void ActsExamples::TrackSummaryPlotTool::write(
   trackSummaryPlotCache.nMeasurements_vs_eta->Write();
   trackSummaryPlotCache.nOutliers_vs_eta->Write();
   trackSummaryPlotCache.nHoles_vs_eta->Write();
+  trackSummaryPlotCache.nSharedHits_vs_eta->Write();
   trackSummaryPlotCache.nStates_vs_pt->Write();
   trackSummaryPlotCache.nMeasurements_vs_pt->Write();
   trackSummaryPlotCache.nOutliers_vs_pt->Write();
   trackSummaryPlotCache.nHoles_vs_pt->Write();
+  trackSummaryPlotCache.nSharedHits_vs_pt->Write();
 }
 
 void ActsExamples::TrackSummaryPlotTool::fill(
     TrackSummaryPlotTool::TrackSummaryPlotCache& trackSummaryPlotCache,
     const Acts::BoundTrackParameters& fittedParameters, size_t nStates,
-    size_t nMeasurements, size_t nOutliers, size_t nHoles) const {
+    size_t nMeasurements, size_t nOutliers, size_t nHoles,
+    size_t nSharedHits) const {
   using Acts::VectorHelpers::eta;
   using Acts::VectorHelpers::perp;
   const auto& momentum = fittedParameters.momentum();
@@ -90,6 +101,8 @@ void ActsExamples::TrackSummaryPlotTool::fill(
   PlotHelpers::fillProf(trackSummaryPlotCache.nOutliers_vs_eta, fit_eta,
                         nOutliers);
   PlotHelpers::fillProf(trackSummaryPlotCache.nHoles_vs_eta, fit_eta, nHoles);
+  PlotHelpers::fillProf(trackSummaryPlotCache.nSharedHits_vs_eta, fit_eta,
+                        nSharedHits);
 
   PlotHelpers::fillProf(trackSummaryPlotCache.nStates_vs_pt, fit_pT, nStates);
   PlotHelpers::fillProf(trackSummaryPlotCache.nMeasurements_vs_pt, fit_pT,
@@ -97,4 +110,6 @@ void ActsExamples::TrackSummaryPlotTool::fill(
   PlotHelpers::fillProf(trackSummaryPlotCache.nOutliers_vs_pt, fit_pT,
                         nOutliers);
   PlotHelpers::fillProf(trackSummaryPlotCache.nHoles_vs_pt, fit_pT, nHoles);
+  PlotHelpers::fillProf(trackSummaryPlotCache.nSharedHits_vs_pt, fit_pT,
+                        nSharedHits);
 }

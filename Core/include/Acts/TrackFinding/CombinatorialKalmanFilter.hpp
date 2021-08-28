@@ -1267,6 +1267,7 @@ class CombinatorialKalmanFilter {
       // Emplace back the successful result
       ckfResults.emplace_back(combKalmanResult);
     }
+
     return ckfResults;
   }
 

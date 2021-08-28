@@ -34,7 +34,8 @@ enum TrackStateFlag {
   OutlierFlag = 2,
   HoleFlag = 3,
   MaterialFlag = 4,
-  NumTrackStateFlags = 5
+  SharedHitFlag = 5,
+  NumTrackStateFlags = 6
 };
 
 using TrackStateType = std::bitset<TrackStateFlag::NumTrackStateFlags>;

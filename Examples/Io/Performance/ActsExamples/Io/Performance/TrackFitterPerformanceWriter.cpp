@@ -155,7 +155,8 @@ ActsExamples::ProcessCode ActsExamples::TrackFitterPerformanceWriter::writeT(
     // Fill the trajectory summary info
     m_trackSummaryPlotTool.fill(m_trackSummaryPlotCache, fittedParameters,
                                 trajState.nStates, trajState.nMeasurements,
-                                trajState.nOutliers, trajState.nHoles);
+                                trajState.nOutliers, trajState.nHoles,
+                                trajState.nSharedHits);
   }
 
   // Fill the efficiency, defined as the ratio between number of tracks with

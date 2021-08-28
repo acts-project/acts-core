@@ -11,6 +11,7 @@
 #include "Acts/Geometry/TrackingGeometry.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
+#include "Acts/TrackFinding/SourceLinkAccessorConcept.hpp"
 #include "ActsExamples/EventData/Measurement.hpp"
 #include "ActsExamples/EventData/Track.hpp"
 #include "ActsExamples/Framework/BareAlgorithm.hpp"
@@ -64,6 +65,8 @@ class TrackFindingAlgorithm final : public BareAlgorithm {
     std::shared_ptr<TrackFinderFunction> findTracks;
     /// CKF measurement selector config
     Acts::MeasurementSelector::Config measurementSelectorCfg;
+    /// Compute shared hit information
+    bool computeSharedHits = false;
   };
 
   /// Constructor of the track finding algorithm
@@ -83,7 +86,82 @@ class TrackFindingAlgorithm final : public BareAlgorithm {
   const Config& config() const { return m_cfg; }
 
  private:
+  template <typename source_link_accessor_container_t,
+            typename source_link_accessor_value_t>
+  void computeSharedHits(
+      const source_link_accessor_container_t& sourcelinks,
+      std::vector<Acts::Result<Acts::CombinatorialKalmanFilterResult<
+          source_link_accessor_value_t>>>&) const;
+
+ private:
   Config m_cfg;
 };
+
+template <typename source_link_accessor_container_t,
+          typename source_link_accessor_value_t>
+void TrackFindingAlgorithm::computeSharedHits(
+    const source_link_accessor_container_t& sourceLinks,
+    std::vector<Acts::Result<
+        Acts::CombinatorialKalmanFilterResult<source_link_accessor_value_t>>>&
+        results) const {
+  // Compute shared hits from all the reconstructed tracks
+  // Compute nSharedhits and Update ckf results
+  // hit index -> list of multi traj indexes [traj, meas]
+  static_assert(Acts::SourceLinkConcept<source_link_accessor_value_t>,
+                "Source link does not fulfill SourceLinkConcept");
+
+  std::vector<std::size_t> firstTrackOnTheHit(
+      sourceLinks.size(), std::numeric_limits<std::size_t>::max());
+  std::vector<std::size_t> firstStateOnTheHit(
+      sourceLinks.size(), std::numeric_limits<std::size_t>::max());
+
+  for (unsigned int iresult(0); iresult < results.size(); iresult++) {
+    if (not results.at(iresult).ok()) {
+      continue;
+    }
+
+    auto& ckfResult = results.at(iresult).value();
+    auto& measIndexes = ckfResult.lastMeasurementIndices;
+
+    for (auto measIndex : measIndexes) {
+      ckfResult.fittedStates.visitBackwards(measIndex, [&](const auto& state) {
+        if (not state.typeFlags().test(Acts::TrackStateFlag::MeasurementFlag))
+          return;
+
+        std::size_t hitIndex = state.uncalibrated().index();
+
+        // Check if hit not already used
+        if (firstTrackOnTheHit.at(hitIndex) ==
+            std::numeric_limits<std::size_t>::max()) {
+          firstTrackOnTheHit.at(hitIndex) = iresult;
+          firstStateOnTheHit.at(hitIndex) = state.index();
+          return;
+        }
+
+        // if already used, control if first track state has been marked
+        // as shared
+        int indexFirstTrack = firstTrackOnTheHit.at(hitIndex);
+        int indexFirstState = firstStateOnTheHit.at(hitIndex);
+        if (not results.at(indexFirstTrack)
+                    .value()
+                    .fittedStates.getTrackState(indexFirstState)
+                    .typeFlags()
+                    .test(Acts::TrackStateFlag::SharedHitFlag))
+          results.at(indexFirstTrack)
+              .value()
+              .fittedStates.getTrackState(indexFirstState)
+              .typeFlags()
+              .set(Acts::TrackStateFlag::SharedHitFlag);
+
+        // Decorate this track
+        results.at(iresult)
+            .value()
+            .fittedStates.getTrackState(state.index())
+            .typeFlags()
+            .set(Acts::TrackStateFlag::SharedHitFlag);
+      });
+    }
+  }
+}
 
 }  // namespace ActsExamples

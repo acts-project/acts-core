@@ -66,6 +66,12 @@ ActsExamples::ProcessCode ActsExamples::TrackFindingAlgorithm::execute(
   ACTS_DEBUG("Invoke track finding with " << initialParameters.size()
                                           << " seeds.");
   auto results = (*m_cfg.findTracks)(sourceLinks, initialParameters, options);
+
+  // Compute shared hits from all the reconstructed tracks
+  if (m_cfg.computeSharedHits) {
+    computeSharedHits(sourceLinks, results);
+  }
+
   // Loop over the track finding results for all initial parameters
   for (std::size_t iseed = 0; iseed < initialParameters.size(); ++iseed) {
     // The result for this seed

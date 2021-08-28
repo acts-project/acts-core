@@ -21,7 +21,6 @@ namespace Acts {
 namespace MultiTrajectoryHelpers {
 
 /// @brief Struct for brief trajectory summary info
-/// @todo add nSharedHits
 ///
 struct TrajectoryState {
   size_t nStates = 0;
@@ -36,6 +35,7 @@ struct TrajectoryState {
   std::vector<unsigned int> measurementLayer = {};
   std::vector<unsigned int> outlierVolume = {};
   std::vector<unsigned int> outlierLayer = {};
+  size_t nSharedHits = 0;
 };
 
 // Container for trajectory summary info at a specific volume
@@ -65,6 +65,8 @@ TrajectoryState trajectoryState(
     trajState.NDF += state.calibratedSize();
     auto typeFlags = state.typeFlags();
     if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      if (typeFlags.test(Acts::TrackStateFlag::SharedHitFlag))
+        trajState.nSharedHits++;
       trajState.nMeasurements++;
       trajState.measurementChi2.push_back(state.chi2());
       trajState.measurementVolume.push_back(volume);
@@ -115,6 +117,8 @@ VolumeTrajectoryStateContainer trajectoryState(
     trajState.NDF += state.calibratedSize();
     auto typeFlags = state.typeFlags();
     if (typeFlags.test(Acts::TrackStateFlag::MeasurementFlag)) {
+      if (typeFlags.test(Acts::TrackStateFlag::SharedHitFlag))
+        trajState.nSharedHits++;
       trajState.nMeasurements++;
       trajState.measurementChi2.push_back(state.chi2());
       trajState.measurementVolume.push_back(volume);

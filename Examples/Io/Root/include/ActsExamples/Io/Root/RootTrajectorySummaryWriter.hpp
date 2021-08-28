@@ -86,6 +86,7 @@ class RootTrajectorySummaryWriter final
   std::vector<unsigned int> m_nMeasurements;  ///< The number of measurements
   std::vector<unsigned int> m_nOutliers;      ///< The number of outliers
   std::vector<unsigned int> m_nHoles;         ///< The number of holes
+  std::vector<unsigned int> m_nSharedHits;    ///< The number of shared hits
   std::vector<float> m_chi2Sum;               ///< The total chi2
   std::vector<unsigned int>
       m_NDF;  ///< The number of ndf of the measurements+outliers

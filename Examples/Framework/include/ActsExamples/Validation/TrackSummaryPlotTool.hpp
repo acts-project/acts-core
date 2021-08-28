@@ -38,11 +38,13 @@ class TrackSummaryPlotTool {
         nMeasurements_vs_eta;    ///< Number of non-outlier measurements vs eta
     TProfile* nHoles_vs_eta;     ///< Number of holes vs eta
     TProfile* nOutliers_vs_eta;  ///< Number of outliers vs eta
-    TProfile* nStates_vs_pt;     ///< Number of total states vs pt
+    TProfile* nSharedHits_vs_eta;  ///< Number of Shared Hits vs eta
+    TProfile* nStates_vs_pt;       ///< Number of total states vs pt
     TProfile*
-        nMeasurements_vs_pt;    ///< Number of non-outlier measurements vs pt
-    TProfile* nHoles_vs_pt;     ///< Number of holes vs pt
-    TProfile* nOutliers_vs_pt;  ///< Number of outliers vs pt
+        nMeasurements_vs_pt;      ///< Number of non-outlier measurements vs pt
+    TProfile* nHoles_vs_pt;       ///< Number of holes vs pt
+    TProfile* nOutliers_vs_pt;    ///< Number of outliers vs pt
+    TProfile* nSharedHits_vs_pt;  ///< Number of Shared Hits vs pt
   };
 
   /// Constructor
@@ -66,7 +68,8 @@ class TrackSummaryPlotTool {
   /// @param nHoles number of holes
   void fill(TrackSummaryPlotCache& trackSummaryPlotCache,
             const Acts::BoundTrackParameters& fittedParameters, size_t nStates,
-            size_t nMeasurments, size_t Outliers, size_t nHoles) const;
+            size_t nMeasurments, size_t Outliers, size_t nHoles,
+            size_t nSharedHits) const;
 
   /// @brief write the track info plots to file
   ///

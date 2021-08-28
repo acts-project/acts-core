@@ -72,6 +72,7 @@ ActsExamples::RootTrajectorySummaryWriter::RootTrajectorySummaryWriter(
     m_outputTree->Branch("nMeasurements", &m_nMeasurements);
     m_outputTree->Branch("nOutliers", &m_nOutliers);
     m_outputTree->Branch("nHoles", &m_nHoles);
+    m_outputTree->Branch("nSharedHits", &m_nSharedHits);
     m_outputTree->Branch("chi2Sum", &m_chi2Sum);
     m_outputTree->Branch("NDF", &m_NDF);
     m_outputTree->Branch("measurementChi2", &m_measurementChi2);
@@ -192,6 +193,7 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectorySummaryWriter::writeT(
       m_nMeasurements.push_back(trajState.nMeasurements);
       m_nOutliers.push_back(trajState.nOutliers);
       m_nHoles.push_back(trajState.nHoles);
+      m_nSharedHits.push_back(trajState.nSharedHits);
       m_chi2Sum.push_back(trajState.chi2Sum);
       m_NDF.push_back(trajState.NDF);
       m_measurementChi2.push_back(trajState.measurementChi2);
@@ -385,6 +387,7 @@ ActsExamples::ProcessCode ActsExamples::RootTrajectorySummaryWriter::writeT(
   m_nMeasurements.clear();
   m_nOutliers.clear();
   m_nHoles.clear();
+  m_nSharedHits.clear();
   m_chi2Sum.clear();
   m_NDF.clear();
   m_measurementChi2.clear();

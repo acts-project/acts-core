@@ -62,6 +62,7 @@ struct TestSourceLink {
   TestSourceLink& operator=(TestSourceLink&&) = default;
 
   constexpr GeometryIdentifier geometryId() const { return geoId; }
+  std::size_t index() const { return sourceId; }
 };
 
 bool operator==(const TestSourceLink& lhs, const TestSourceLink& rhs);

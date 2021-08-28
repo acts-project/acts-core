@@ -115,6 +115,7 @@ ProcessCode CsvMultiTrajectoryWriter::writeT(
       toAdd.nMeasurements = trajState.nMeasurements;
       toAdd.nOutliers = trajState.nOutliers;
       toAdd.nHoles = trajState.nHoles;
+      toAdd.nSharedHits = trajState.nSharedHits;
       toAdd.chi2Sum = trajState.chi2Sum;
       toAdd.NDF = trajState.NDF;
       toAdd.truthMatchProb = toAdd.nMajorityHits * 1. / trajState.nMeasurements;
@@ -153,9 +154,9 @@ ProcessCode CsvMultiTrajectoryWriter::writeT(
 
   // write csv header
   mos << "track_id,particleId,"
-      << "nStates,nMajorityHits,nMeasurements,nOutliers,nHoles,"
+      << "nStates,nMajorityHits,nMeasurements,nOutliers,nHoles,nSharedHits,"
       << "chi2,ndf,chi2/ndf,"
-      << "pT,"
+      << "pT,eta,phi,"
       << "truthMatchProbability,"
       << "good/duplicate/fake";
 
@@ -178,10 +179,15 @@ ProcessCode CsvMultiTrajectoryWriter::writeT(
     mos << trajState.nMeasurements << ",";
     mos << trajState.nOutliers << ",";
     mos << trajState.nHoles << ",";
+    mos << trajState.nSharedHits << ",";
     mos << trajState.chi2Sum << ",";
     mos << trajState.NDF << ",";
     mos << trajState.chi2Sum * 1.0 / trajState.NDF << ",";
     mos << Acts::VectorHelpers::perp(trajState.fittedParameters->momentum())
+        << ",";
+    mos << Acts::VectorHelpers::eta(trajState.fittedParameters->momentum())
+        << ",";
+    mos << Acts::VectorHelpers::phi(trajState.fittedParameters->momentum())
         << ",";
     mos << trajState.truthMatchProb << ",";
     mos << trajState.trackType;
