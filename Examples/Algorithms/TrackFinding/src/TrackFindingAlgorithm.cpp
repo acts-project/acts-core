@@ -27,6 +27,7 @@
 #include "Acts/Surfaces/PerigeeSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/Utilities/Enumerate.hpp"
 #include "Acts/Utilities/Logger.hpp"
@@ -318,27 +319,34 @@ ProcessCode TrackFindingAlgorithm::execute(const AlgorithmContext& ctx) const {
   PassThroughCalibrator pcalibrator;
   MeasurementCalibratorAdapter calibrator(pcalibrator, measurements);
   Acts::GainMatrixUpdater kfUpdater;
-  MeasurementSelector measSel{
-      Acts::MeasurementSelector(m_cfg.measurementSelectorCfg)};
 
   using Extensions = Acts::CombinatorialKalmanFilterExtensions<TrackContainer>;
 
   BranchStopper branchStopper(m_cfg);
-
-  Extensions extensions;
-  extensions.calibrator.connect<&MeasurementCalibratorAdapter::calibrate>(
-      &calibrator);
-  extensions.updater.connect<&Acts::GainMatrixUpdater::operator()<
-      typename TrackContainer::TrackStateContainerBackend>>(&kfUpdater);
-  extensions.measurementSelector.connect<&MeasurementSelector::select>(
-      &measSel);
-  extensions.branchStopper.connect<&BranchStopper::operator()>(&branchStopper);
+  MeasurementSelector measSel{
+      Acts::MeasurementSelector(m_cfg.measurementSelectorCfg)};
 
   IndexSourceLinkAccessor slAccessor;
   slAccessor.container = &measurements.orderedIndices();
-  Acts::SourceLinkAccessorDelegate<IndexSourceLinkAccessor::Iterator>
-      slAccessorDelegate;
-  slAccessorDelegate.connect<&IndexSourceLinkAccessor::range>(&slAccessor);
+
+  using TrackStateCreatorType =
+      Acts::TrackStateCreator<IndexSourceLinkAccessor::Iterator,
+                              TrackContainer>;
+  TrackStateCreatorType trackStateCreator;
+  trackStateCreator.sourceLinkAccessor
+      .template connect<&IndexSourceLinkAccessor::range>(&slAccessor);
+  trackStateCreator.calibrator
+      .template connect<&MeasurementCalibratorAdapter::calibrate>(&calibrator);
+  trackStateCreator.measurementSelector
+      .template connect<&MeasurementSelector::select>(&measSel);
+
+  Extensions extensions;
+  extensions.updater.connect<&Acts::GainMatrixUpdater::operator()<
+      typename TrackContainer::TrackStateContainerBackend>>(&kfUpdater);
+  extensions.branchStopper.connect<&BranchStopper::operator()>(&branchStopper);
+  extensions.createTrackStates
+      .template connect<&TrackStateCreatorType ::createTrackStates>(
+          &trackStateCreator);
 
   Acts::PropagatorPlainOptions firstPropOptions(ctx.geoContext,
                                                 ctx.magFieldContext);
@@ -357,13 +365,14 @@ ProcessCode TrackFindingAlgorithm::execute(const AlgorithmContext& ctx) const {
 
   // Set the CombinatorialKalmanFilter options
   TrackFinderOptions firstOptions(ctx.geoContext, ctx.magFieldContext,
-                                  ctx.calibContext, slAccessorDelegate,
-                                  extensions, firstPropOptions);
+                                  ctx.calibContext, extensions,
+                                  firstPropOptions);
+
   firstOptions.targetSurface = m_cfg.reverseSearch ? pSurface.get() : nullptr;
 
   TrackFinderOptions secondOptions(ctx.geoContext, ctx.magFieldContext,
-                                   ctx.calibContext, slAccessorDelegate,
-                                   extensions, secondPropOptions);
+                                   ctx.calibContext, extensions,
+                                   secondPropOptions);
   secondOptions.targetSurface = m_cfg.reverseSearch ? nullptr : pSurface.get();
   secondOptions.skipPrePropagationUpdate = true;
 

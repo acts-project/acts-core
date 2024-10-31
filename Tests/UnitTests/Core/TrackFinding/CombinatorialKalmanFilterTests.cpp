@@ -39,6 +39,7 @@
 #include "Acts/Tests/CommonHelpers/MeasurementsCreator.hpp"
 #include "Acts/TrackFinding/CombinatorialKalmanFilter.hpp"
 #include "Acts/TrackFinding/MeasurementSelector.hpp"
+#include "Acts/TrackFinding/TrackStateCreator.hpp"
 #include "Acts/TrackFitting/GainMatrixSmoother.hpp"
 #include "Acts/TrackFitting/GainMatrixUpdater.hpp"
 #include "Acts/TrackFitting/KalmanFitter.hpp"
@@ -168,8 +169,7 @@ struct Fixture {
       std::unordered_multimap<Acts::GeometryIdentifier, TestSourceLink>;
   using TestSourceLinkAccessor = TestContainerAccessor<TestSourceLinkContainer>;
   using CombinatorialKalmanFilterOptions =
-      Acts::CombinatorialKalmanFilterOptions<TestSourceLinkAccessor::Iterator,
-                                             TrackContainer>;
+      Acts::CombinatorialKalmanFilterOptions<TrackContainer>;
 
   KalmanUpdater kfUpdater;
   KalmanSmoother kfSmoother;
@@ -201,13 +201,8 @@ struct Fixture {
   Acts::CombinatorialKalmanFilterExtensions<TrackContainer> getExtensions()
       const {
     Acts::CombinatorialKalmanFilterExtensions<TrackContainer> extensions;
-    extensions.calibrator.template connect<
-        &testSourceLinkCalibrator<TrackStateContainerBackend>>();
     extensions.updater.template connect<
         &KalmanUpdater::operator()<TrackStateContainerBackend>>(&kfUpdater);
-    extensions.measurementSelector.template connect<
-        &Acts::MeasurementSelector::select<TrackStateContainerBackend>>(
-        &measSel);
     return extensions;
   }
 
@@ -289,13 +284,39 @@ struct Fixture {
   CombinatorialKalmanFilterOptions makeCkfOptions() const {
     // leave the accessor empty, this will have to be set before running the CKF
     return CombinatorialKalmanFilterOptions(
-        geoCtx, magCtx, calCtx,
-        Acts::SourceLinkAccessorDelegate<TestSourceLinkAccessor::Iterator>{},
-        getExtensions(), Acts::PropagatorPlainOptions(geoCtx, magCtx));
+        geoCtx, magCtx, calCtx, getExtensions(),
+        Acts::PropagatorPlainOptions(geoCtx, magCtx));
   }
 };
 
+// set up composable track state creator from these components:
+//  - source link accessor,
+//  - measurement selector
+//  - track  state candidate creator
+template <typename source_link_accessor_t>
+inline auto makeTrackStateCreator(const source_link_accessor_t& slAccessor,
+                                  const Acts::MeasurementSelector& measSel) {
+  using TrackStateCreatorType =
+      Acts::TrackStateCreator<typename source_link_accessor_t::Iterator,
+                              TrackContainer>;
+  TrackStateCreatorType trackStateCreator;
+  trackStateCreator.sourceLinkAccessor
+      .template connect<&source_link_accessor_t::range>(&slAccessor);
+  trackStateCreator.calibrator.template connect<
+      &testSourceLinkCalibrator<TrackStateContainerBackend>>();
+  trackStateCreator.measurementSelector.template connect<
+      &Acts::MeasurementSelector::select<TrackStateContainerBackend>>(&measSel);
+  return trackStateCreator;
+}
 }  // namespace
+
+// somehow this is not automatically instantiated
+template Acts::Result<::std::pair<
+    std::vector<TrackStateContainerBackend::TrackStateProxy>::iterator,
+    std::vector<TrackStateContainerBackend::TrackStateProxy>::iterator>>
+Acts::MeasurementSelector::select<TrackStateContainerBackend>(
+    std::vector<TrackStateContainerBackend::TrackStateProxy>&, bool&,
+    const Acts::Logger&) const;
 
 BOOST_AUTO_TEST_SUITE(TrackFindingCombinatorialKalmanFilter)
 
@@ -312,8 +333,12 @@ BOOST_AUTO_TEST_CASE(ZeroFieldForward) {
 
   Fixture::TestSourceLinkAccessor slAccessor;
   slAccessor.container = &f.sourceLinks;
-  options.sourceLinkAccessor.connect<&Fixture::TestSourceLinkAccessor::range>(
-      &slAccessor);
+
+  auto trackStateCreator = makeTrackStateCreator(slAccessor, f.measSel);
+
+  options.extensions.createTrackStates
+      .template connect<&decltype(trackStateCreator)::createTrackStates>(
+          &trackStateCreator);
 
   TrackContainer tc{Acts::VectorTrackContainer{},
                     Acts::VectorMultiTrajectory{}};
@@ -370,8 +395,11 @@ BOOST_AUTO_TEST_CASE(ZeroFieldBackward) {
 
   Fixture::TestSourceLinkAccessor slAccessor;
   slAccessor.container = &f.sourceLinks;
-  options.sourceLinkAccessor.connect<&Fixture::TestSourceLinkAccessor::range>(
-      &slAccessor);
+
+  auto trackStateCreator = makeTrackStateCreator(slAccessor, f.measSel);
+  options.extensions.createTrackStates
+      .template connect<&decltype(trackStateCreator)::createTrackStates>(
+          &trackStateCreator);
 
   TrackContainer tc{Acts::VectorTrackContainer{},
                     Acts::VectorMultiTrajectory{}};
