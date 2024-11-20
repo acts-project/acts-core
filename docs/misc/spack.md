@@ -61,6 +61,17 @@ variants you do not need in order to speed up the Spack build.
 Once Spack has concretized and installed the ACTS dependencies, you can build
 ACTS as normal using CMake.
 
+### Running DD4hep
+
+In order to run code depending on DD4hep, you may need to run an additional
+shell script when you activate your Spack environment. This shell script is
+called `thisdd4hep_only.sh` and resides in the binary directory of your Spack
+view. An easy way to activate this shell script is to run the following
+command:
+
+```console
+$ source $(dirname $(which ddsim))/thisdd4hep_only.sh
+```
 
 ## Build caches
 
@@ -74,3 +85,20 @@ at times be out of date. If you encounter any problems using Spack to build
 ACTS, unofficial support is available in the
 [#Spack](https://mattermost.web.cern.ch/acts/channels/spack) channel on the
 ACTS Mattermost.
+
+## Troubleshooting
+
+The following are some common problems you may encounter using Spack to build
+ACTS.
+
+### DD4hep not finding factories
+
+If you run into an error like the following, DD4hep is failing to find the
+object files required to parse some its required factories. Remember to
+initialize DD4hep as described in ["Running DD4hep"](#running-dd4hep):
+
+```text
+dd4hep: Failed to locate plugin to interprete files of type "lccdd" - no factory:lccdd_XML_reader.
+        No factory with name Create(lccdd_XML_reader) for type lccdd_XML_reader found.
+        Please check library load path and/or plugin factory name.
+```
