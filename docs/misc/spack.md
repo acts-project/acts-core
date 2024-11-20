@@ -70,7 +70,7 @@ view. An easy way to activate this shell script is to run the following
 command:
 
 ```console
-$ source $(dirname $(which ddsim))/thisdd4hep_only.sh
+source $(dirname $(which ddsim))/thisdd4hep_only.sh
 ```
 
 ## Build caches
