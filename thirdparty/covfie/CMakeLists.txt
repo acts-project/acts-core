@@ -6,6 +6,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+cmake_minimum_required(VERSION 3.25)
+
 # CMake include(s).
 include(FetchContent)
 
@@ -15,7 +17,7 @@ message(STATUS "Building Covfie as part of the Acts project")
 set(COVFIE_VERSION "v${_acts_covfie_version}")
 
 # Declare where to get covfie from.
-FetchContent_Declare(covfie ${ACTS_COVFIE_SOURCE})
+FetchContent_Declare(covfie SYSTEM ${ACTS_COVFIE_SOURCE})
 
 # Options used for covfie.
 set(COVFIE_BUILD_EXAMPLES OFF CACHE BOOL "Build covfie examples")
