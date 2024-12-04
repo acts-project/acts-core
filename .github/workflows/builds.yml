@@ -248,9 +248,11 @@ jobs:
         include:
           - image: ubuntu2204
             std: 20
-          - image: ubuntu2204_clang
+            cxx: g++
+          - image: ubuntu2204
             std: 20
-    container: ghcr.io/acts-project/${{ matrix.image }}:63
+            cxx: clang++
+    container: ghcr.io/acts-project/${{ matrix.image }}:71
     env:
       INSTALL_DIR: ${{ github.workspace }}/install
       ACTS_LOG_FAILURE_THRESHOLD: WARNING
@@ -285,6 +287,7 @@ jobs:
           ccache -z &&
           cmake -B build -S .
           --preset=github-ci
+          -DCMAKE_CXX_COMPILER=${{ matrix.cxx }}
           -DCMAKE_CXX_STANDARD=${{ matrix.std }}
           -DCMAKE_INSTALL_PREFIX="${INSTALL_DIR}"
           -DPython_EXECUTABLE=$(which python3)

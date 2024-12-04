@@ -6,6 +6,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+cmake_minimum_required(VERSION 3.25)
+
 # CMake include(s).
 include(FetchContent)
 
@@ -15,7 +17,7 @@ message(STATUS "Building VecMem as part of the Acts project")
 set(VECMEM_VERSION "v${_acts_vecmem_version}")
 
 # Declare where to get VecMem from.
-FetchContent_Declare(VecMem ${ACTS_VECMEM_SOURCE})
+FetchContent_Declare(VecMem SYSTEM ${ACTS_VECMEM_SOURCE})
 
 # Options used in the build of VecMem.
 set(VECMEM_BUILD_TESTING

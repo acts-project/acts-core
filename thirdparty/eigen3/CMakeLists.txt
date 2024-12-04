@@ -1,18 +1,11 @@
-message(STATUS "Building Eigen ${_acts_eigen3_version}")
+cmake_minimum_required(VERSION 3.25)
 
-include(ExternalProject)
+# CMake include(s).
+include(FetchContent)
 
-set(Eigen3_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/eigen3-prefix/src/eigen3)
+# Tell the user what's happening.
+message(STATUS "Building Eigen3 as part of the Acts project")
 
-ExternalProject_Add(
-    eigen3
-    "${ACTS_EIGEN3_SOURCE};CONFIGURE_COMMAND;;BUILD_COMMAND;;INSTALL_COMMAND;"
-)
-
-add_library(Eigen3::Eigen INTERFACE IMPORTED GLOBAL)
-add_dependencies(Eigen3::Eigen eigen3)
-target_include_directories(Eigen3::Eigen INTERFACE ${Eigen3_INCLUDE_DIR})
-install(
-    DIRECTORY ${Eigen3_INCLUDE_DIR}/Eigen
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
+# Declare where to get Eigen from.
+FetchContent_Declare(Eigen SYSTEM ${ACTS_EIGEN3_SOURCE})
+FetchContent_MakeAvailable(Eigen)

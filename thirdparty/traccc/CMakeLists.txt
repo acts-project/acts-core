@@ -6,6 +6,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+cmake_minimum_required(VERSION 3.25)
+
 # CMake include(s).
 include(FetchContent)
 
@@ -15,7 +17,7 @@ message(STATUS "Building traccc as part of the Acts project")
 set(TRACCC_VERSION "${_acts_traccc_version}")
 
 # Declare where to get traccc from.
-FetchContent_Declare(traccc ${ACTS_TRACCC_SOURCE})
+FetchContent_Declare(traccc SYSTEM ${ACTS_TRACCC_SOURCE})
 
 set(ACTS_TRACCC_SCALARTYPE "double")
 
