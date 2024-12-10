@@ -27,7 +27,8 @@ class SinglyChargedParticleHypothesis
  public:
   constexpr SinglyChargedParticleHypothesis(PdgParticle absPdg, float mass)
       : GenericParticleHypothesis(absPdg, mass, {}) {}
-  SinglyChargedParticleHypothesis(PdgParticle absPdg)
+
+  explicit SinglyChargedParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -70,7 +71,7 @@ class NeutralParticleHypothesis : public GenericParticleHypothesis<Neutral> {
  public:
   constexpr NeutralParticleHypothesis(PdgParticle absPdg, float mass)
       : GenericParticleHypothesis(absPdg, mass, {}) {}
-  NeutralParticleHypothesis(PdgParticle absPdg)
+  explicit NeutralParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -102,7 +103,7 @@ class NonNeutralChargedParticleHypothesis
   constexpr NonNeutralChargedParticleHypothesis(PdgParticle absPdg, float mass,
                                                 NonNeutralCharge chargeType)
       : GenericParticleHypothesis(absPdg, mass, chargeType) {}
-  NonNeutralChargedParticleHypothesis(PdgParticle absPdg)
+  explicit NonNeutralChargedParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -148,7 +149,8 @@ class ParticleHypothesis : public GenericParticleHypothesis<AnyCharge> {
   constexpr ParticleHypothesis(PdgParticle absPdg, float mass,
                                AnyCharge chargeType)
       : GenericParticleHypothesis(absPdg, mass, chargeType) {}
-  ParticleHypothesis(PdgParticle absPdg) : GenericParticleHypothesis(absPdg) {}
+  explicit ParticleHypothesis(PdgParticle absPdg)
+      : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
   constexpr ParticleHypothesis(
