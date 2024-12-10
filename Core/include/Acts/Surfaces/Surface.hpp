@@ -82,7 +82,7 @@ class Surface : public virtual GeometryObject,
   ///
   /// @param transform Transform3 positions the surface in 3D global space
   /// @note also acts as default constructor
-  Surface(const Transform3& transform = Transform3::Identity());
+  explicit Surface(const Transform3& transform = Transform3::Identity());
 
   /// Copy constructor
   ///
@@ -90,12 +90,12 @@ class Surface : public virtual GeometryObject,
   /// to detector element and layer
   ///
   /// @param other Source surface for copy.
-  Surface(const Surface& other);
+  explicit Surface(const Surface& other);
 
   /// Constructor from DetectorElementBase: Element proxy
   ///
   /// @param detelement Detector element which is represented by this surface
-  Surface(const DetectorElementBase& detelement);
+  explicit Surface(const DetectorElementBase& detelement);
 
   /// Copy constructor with optional shift
   ///
