@@ -4,6 +4,7 @@ Checks: '-*, \
   cppcoreguidelines-init-variables, \
   cppcoreguidelines-pro-type-member-init, \
   google-readability-casting, \
+  google-explicit-constructor, \
   modernize-concat-nested-namespaces, \
   modernize-use-equals-default, \
   modernize-use-default-member-init, \
