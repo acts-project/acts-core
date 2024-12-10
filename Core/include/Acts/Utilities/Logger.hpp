@@ -446,8 +446,8 @@ class TimedOutputDecorator final : public OutputDecorator {
   ///
   /// @param [in] wrappee output print policy object to be wrapped
   /// @param [in] format  format of time stamp (see std::strftime)
-  TimedOutputDecorator(std::unique_ptr<OutputPrintPolicy> wrappee,
-                       const std::string& format = "%X")
+  explicit TimedOutputDecorator(std::unique_ptr<OutputPrintPolicy> wrappee,
+                                const std::string& format = "%X")
       : OutputDecorator(std::move(wrappee)), m_format(format) {}
 
   /// @brief flush the debug message to the destination stream
