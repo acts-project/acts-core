@@ -30,7 +30,7 @@ if(ACTS_BUILD_EXAMPLES_GEANT4)
     )
 else()
     target_sources(
-        ActsExamplesDetectorDD4hep
+        ActsExamplesDetectorGeoModel
         PUBLIC src/GeoModelDetectorGeant4Stub.cpp
     )
 endif()
