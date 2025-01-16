@@ -62,8 +62,8 @@ def test_steppers(conf_const, trk_geo):
 
         trkParamExtractor = acts.examples.ParticleTrackParamExtractor(
             level=acts.logging.WARNING,
-            inputParticles="particles_input",
-            outputTrackParameters="params_particles_input",
+            inputParticles="particles_generated",
+            outputTrackParameters="params_particles_generated",
         )
         seq.addAlgorithm(trkParamExtractor)
 
@@ -71,7 +71,7 @@ def test_steppers(conf_const, trk_geo):
             acts.examples.PropagationAlgorithm,
             level=acts.logging.WARNING,
             propagatorImpl=prop,
-            inputTrackParameters="params_particles_input",
+            inputTrackParameters="params_particles_generated",
             outputSummaryCollection="propagation_summary",
             sterileLogger=False,
         )

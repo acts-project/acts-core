@@ -2149,9 +2149,9 @@ def addVertexFitting(
         trackParameters = converter.config.outputTrackParameters
 
     tracks = tracks if tracks is not None else ""
-    inputParticles = "particles_input"
+    inputParticles = "particles"
     selectedParticles = "particles_selected"
-    inputTruthVertices = "vertices_input"
+    inputTruthVertices = "vertices_truth"
 
     if vertexFinder == VertexFinder.Truth:
         findVertices = TruthVertexFinder(
@@ -2245,7 +2245,7 @@ def addSingleSeedVertexFinding(
     )
     s.addAlgorithm(findSingleSeedVertex)
 
-    inputParticles = "particles_input"
+    inputParticles = "particles"
     selectedParticles = "particles_selected"
 
     if outputDirRoot is not None:

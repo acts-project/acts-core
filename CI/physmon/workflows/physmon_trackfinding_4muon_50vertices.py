@@ -11,9 +11,10 @@ from acts.examples.simulation import (
     EtaConfig,
     PhiConfig,
     ParticleConfig,
-    ParticleSelectorConfig,
     addFatras,
     addDigitization,
+    ParticleSelectorConfig,
+    addDigiParticleSelection,
 )
 from acts.examples.reconstruction import (
     addSeeding,
@@ -69,11 +70,6 @@ with tempfile.TemporaryDirectory() as temp:
         setup.trackingGeometry,
         setup.field,
         rnd=rnd,
-        postSelectParticles=ParticleSelectorConfig(
-            pt=(0.9 * u.GeV, None),
-            hits=(9, None),
-            removeNeutral=True,
-        ),
     )
 
     addDigitization(
@@ -82,6 +78,15 @@ with tempfile.TemporaryDirectory() as temp:
         setup.field,
         digiConfigFile=setup.digiConfig,
         rnd=rnd,
+    )
+
+    addDigiParticleSelection(
+        s,
+        ParticleSelectorConfig(
+            pt=(0.9 * u.GeV, None),
+            measurements=(9, None),
+            removeNeutral=True,
+        ),
     )
 
     addSeeding(

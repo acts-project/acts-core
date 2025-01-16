@@ -24,9 +24,10 @@ def runTruthTrackingGsf(
         EtaConfig,
         PhiConfig,
         MomentumConfig,
-        ParticleSelectorConfig,
         addFatras,
         addDigitization,
+        ParticleSelectorConfig,
+        addDigiParticleSelection,
     )
     from acts.examples.reconstruction import (
         addSeeding,
@@ -67,7 +68,7 @@ def runTruthTrackingGsf(
             acts.examples.RootParticleReader(
                 level=acts.logging.INFO,
                 filePath=str(inputParticlePath.resolve()),
-                outputParticles="particles_input",
+                outputParticles="particles_generated",
             )
         )
 
@@ -77,12 +78,6 @@ def runTruthTrackingGsf(
         field,
         rnd=rnd,
         enableInteractions=True,
-        postSelectParticles=ParticleSelectorConfig(
-            pt=(0.9 * u.GeV, None),
-            hits=(7, None),
-            removeNeutral=True,
-            removeSecondaries=True,
-        ),
     )
 
     addDigitization(
@@ -93,12 +88,22 @@ def runTruthTrackingGsf(
         rnd=rnd,
     )
 
+    addDigiParticleSelection(
+        s,
+        ParticleSelectorConfig(
+            pt=(0.9 * u.GeV, None),
+            measurements=(7, None),
+            removeNeutral=True,
+            removeSecondaries=True,
+        ),
+    )
+
     addSeeding(
         s,
         trackingGeometry,
         field,
         rnd=rnd,
-        inputParticles="particles_input",
+        inputParticles="particles_generated",
         seedingAlgorithm=SeedingAlgorithm.TruthSmeared,
         particleHypothesis=acts.ParticleHypothesis.electron,
     )

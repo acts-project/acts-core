@@ -57,9 +57,10 @@ def runSeeding(
         EtaConfig,
         PhiConfig,
         ParticleConfig,
-        ParticleSelectorConfig,
         addFatras,
         addDigitization,
+        ParticleSelectorConfig,
+        addDigiParticleSelection,
     )
 
     s = s or acts.examples.Sequencer(
@@ -86,13 +87,6 @@ def runSeeding(
         outputDirCsv=outputDir / "csv",
         outputDirRoot=outputDir,
         rnd=rnd,
-        preSelectParticles=None,
-        postSelectParticles=ParticleSelectorConfig(
-            pt=(1.0 * u.GeV, None),
-            eta=(-2.5, 2.5),
-            hits=(9, None),
-            removeNeutral=True,
-        ),
     )
 
     srcdir = Path(__file__).resolve().parent.parent.parent.parent
@@ -103,6 +97,16 @@ def runSeeding(
         digiConfigFile=srcdir
         / "Examples/Algorithms/Digitization/share/default-smearing-config-generic.json",
         rnd=rnd,
+    )
+
+    addDigiParticleSelection(
+        s,
+        ParticleSelectorConfig(
+            pt=(1.0 * u.GeV, None),
+            eta=(-2.5, 2.5),
+            measurements=(9, None),
+            removeNeutral=True,
+        ),
     )
 
     from acts.examples.reconstruction import (

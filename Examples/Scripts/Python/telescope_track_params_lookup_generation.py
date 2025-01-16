@@ -47,10 +47,9 @@ def estimateLookup(trackingGeometry, numEvents, outputPath):
         s,
         trackingGeometry,
         field,
-        inputParticles="particles_input",
+        inputParticles="particles_generated",
         outputSimHits="sim_hits",
         rnd=rnd,
-        preSelectParticles=None,
     )
 
     # Set up the track lookup grid writer
@@ -66,7 +65,7 @@ def estimateLookup(trackingGeometry, numEvents, outputPath):
         refLayers={refGeometryId: refSurface},
         bins=(1, 1000),
         inputHits="sim_hits",
-        inputParticles="particles_input",
+        inputParticles="particles_generated",
         trackLookupGridWriters=[jsonWriter],
     )
     trackEstAlg = acts.examples.TrackParamsLookupEstimation(

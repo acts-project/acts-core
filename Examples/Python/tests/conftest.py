@@ -211,8 +211,8 @@ def basic_prop_seq(rng):
 
         trkParamExtractor = acts.examples.ParticleTrackParamExtractor(
             level=acts.logging.WARNING,
-            inputParticles="particles_input",
-            outputTrackParameters="params_particles_input",
+            inputParticles="particles_generated",
+            outputTrackParameters="params_particles_generated",
         )
         s.addAlgorithm(trkParamExtractor)
 
@@ -225,7 +225,7 @@ def basic_prop_seq(rng):
             level=acts.logging.WARNING,
             propagatorImpl=prop,
             sterileLogger=False,
-            inputTrackParameters="params_particles_input",
+            inputTrackParameters="params_particles_generated",
             outputSummaryCollection="propagation_summary",
         )
         s.addAlgorithm(alg)
@@ -325,7 +325,7 @@ def ptcl_gun(rng):
                     ),
                 )
             ],
-            outputParticles="particles_input",
+            outputParticles="particles_generated",
             outputVertices="vertices_input",
             randomNumbers=rng,
         )

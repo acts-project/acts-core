@@ -8,18 +8,19 @@ import math
 import acts
 import acts.examples
 from acts.examples.simulation import (
-    addParticleGun,
     MomentumConfig,
     EtaConfig,
     PhiConfig,
     ParticleConfig,
     ParticleSelectorConfig,
+    addParticleGun,
     addPythia8,
+    addGenParticleSelection,
     addFatras,
     addGeant4,
-    ParticleSelectorConfig,
+    addSimParticleSelection,
     addDigitization,
-    addParticleSelection,
+    addDigiParticleSelection,
 )
 from acts.examples.reconstruction import (
     addSeeding,
@@ -194,7 +195,7 @@ if args.edm4hep:
             "LongStripBarrelReadout",
             "LongStripEndcapReadout",
         ],
-        outputParticlesGenerator="particles_input",
+        outputParticlesGenerator="particles_generated",
         outputParticlesSimulation="particles_simulated",
         outputSimHits="simhits",
         graphvizOutput="graphviz",
@@ -204,19 +205,18 @@ if args.edm4hep:
         level=acts.logging.INFO,
     )
     s.addReader(edm4hepReader)
+
     s.addWhiteboardAlias("particles", edm4hepReader.config.outputParticlesGenerator)
 
-    addParticleSelection(
+    addSimParticleSelection(
         s,
-        config=ParticleSelectorConfig(
+        ParticleSelectorConfig(
             rho=(0.0, 24 * u.mm),
             absZ=(0.0, 1.0 * u.m),
             eta=(-3.0, 3.0),
             pt=(150 * u.MeV, None),
             removeNeutral=True,
         ),
-        inputParticles="particles",
-        outputParticles="particles_selected",
     )
 else:
     if not args.ttbar:
@@ -257,6 +257,16 @@ else:
             outputDirCsv=outputDir if args.output_csv else None,
         )
 
+        addGenParticleSelection(
+            s,
+            ParticleSelectorConfig(
+                rho=(0.0, 24 * u.mm),
+                absZ=(0.0, 1.0 * u.m),
+                eta=(-3.0, 3.0),
+                pt=(150 * u.MeV, None),
+            ),
+        )
+
     if args.geant4:
         if s.config.numThreads != 1:
             raise ValueError("Geant 4 simulation does not support multi-threading")
@@ -269,18 +279,6 @@ else:
             detector,
             trackingGeometry,
             field,
-            preSelectParticles=ParticleSelectorConfig(
-                rho=(0.0, 24 * u.mm),
-                absZ=(0.0, 1.0 * u.m),
-                eta=(-3.0, 3.0),
-                pt=(150 * u.MeV, None),
-            ),
-            postSelectParticles=ParticleSelectorConfig(
-                pt=(1.0 * u.GeV, None),
-                eta=(-3.0, 3.0),
-                hits=(9, None),
-                removeNeutral=True,
-            ),
             outputDirRoot=outputDir if args.output_root else None,
             outputDirCsv=outputDir if args.output_csv else None,
             outputDirObj=outputDir if args.output_obj else None,
@@ -293,22 +291,6 @@ else:
             s,
             trackingGeometry,
             field,
-            preSelectParticles=(
-                ParticleSelectorConfig(
-                    rho=(0.0, 24 * u.mm),
-                    absZ=(0.0, 1.0 * u.m),
-                    eta=(-3.0, 3.0),
-                    pt=(150 * u.MeV, None),
-                )
-                if args.ttbar
-                else ParticleSelectorConfig()
-            ),
-            postSelectParticles=ParticleSelectorConfig(
-                pt=(1.0 * u.GeV, None),
-                eta=(-3.0, 3.0),
-                hits=(9, None),
-                removeNeutral=True,
-            ),
             enableInteractions=True,
             outputDirRoot=outputDir if args.output_root else None,
             outputDirCsv=outputDir if args.output_csv else None,
@@ -324,6 +306,16 @@ addDigitization(
     outputDirRoot=outputDir if args.output_root else None,
     outputDirCsv=outputDir if args.output_csv else None,
     rnd=rnd,
+)
+
+addDigiParticleSelection(
+    s,
+    ParticleSelectorConfig(
+        pt=(1.0 * u.GeV, None),
+        eta=(-3.0, 3.0),
+        measurements=(9, None),
+        removeNeutral=True,
+    ),
 )
 
 if args.reco:

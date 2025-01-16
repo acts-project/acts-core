@@ -177,7 +177,7 @@ class Sequencer {
   std::vector<SequenceElementWithFpeResult> m_sequenceElements;
   std::unique_ptr<const Acts::Logger> m_logger;
 
-  std::unordered_map<std::string, std::string> m_whiteboardObjectAliases;
+  std::unordered_multimap<std::string, std::string> m_whiteboardObjectAliases;
 
   std::unordered_map<std::string, const DataHandleBase *> m_whiteBoardState;
 

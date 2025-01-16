@@ -8,7 +8,6 @@ import acts
 from acts.examples.simulation import (
     addFatras,
     addGeant4,
-    ParticleSelectorConfig,
     addPythia8,
 )
 
@@ -58,7 +57,7 @@ with tempfile.TemporaryDirectory() as temp:
                     acts.PdgParticle.eElectron,
                 ]
             ],
-            outputParticles="particles_input",
+            outputParticles="particles_generated",
             outputVertices="vertices_input",
             randomNumbers=rnd,
         )
@@ -67,7 +66,7 @@ with tempfile.TemporaryDirectory() as temp:
     s.addWriter(
         acts.examples.RootParticleWriter(
             level=acts.logging.INFO,
-            inputParticles="particles_input",
+            inputParticles="particles_generated",
             filePath=tp / "particles.root",
         )
     )
@@ -78,9 +77,7 @@ with tempfile.TemporaryDirectory() as temp:
         setup.field,
         rnd,
         enableInteractions=True,
-        preSelectParticles=None,
-        postSelectParticles=ParticleSelectorConfig(removeSecondaries=True),
-        inputParticles="particles_input",
+        inputParticles="particles_generated",
         outputParticles="particles_fatras",
         outputSimHits="simhits_fatras",
         outputDirRoot=tp / "fatras",
@@ -92,12 +89,10 @@ with tempfile.TemporaryDirectory() as temp:
         setup.trackingGeometry,
         setup.field,
         rnd,
-        preSelectParticles=None,
-        postSelectParticles=ParticleSelectorConfig(removeSecondaries=True),
         killVolume=setup.trackingGeometry.highestTrackingVolume,
         killAfterTime=25 * u.ns,
         killSecondaries=True,
-        inputParticles="particles_input",
+        inputParticles="particles_generated",
         outputParticles="particles_geant4",
         outputSimHits="simhits_geant4",
         outputDirRoot=tp / "geant4",

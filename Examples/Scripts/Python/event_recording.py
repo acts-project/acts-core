@@ -41,7 +41,7 @@ def runEventRecording(detector, outputDir, s=None):
                 ),
             )
         ],
-        outputParticles="particles_input",
+        outputParticles="particles_generated",
         outputVertices="vertices_input",
         randomNumbers=rnd,
     )

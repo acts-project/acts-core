@@ -7,9 +7,11 @@ import acts
 import acts.examples
 from acts.examples.simulation import (
     addPythia8,
-    addFatras,
     ParticleSelectorConfig,
+    addGenParticleSelection,
+    addFatras,
     addDigitization,
+    addDigiParticleSelection,
 )
 
 from acts.examples.reconstruction import (
@@ -204,20 +206,18 @@ def runHashingSeeding(
         rnd=rnd,
     )
 
+    addGenParticleSelection(
+        s,
+        ParticleSelectorConfig(
+            rho=(0.0, 24 * u.mm),
+            absZ=(0.0, 1.0 * u.m),
+        ),
+    )
+
     addFatras(
         s,
         trackingGeometry,
         field,
-        preSelectParticles=ParticleSelectorConfig(
-            rho=(0.0, 24 * u.mm),
-            absZ=(0.0, 1.0 * u.m),
-        ),
-        postSelectParticles=ParticleSelectorConfig(
-            pt=(1.0 * u.GeV, None),
-            eta=(-eta, eta),
-            hits=(9, None),
-            removeNeutral=True,
-        ),
         enableInteractions=True,
         # outputDirRoot=outputDir,  # RootParticle ERROR when setting the outputDirRoot
         outputDirCsv=outputDir if saveFiles else None,
@@ -232,6 +232,16 @@ def runHashingSeeding(
         outputDirRoot=outputDir,
         outputDirCsv=outputDir if saveFiles else None,
         rnd=rnd,
+    )
+
+    addDigiParticleSelection(
+        s,
+        ParticleSelectorConfig(
+            pt=(1.0 * u.GeV, None),
+            eta=(-eta, eta),
+            measurements=(9, None),
+            removeNeutral=True,
+        ),
     )
 
     import numpy as np

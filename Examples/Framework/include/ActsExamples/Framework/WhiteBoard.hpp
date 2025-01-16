@@ -18,7 +18,6 @@
 #include <stdexcept>
 #include <string>
 #include <string_view>
-#include <type_traits>
 #include <typeinfo>
 #include <unordered_map>
 #include <utility>
@@ -34,9 +33,10 @@ namespace ActsExamples {
 /// Its lifetime is bound to the lifetime of the white board.
 class WhiteBoard {
  public:
-  WhiteBoard(std::unique_ptr<const Acts::Logger> logger =
-                 Acts::getDefaultLogger("WhiteBoard", Acts::Logging::INFO),
-             std::unordered_map<std::string, std::string> objectAliases = {});
+  WhiteBoard(
+      std::unique_ptr<const Acts::Logger> logger =
+          Acts::getDefaultLogger("WhiteBoard", Acts::Logging::INFO),
+      std::unordered_multimap<std::string, std::string> objectAliases = {});
 
   // A WhiteBoard holds unique elements and can not be copied
   WhiteBoard(const WhiteBoard& other) = delete;
@@ -82,7 +82,7 @@ class WhiteBoard {
 
   std::unique_ptr<const Acts::Logger> m_logger;
   std::unordered_map<std::string, std::shared_ptr<IHolder>> m_store;
-  std::unordered_map<std::string, std::string> m_objectAliases;
+  std::unordered_multimap<std::string, std::string> m_objectAliases;
 
   const Acts::Logger& logger() const { return *m_logger; }
 
@@ -100,7 +100,7 @@ class WhiteBoard {
 
 inline ActsExamples::WhiteBoard::WhiteBoard(
     std::unique_ptr<const Acts::Logger> logger,
-    std::unordered_map<std::string, std::string> objectAliases)
+    std::unordered_multimap<std::string, std::string> objectAliases)
     : m_logger(std::move(logger)), m_objectAliases(std::move(objectAliases)) {}
 
 template <typename T>
@@ -111,10 +111,14 @@ inline void ActsExamples::WhiteBoard::add(const std::string& name, T&& object) {
   if (m_store.contains(name)) {
     throw std::invalid_argument("Object '" + name + "' already exists");
   }
+
   auto holder = std::make_shared<HolderT<T>>(std::forward<T>(object));
   m_store.emplace(name, holder);
   ACTS_VERBOSE("Added object '" << name << "' of type " << typeid(T).name());
-  if (auto it = m_objectAliases.find(name); it != m_objectAliases.end()) {
+
+  // deal with aliases
+  auto range = m_objectAliases.equal_range(name);
+  for (auto it = range.first; it != range.second; ++it) {
     m_store[it->second] = holder;
     ACTS_VERBOSE("Added alias object '" << it->second << "'");
   }

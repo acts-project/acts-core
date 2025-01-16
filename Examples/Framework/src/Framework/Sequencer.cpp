@@ -9,7 +9,6 @@
 #include "ActsExamples/Framework/Sequencer.hpp"
 
 #include "Acts/Plugins/FpeMonitoring/FpeMonitor.hpp"
-#include "Acts/Utilities/Helpers.hpp"
 #include "Acts/Utilities/Logger.hpp"
 #include "ActsExamples/Framework/AlgorithmContext.hpp"
 #include "ActsExamples/Framework/DataHandle.hpp"
@@ -26,9 +25,7 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
-#include <cstdint>
 #include <cstdlib>
-#include <exception>
 #include <fstream>
 #include <functional>
 #include <iterator>
@@ -256,20 +253,26 @@ void Sequencer::addElement(const std::shared_ptr<SequenceElement>& element) {
 
 void Sequencer::addWhiteboardAlias(const std::string& aliasName,
                                    const std::string& objectName) {
-  auto [it, success] =
-      m_whiteboardObjectAliases.insert({objectName, aliasName});
-  if (!success) {
-    ACTS_INFO("Key '" << objectName << "' aliased to '" << aliasName
-                      << "' already set");
+  const auto range = m_whiteboardObjectAliases.equal_range(objectName);
+  for (auto it = range.first; it != range.second; ++it) {
+    const auto& [key, value] = *it;
+    if (value == aliasName) {
+      ACTS_INFO("Key '" << objectName << "' aliased to '" << aliasName
+                        << "' already set");
+      return;
+    }
+  }
+
+  m_whiteboardObjectAliases.insert({objectName, aliasName});
+
+  auto oit = m_whiteBoardState.find(objectName);
+  if (oit == m_whiteBoardState.end()) {
+    ACTS_ERROR("Key '" << objectName << "' does not exist");
     return;
   }
 
   ACTS_INFO("Key '" << objectName << "' aliased to '" << aliasName << "'");
-
-  if (auto oit = m_whiteBoardState.find(objectName);
-      oit != m_whiteBoardState.end()) {
-    m_whiteBoardState[aliasName] = oit->second;
-  }
+  m_whiteBoardState[aliasName] = oit->second;
 }
 
 std::vector<std::string> Sequencer::listAlgorithmNames() const {

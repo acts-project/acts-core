@@ -33,7 +33,7 @@ def runVertexFitting(
 
     rnd = acts.examples.RandomNumbers(seed=42)
 
-    inputParticles = "particles_input"
+    inputParticles = "particles_generated"
     if inputParticlePath is None:
         logger.info("Generating particles using Pythia8")
         addPythia8(s, rnd)
@@ -68,13 +68,13 @@ def runVertexFitting(
         trkParamExtractor = acts.examples.ParticleTrackParamExtractor(
             level=acts.logging.WARNING,
             inputParticles=selectedParticles,
-            outputTrackParameters="params_particles_input",
+            outputTrackParameters="params_particles_generated",
         )
         s.addAlgorithm(trkParamExtractor)
 
         ptclSmearing = TrackParameterSmearing(
             level=acts.logging.INFO,
-            inputTrackParameters="params_particles_input",
+            inputTrackParameters="params_particles_generated",
             outputTrackParameters=trackParameters,
             randomNumbers=rnd,
         )

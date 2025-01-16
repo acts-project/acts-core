@@ -49,9 +49,13 @@ def runDigitization(
         evGen = acts.examples.RootParticleReader(
             level=s.config.logLevel,
             filePath=str(particlesInput),
-            outputParticles="particles_input",
+            outputParticles="particles_generated",
         )
         s.addReader(evGen)
+
+        s.addWhiteboardAlias(
+            "particles_generated_selected", evGen.config.outputParticles
+        )
 
     outputDir = Path(outputDir)
     addFatras(
