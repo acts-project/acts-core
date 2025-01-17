@@ -258,7 +258,8 @@ auto Acts::Propagator<S, N>::makeState(
       actor_list_t_state_t<OptionsType,
                            typename propagator_options_t::actor_list_type>;
   // Initialize the internal propagator state
-  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
+  StateType state{eOptions,
+                  m_stepper.makeState(eOptions.stepping, start.toBound()),
                   m_navigator.makeState(eOptions.navigation)};
 
   static_assert(
