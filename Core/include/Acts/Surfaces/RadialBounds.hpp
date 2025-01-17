@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "Acts/Surfaces/DiscBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 
@@ -56,21 +55,30 @@ class RadialBounds : public DiscBounds {
     checkConsistency();
   }
 
-  BoundsType type() const final { return SurfaceBounds::eDisc; }
+  /// @copydoc SurfaceBounds::type
+  BoundsType type() const final { return eDisc; }
+
+  /// @copydoc SurfaceBounds::isCartesian
+  bool isCartesian() const final { return false; }
+
+  /// @copydoc SurfaceBounds::boundToCartesianJacobian
+  SquareMatrix2 boundToCartesianJacobian(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::boundToCartesianMetric
+  SquareMatrix2 boundToCartesianMetric(const Vector2& lposition) const final;
 
   /// Return the bound values as dynamically sized vector
-  ///
   /// @return this returns a copy of the internal values
   std::vector<double> values() const final;
 
-  /// For disc surfaces the local position in (r,phi) is checked
-  ///
-  /// @param lposition local position to be checked
-  /// @param boundaryTolerance boundary check directive
-  ///
-  /// @return is a boolean indicating the operation success
-  bool inside(const Vector2& lposition,
-              const BoundaryTolerance& boundaryTolerance) const final;
+  /// @copydoc SurfaceBounds::inside
+  bool inside(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::closestPoint
+  Vector2 closestPoint(const Vector2& lposition,
+                       const std::optional<SquareMatrix2>& metric) const final;
+
+  using SurfaceBounds::inside;
 
   /// Outstream operator
   ///

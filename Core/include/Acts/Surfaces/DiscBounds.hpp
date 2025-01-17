@@ -18,7 +18,7 @@ namespace Acts {
 ///
 /// common base class for all bounds that are in a r/phi frame
 ///  - simply introduced to avoid wrong bound assignments to surfaces
-
+///
 class DiscBounds : public SurfaceBounds {
  public:
   /// Return method for inner Radius

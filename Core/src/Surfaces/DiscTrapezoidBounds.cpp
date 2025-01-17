@@ -9,8 +9,7 @@
 #include "Acts/Surfaces/DiscTrapezoidBounds.hpp"
 
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
+#include "Acts/Surfaces/detail/VerticesHelper.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
 #include <cmath>
@@ -52,26 +51,45 @@ Vector2 DiscTrapezoidBounds::toLocalCartesian(const Vector2& lposition) const {
           lposition[0] * std::cos(lposition[1] - get(eAveragePhi))};
 }
 
-SquareMatrix2 DiscTrapezoidBounds::jacobianToLocalCartesian(
+SquareMatrix2 DiscTrapezoidBounds::boundToCartesianJacobian(
     const Vector2& lposition) const {
-  SquareMatrix2 jacobian;
-  jacobian(0, 0) = std::sin(lposition[1] - get(eAveragePhi));
-  jacobian(1, 0) = std::cos(lposition[1] - get(eAveragePhi));
-  jacobian(0, 1) = lposition[0] * std::cos(lposition[1]);
-  jacobian(1, 1) = lposition[0] * -std::sin(lposition[1]);
-  return jacobian;
+  SquareMatrix2 j;
+  j(0, 0) = std::cos(lposition[1]);
+  j(0, 1) = -lposition[0] * std::sin(lposition[1]);
+  j(1, 0) = std::sin(lposition[1]);
+  j(1, 1) = lposition[0] * std::cos(lposition[1]);
+  return j;
 }
 
-bool DiscTrapezoidBounds::inside(
-    const Vector2& lposition,
-    const BoundaryTolerance& boundaryTolerance) const {
+SquareMatrix2 DiscTrapezoidBounds::boundToCartesianMetric(
+    const Vector2& lposition) const {
+  SquareMatrix2 m;
+  m(0, 0) = 1;
+  m(0, 1) = 0;
+  m(1, 0) = 0;
+  m(1, 1) = lposition[0] * lposition[0];
+  return m;
+}
+
+bool DiscTrapezoidBounds::inside(const Vector2& lposition) const {
   Vector2 vertices[] = {{get(eHalfLengthXminR), get(eMinR)},
                         {get(eHalfLengthXmaxR), m_ymax},
                         {-get(eHalfLengthXmaxR), m_ymax},
                         {-get(eHalfLengthXminR), get(eMinR)}};
-  auto jacobian = jacobianToLocalCartesian(lposition);
-  return detail::insidePolygon(vertices, boundaryTolerance,
-                               toLocalCartesian(lposition), jacobian);
+  return detail::VerticesHelper::isInsidePolygon(toLocalCartesian(lposition),
+                                                 vertices);
+}
+
+Vector2 DiscTrapezoidBounds::closestPoint(
+    const Vector2& lposition,
+    const std::optional<SquareMatrix2>& metric) const {
+  Vector2 vertices[] = {{get(eHalfLengthXminR), get(eMinR)},
+                        {get(eHalfLengthXmaxR), m_ymax},
+                        {-get(eHalfLengthXmaxR), m_ymax},
+                        {-get(eHalfLengthXminR), get(eMinR)}};
+  return detail::VerticesHelper::computeClosestPointOnPolygon(
+      toLocalCartesian(lposition), vertices,
+      metric.value_or(SquareMatrix2::Identity()));
 }
 
 std::vector<Vector2> DiscTrapezoidBounds::vertices(

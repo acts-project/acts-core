@@ -7,16 +7,12 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Definitions/Units.hpp"
 #include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
+#include "Acts/Surfaces/ConvexPolygonBounds.hpp"
 #include "Acts/Tests/CommonHelpers/BenchmarkTools.hpp"
 
 #include <algorithm>
-#include <chrono>
-#include <functional>
 #include <iostream>
-#include <optional>
 #include <random>
 #include <vector>
 
@@ -26,7 +22,8 @@ int main(int /*argc*/, char** /*argv[]*/) {
   // === PROBLEM DATA ===
 
   // Trapezoidal area of interest
-  const Vector2 poly[] = {{0.4, 0.25}, {0.6, 0.25}, {0.8, 0.75}, {0.2, 0.75}};
+  ConvexPolygonBounds<PolygonDynamic> poly(
+      {{0.4, 0.25}, {0.6, 0.25}, {0.8, 0.75}, {0.2, 0.75}});
 
   // Covariance matrix which specifies "soft" boundary check tolerance
   SquareMatrix2 cov;
@@ -107,35 +104,21 @@ int main(int /*argc*/, char** /*argv[]*/) {
       default:  // do nothing
         break;
     };
-    run_bench(
-        [&] {
-          return detail::insidePolygon(poly, check, center, std::nullopt);
-        },
-        num_inside_points, "Center");
-    run_bench(
-        [&] {
-          return detail::insidePolygon(poly, check, edge_inside, std::nullopt);
-        },
-        num_inside_points, "Inside edge");
-    run_bench(
-        [&] {
-          return detail::insidePolygon(poly, check, edge_outside, std::nullopt);
-        },
-        num_outside_points, "Outside edge");
-    run_bench(
-        [&] {
-          return detail::insidePolygon(poly, check, far_away, std::nullopt);
-        },
-        num_outside_points, "Far away");
+    run_bench([&] { return poly.inside(center, check); }, num_inside_points,
+              "Center");
+    run_bench([&] { return poly.inside(edge_inside, check); },
+              num_inside_points, "Inside edge");
+    run_bench([&] { return poly.inside(edge_outside, check); },
+              num_outside_points, "Outside edge");
+    run_bench([&] { return poly.inside(far_away, check); }, num_outside_points,
+              "Far away");
 
     // Pre-rolled random points
     std::vector<Vector2> points(num_outside_points);
     std::generate(points.begin(), points.end(), random_point);
     run_bench_with_inputs(
-        [&](const auto& point) {
-          return detail::insidePolygon(poly, check, point, std::nullopt);
-        },
-        points, "Random");
+        [&](const auto& point) { return poly.inside(point, check); }, points,
+        "Random");
   };
 
   // Benchmark scenarios

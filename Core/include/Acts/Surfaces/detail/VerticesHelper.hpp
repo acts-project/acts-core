@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+#include <optional>
 #include <span>
 #include <utility>
 #include <vector>
@@ -295,6 +296,31 @@ inline Vector2 computeEuclideanClosestPointOnRectangle(
       // third case not necessary, see INSIDE above
     }
   }
+}
+
+inline Vector2 computeClosestPointOnAlignedBox(
+    const Vector2& lowerLeft, const Vector2& upperRight, const Vector2& point,
+    const std::optional<SquareMatrix2>& metricOpt) {
+  Vector2 closestPoint;
+
+  if (!metricOpt.has_value()) {
+    closestPoint =
+        detail::VerticesHelper::computeEuclideanClosestPointOnRectangle(
+            point, lowerLeft, upperRight);
+  } else {
+    // TODO there might be a more optimal way to compute the closest point to a
+    // box with metric
+
+    std::array<Vector2, 4> vertices = {{lowerLeft,
+                                        {upperRight[0], lowerLeft[1]},
+                                        upperRight,
+                                        {lowerLeft[0], upperRight[1]}}};
+
+    closestPoint = detail::VerticesHelper::computeClosestPointOnPolygon(
+        point, vertices, *metricOpt);
+  }
+
+  return closestPoint;
 }
 
 }  // namespace Acts::detail::VerticesHelper

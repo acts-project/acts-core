@@ -10,7 +10,6 @@
 
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Tolerance.hpp"
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "Acts/Surfaces/DiscBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 
@@ -66,27 +65,31 @@ class AnnulusBounds : public DiscBounds {
   /// @param values The parameter array
   AnnulusBounds(const std::array<double, eSize>& values) noexcept(false);
 
-  AnnulusBounds(const AnnulusBounds& source) = default;
+  BoundsType type() const final { return eAnnulus; }
 
-  BoundsType type() const final { return SurfaceBounds::eAnnulus; }
+  /// @copydoc SurfaceBounds::isCartesian
+  bool isCartesian() const final { return false; }
+
+  /// @copydoc SurfaceBounds::boundToCartesianJacobian
+  SquareMatrix2 boundToCartesianJacobian(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::boundToCartesianMetric
+  SquareMatrix2 boundToCartesianMetric(const Vector2& lposition) const final;
 
   /// Return the bound values as dynamically sized vector
-  ///
   /// @return this returns a copy of the internal values
   std::vector<double> values() const final;
 
-  /// Inside check for the bounds object driven by the boundary check directive
-  /// Each Bounds has a method inside, which checks if a LocalPosition is inside
-  /// the bounds  Inside can be called without/with tolerances.
-  ///
-  /// @param lposition Local position (assumed to be in right surface frame)
-  /// @param boundaryTolerance boundary check directive
-  /// @return boolean indicator for the success of this operation
-  bool inside(const Vector2& lposition,
-              const BoundaryTolerance& boundaryTolerance) const final;
+  /// @copydoc SurfaceBounds::inside
+  bool inside(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::closestPoint
+  Vector2 closestPoint(const Vector2& lposition,
+                       const std::optional<SquareMatrix2>& metric) const final;
+
+  using SurfaceBounds::inside;
 
   /// Outstream operator
-  ///
   /// @param sl is the ostream to be dumped into
   std::ostream& toStream(std::ostream& sl) const final;
 
@@ -184,23 +187,19 @@ class AnnulusBounds : public DiscBounds {
   /// if consistency is not given
   void checkConsistency() noexcept(false);
 
-  /// Inside check for the bounds object driven by the boundary check directive
-  /// Each Bounds has a method inside, which checks if a LocalPosition is inside
-  /// the bounds  Inside can be called without/with tolerances.
-  ///
-  /// @param lposition Local position (assumed to be in right surface frame)
-  /// @param tolR tolerance on the radius
-  /// @param tolPhi tolerance on the polar angle phi
-  /// @return boolean indicator for the success of this operation
-  virtual bool inside(const Vector2& lposition, double tolR,
-                      double tolPhi) const final;
-
   /// Transform the strip cartesian
   /// into the module polar system
   ///
   /// @param vStripXY the position in the cartesian strip system
   /// @return the position in the module polar coordinate system
   Vector2 stripXYToModulePC(const Vector2& vStripXY) const;
+
+  Vector2 stripPCToModulePC(const Vector2& vStripPC) const;
+
+  Vector2 modulePCToStripPC(const Vector2& vModulePC) const;
+
+  SquareMatrix2 stripPCToModulePCJacobian(
+      const Vector2& lpositionRotated) const;
 };
 
 }  // namespace Acts

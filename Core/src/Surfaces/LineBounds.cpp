@@ -8,8 +8,7 @@
 
 #include "Acts/Surfaces/LineBounds.hpp"
 
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
+#include "Acts/Surfaces/detail/VerticesHelper.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -29,13 +28,20 @@ void LineBounds::checkConsistency() noexcept(false) {
   }
 }
 
-bool LineBounds::inside(const Vector2& lposition,
-                        const BoundaryTolerance& boundaryTolerance) const {
+bool LineBounds::inside(const Vector2& lposition) const {
   double r = get(LineBounds::eR);
   double halfLengthZ = get(LineBounds::eHalfLengthZ);
-  return detail::insideAlignedBox(Vector2(-r, -halfLengthZ),
-                                  Vector2(r, halfLengthZ), boundaryTolerance,
-                                  lposition, std::nullopt);
+  return detail::VerticesHelper::isInsideRectangle(
+      lposition, Vector2(-r, -halfLengthZ), Vector2(r, halfLengthZ));
+}
+
+Vector2 LineBounds::closestPoint(
+    const Vector2& lposition,
+    const std::optional<SquareMatrix2>& metric) const {
+  double r = get(LineBounds::eR);
+  double halfLengthZ = get(LineBounds::eHalfLengthZ);
+  return detail::VerticesHelper::computeClosestPointOnAlignedBox(
+      Vector2(-r, -halfLengthZ), Vector2(r, halfLengthZ), lposition, metric);
 }
 
 std::ostream& LineBounds::toStream(std::ostream& sl) const {

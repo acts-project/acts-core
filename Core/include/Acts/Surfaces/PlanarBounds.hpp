@@ -36,8 +36,22 @@ class PlanarBounds : public SurfaceBounds {
   virtual std::vector<Vector2> vertices(
       unsigned int quarterSegments = 2u) const = 0;
 
+  /// @copydoc SurfaceBounds::isCartesian
+  bool isCartesian() const final { return true; }
+
+  /// @copydoc SurfaceBounds::boundToCartesianJacobian
+  SquareMatrix2 boundToCartesianJacobian(const Vector2& lposition) const final {
+    (void)lposition;
+    return SquareMatrix2::Identity();
+  }
+
+  /// @copydoc SurfaceBounds::boundToCartesianMetric
+  SquareMatrix2 boundToCartesianMetric(const Vector2& lposition) const final {
+    (void)lposition;
+    return SquareMatrix2::Identity();
+  }
+
   /// Bounding box parameters
-  ///
   /// @return rectangle bounds for a bounding box
   virtual const RectangleBounds& boundingBox() const = 0;
 };

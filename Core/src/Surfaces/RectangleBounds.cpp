@@ -8,7 +8,8 @@
 
 #include "Acts/Surfaces/RectangleBounds.hpp"
 
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
+#include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Surfaces/detail/VerticesHelper.hpp"
 
 #include <iomanip>
 #include <iostream>
@@ -32,6 +33,10 @@ double RectangleBounds::get(BoundValues bValue) const {
   }
 }
 
+std::vector<double> RectangleBounds::values() const {
+  return {m_min.x(), m_min.y(), m_max.x(), m_max.y()};
+}
+
 void RectangleBounds::checkConsistency() noexcept(false) {
   if (get(eMinX) > get(eMaxX)) {
     throw std::invalid_argument("RectangleBounds: invalid local x setup");
@@ -41,10 +46,24 @@ void RectangleBounds::checkConsistency() noexcept(false) {
   }
 }
 
-bool RectangleBounds::inside(const Vector2& lposition,
-                             const BoundaryTolerance& boundaryTolerance) const {
-  return detail::insideAlignedBox(m_min, m_max, boundaryTolerance, lposition,
-                                  std::nullopt);
+bool RectangleBounds::inside(const Vector2& lposition) const {
+  return detail::VerticesHelper::isInsideRectangle(lposition, m_min, m_max);
+}
+
+Vector2 RectangleBounds::closestPoint(
+    const Vector2& lposition,
+    const std::optional<SquareMatrix2>& metric) const {
+  // If no metric is provided we can use a shortcut for the rectangle
+  if (!metric.has_value()) {
+    return detail::VerticesHelper::computeEuclideanClosestPointOnRectangle(
+        lposition, m_min, m_max);
+  }
+
+  // Otherwise we need to compute the closest point on the polygon
+  std::array<Vector2, 4> vertices = {
+      {m_min, {m_max[0], m_min[1]}, m_max, {m_min[0], m_max[1]}}};
+  return detail::VerticesHelper::computeClosestPointOnPolygon(
+      lposition, vertices, metric.value_or(SquareMatrix2::Identity()));
 }
 
 std::vector<Vector2> RectangleBounds::vertices(unsigned int /*lseg*/) const {

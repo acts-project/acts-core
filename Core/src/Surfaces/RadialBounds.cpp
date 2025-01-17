@@ -8,8 +8,6 @@
 
 #include "Acts/Surfaces/RadialBounds.hpp"
 
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
 #include "Acts/Surfaces/detail/VerticesHelper.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
@@ -35,6 +33,26 @@ void RadialBounds::checkConsistency() noexcept(false) {
   }
 }
 
+SquareMatrix2 RadialBounds::boundToCartesianJacobian(
+    const Vector2& lposition) const {
+  SquareMatrix2 j;
+  j(0, 0) = std::cos(lposition[1]);
+  j(0, 1) = -lposition[0] * std::sin(lposition[1]);
+  j(1, 0) = std::sin(lposition[1]);
+  j(1, 1) = lposition[0] * std::cos(lposition[1]);
+  return j;
+}
+
+SquareMatrix2 RadialBounds::boundToCartesianMetric(
+    const Vector2& lposition) const {
+  SquareMatrix2 m;
+  m(0, 0) = 1;
+  m(0, 1) = 0;
+  m(1, 0) = 0;
+  m(1, 1) = lposition[0] * lposition[0];
+  return m;
+}
+
 Vector2 RadialBounds::shifted(const Vector2& lposition) const {
   Vector2 tmp;
   tmp[0] = lposition[0];
@@ -42,12 +60,18 @@ Vector2 RadialBounds::shifted(const Vector2& lposition) const {
   return tmp;
 }
 
-bool RadialBounds::inside(const Vector2& lposition,
-                          const BoundaryTolerance& boundaryTolerance) const {
-  return detail::insideAlignedBox(Vector2(get(eMinR), -get(eHalfPhiSector)),
-                                  Vector2(get(eMaxR), get(eHalfPhiSector)),
-                                  boundaryTolerance, shifted(lposition),
-                                  std::nullopt);
+bool RadialBounds::inside(const Vector2& lposition) const {
+  return detail::VerticesHelper::isInsideRectangle(
+      shifted(lposition), Vector2(get(eMinR), -get(eHalfPhiSector)),
+      Vector2(get(eMaxR), get(eHalfPhiSector)));
+}
+
+Vector2 RadialBounds::closestPoint(
+    const Vector2& lposition,
+    const std::optional<SquareMatrix2>& metric) const {
+  return detail::VerticesHelper::computeClosestPointOnAlignedBox(
+      Vector2(get(eMinR), -get(eHalfPhiSector)),
+      Vector2(get(eMaxR), get(eHalfPhiSector)), shifted(lposition), metric);
 }
 
 std::vector<Vector2> RadialBounds::vertices(unsigned int lseg) const {

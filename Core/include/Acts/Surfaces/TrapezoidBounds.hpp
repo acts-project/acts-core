@@ -9,7 +9,6 @@
 #pragma once
 
 #include "Acts/Definitions/Algebra.hpp"
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
 #include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
@@ -51,10 +50,14 @@ class TrapezoidBounds : public PlanarBounds {
   /// @param values the values to be stream in
   TrapezoidBounds(const std::array<double, eSize>& values) noexcept(false);
 
-  BoundsType type() const final { return SurfaceBounds::eTrapezoid; }
+  /// @copydoc SurfaceBounds::type
+  BoundsType type() const final { return eTrapezoid; }
 
+  /// @copydoc SurfaceBounds::values
   std::vector<double> values() const final;
 
+  /// @copydoc SurfaceBounds::inside
+  ///
   /// The orientation of the Trapezoid is according to the figure above,
   /// in words: the shorter of the two parallel sides of the trapezoid
   /// intersects
@@ -91,13 +94,13 @@ class TrapezoidBounds : public PlanarBounds {
   /// <br>
   /// and   @f$  \delta_{I} = \delta_{II} = - \frac{1}{2}\kappa_{I}(x_{max} +
   /// x_{min}) @f$
-  ///
-  /// @param lposition Local position (assumed to be in right surface frame)
-  /// @param boundaryTolerance boundary check directive
-  ///
-  /// @return boolean indicator for the success of this operation
-  bool inside(const Vector2& lposition,
-              const BoundaryTolerance& boundaryTolerance) const final;
+  bool inside(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::closestPoint
+  Vector2 closestPoint(const Vector2& lposition,
+                       const std::optional<SquareMatrix2>& metric) const final;
+
+  using SurfaceBounds::inside;
 
   /// Return the vertices
   ///

@@ -10,7 +10,6 @@
 
 #include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Definitions/Tolerance.hpp"
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 
 #include <array>
@@ -45,6 +44,7 @@ namespace Acts {
 ///  \ | /            \ | /
 ///   \|/______________\|/
 ///     2 * ZhalfLength
+///
 class CylinderBounds : public SurfaceBounds {
  public:
   enum BoundValues : int {
@@ -83,22 +83,36 @@ class CylinderBounds : public SurfaceBounds {
     checkConsistency();
   }
 
-  BoundsType type() const final { return SurfaceBounds::eCylinder; }
+  /// @copydoc SurfaceBounds::type
+  BoundsType type() const final { return eCylinder; }
+
+  /// @copydoc SurfaceBounds::isCartesian
+  bool isCartesian() const final { return true; }
+
+  /// @copydoc SurfaceBounds::boundToCartesianJacobian
+  SquareMatrix2 boundToCartesianJacobian(const Vector2& lposition) const final {
+    (void)lposition;
+    return SquareMatrix2::Identity();
+  }
+
+  /// @copydoc SurfaceBounds::boundToCartesianMetric
+  SquareMatrix2 boundToCartesianMetric(const Vector2& lposition) const final {
+    (void)lposition;
+    return SquareMatrix2::Identity();
+  }
 
   /// Return the bound values as dynamically sized vector
-  ///
   /// @return this returns a copy of the internal values
   std::vector<double> values() const final;
 
-  /// Inside check for the bounds object driven by the boundary check directive
-  /// Each Bounds has a method inside, which checks if a LocalPosition is inside
-  /// the bounds  Inside can be called without/with tolerances.
-  ///
-  /// @param lposition Local position (assumed to be in right surface frame)
-  /// @param boundaryTolerance boundary check tolerance directive
-  /// @return boolean indicator for the success of this operation
-  bool inside(const Vector2& lposition,
-              const BoundaryTolerance& boundaryTolerance) const final;
+  /// @copydoc SurfaceBounds::inside
+  bool inside(const Vector2& lposition) const final;
+
+  /// @copydoc SurfaceBounds::closestPoint
+  Vector2 closestPoint(const Vector2& lposition,
+                       const std::optional<SquareMatrix2>& metric) const final;
+
+  using SurfaceBounds::inside;
 
   /// Access to the bound values
   /// @param bValue the class nested enum for the array access
@@ -136,9 +150,6 @@ class CylinderBounds : public SurfaceBounds {
   /// Helper method to shift into the phi-frame
   /// @param lposition the polar coordinates in the global frame
   Vector2 shifted(const Vector2& lposition) const;
-
-  /// Return the jacobian into the polar coordinate
-  SquareMatrix2 jacobian() const;
 };
 
 }  // namespace Acts

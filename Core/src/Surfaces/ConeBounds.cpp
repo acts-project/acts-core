@@ -8,8 +8,8 @@
 
 #include "Acts/Surfaces/ConeBounds.hpp"
 
-#include "Acts/Surfaces/BoundaryTolerance.hpp"
-#include "Acts/Surfaces/detail/BoundaryCheckHelper.hpp"
+#include "Acts/Definitions/Tolerance.hpp"
+#include "Acts/Surfaces/detail/VerticesHelper.hpp"
 #include "Acts/Utilities/detail/periodic.hpp"
 
 #include <cmath>
@@ -72,12 +72,20 @@ Vector2 ConeBounds::shifted(const Vector2& lposition) const {
   return shifted;
 }
 
-bool ConeBounds::inside(const Vector2& lposition,
-                        const BoundaryTolerance& boundaryTolerance) const {
+bool ConeBounds::inside(const Vector2& lposition) const {
   auto rphiHalf = r(lposition[1]) * get(eHalfPhiSector);
-  return detail::insideAlignedBox(
+  return detail::VerticesHelper::isInsideRectangle(
+      shifted(lposition), Vector2(-rphiHalf, get(eMinZ)),
+      Vector2(rphiHalf, get(eMaxZ)));
+}
+
+Vector2 ConeBounds::closestPoint(
+    const Vector2& lposition,
+    const std::optional<SquareMatrix2>& metric) const {
+  auto rphiHalf = r(lposition[1]) * get(eHalfPhiSector);
+  return detail::VerticesHelper::computeClosestPointOnAlignedBox(
       Vector2(-rphiHalf, get(eMinZ)), Vector2(rphiHalf, get(eMaxZ)),
-      boundaryTolerance, shifted(lposition), std::nullopt);
+      shifted(lposition), metric);
 }
 
 std::ostream& ConeBounds::toStream(std::ostream& sl) const {
