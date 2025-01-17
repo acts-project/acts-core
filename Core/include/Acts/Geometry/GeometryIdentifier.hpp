@@ -32,7 +32,7 @@ class GeometryIdentifier {
   using Value = std::uint64_t;
 
   /// Construct from an already encoded value.
-  constexpr GeometryIdentifier(Value encoded) : m_value(encoded) {}
+  explicit constexpr GeometryIdentifier(Value encoded) : m_value(encoded) {}
   /// Construct default GeometryIdentifier with all values set to zero.
   GeometryIdentifier() = default;
   GeometryIdentifier(GeometryIdentifier&&) = default;

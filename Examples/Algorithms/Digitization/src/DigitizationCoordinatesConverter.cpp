@@ -27,7 +27,7 @@ DigitizationCoordinatesConverter::DigitizationCoordinatesConverter(
 
 std::tuple<double, double> DigitizationCoordinatesConverter::globalToLocal(
     std::uint64_t moduleId, double x, double y, double z) const {
-  const Acts::GeometryIdentifier moduleGeoId = moduleId;
+  const Acts::GeometryIdentifier moduleGeoId(moduleId);
   auto surfaceItr = m_cfg.surfaceByIdentifier.find(moduleGeoId);
   if (surfaceItr == m_cfg.surfaceByIdentifier.end()) {
     throw std::runtime_error("Surface not found for moduleGeoId");
@@ -47,7 +47,7 @@ std::tuple<double, double> DigitizationCoordinatesConverter::globalToLocal(
 std::tuple<double, double, double>
 DigitizationCoordinatesConverter::localToGlobal(std::uint64_t moduleId,
                                                 double x, double y) const {
-  const Acts::GeometryIdentifier moduleGeoId = moduleId;
+  const Acts::GeometryIdentifier moduleGeoId{moduleId};
   auto surfaceItr = m_cfg.surfaceByIdentifier.find(moduleGeoId);
   if (surfaceItr == m_cfg.surfaceByIdentifier.end()) {
     throw std::runtime_error("Surface not found for moduleGeoId");

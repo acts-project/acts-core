@@ -24,7 +24,7 @@ BOOST_AUTO_TEST_CASE(GeometryIdentifier_construct_default) {
 BOOST_AUTO_TEST_CASE(GeometryIdentifier_construct_encoded) {
   // not sure if it is a good idea to test for the encoding since it should be
   // an implementation detail. only the resulting functionality is relevant.
-  GeometryIdentifier id = 0xa0b00c00d00affe0u;
+  GeometryIdentifier id{0xa0b00c00d00affe0u};
   BOOST_CHECK_EQUAL(id.volume(), 0xa0u);
   BOOST_CHECK_EQUAL(id.boundary(), 0xb0u);
   BOOST_CHECK_EQUAL(id.layer(), 0x0c0u);
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE(GeometryIdentifier_max_values) {
   constexpr GeometryIdentifier::Value sensitiveMax = (1u << 20) - 1;
   constexpr GeometryIdentifier::Value extraMax = (1u << 8) - 1;
   // reference values non-zero values everywhere
-  constexpr GeometryIdentifier ref = 0xdeadaffe01234567;
+  constexpr GeometryIdentifier ref{0xdeadaffe01234567};
   // values above the maximum are truncated
   // max+1 has all available bits zeroed
   BOOST_CHECK_EQUAL(GeometryIdentifier(ref).setVolume(volumeMax + 1),

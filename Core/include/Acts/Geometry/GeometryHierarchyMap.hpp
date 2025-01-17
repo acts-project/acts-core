@@ -98,10 +98,12 @@ class GeometryHierarchyMap {
 
   /// Access the geometry identifier for the i-th element with bounds check.
   ///
-  /// @throws std::out_of_range for invalid indices
-  GeometryIdentifier idAt(std::size_t index) const { return m_ids.at(index); }
+  /// @thhrows std::out_of_range for invalid indices
+  GeometryIdentifier idAt(std::size_t index) const {
+    return GeometryIdentifier(m_ids.at(index));
+  }
 
-  /// Access the value of the i-th element in the container with bounds check.
+  /// Access the value at the given index.
   ///
   /// @throws std::out_of_range for invalid indices
   const Value& valueAt(std::size_t index) const { return m_values.at(index); }
@@ -254,7 +256,8 @@ inline void GeometryHierarchyMap<value_t>::fill(
 
   for (const auto& element : elements) {
     m_ids.push_back(element.first.value());
-    m_masks.push_back(makeLeadingLevelsMask(element.first.value()));
+    m_masks.push_back(
+        makeLeadingLevelsMask(GeometryIdentifier(element.first.value())));
     m_values.push_back(std::move(element.second));
   }
 }

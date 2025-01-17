@@ -272,16 +272,16 @@ std::shared_ptr<Experimental::Detector> constructTelescopeDetector() {
   // changes
   int id = 1;
 
-  // Volume ids
+  // Volume ids: 1-3
   for (auto& volume : volumes) {
-    volume->assignGeometryId(id);
+    volume->assignGeometryId(Acts::GeometryIdentifier(id));
     id++;
   }
-  // Intervolume portal ids
+  // Intervolume portal ids: 6,7,10,11
   for (auto& volume : volumes) {
     for (auto& port : volume->portalPtrs()) {
-      if (port->surface().geometryId() == 0) {
-        port->surface().assignGeometryId(id);
+      if (port->surface().geometryId() == Acts::GeometryIdentifier(0)) {
+        port->surface().assignGeometryId(Acts::GeometryIdentifier(id));
         id++;
       }
     }
