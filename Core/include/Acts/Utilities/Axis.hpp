@@ -43,7 +43,8 @@ class NeighborHoodIndices {
     iterator() = default;
 
     // Specialized constructor for end() iterator
-    iterator(std::size_t current) : m_current(current), m_wrapped(true) {}
+    explicit iterator(std::size_t current)
+        : m_current(current), m_wrapped(true) {}
 
     iterator(std::size_t begin1, std::size_t end1, std::size_t begin2)
         : m_current(begin1),

@@ -90,7 +90,7 @@ class Surface : public virtual GeometryObject,
   /// to detector element and layer
   ///
   /// @param other Source surface for copy.
-  explicit Surface(const Surface& other);
+  Surface(const Surface& other);
 
   /// Constructor from DetectorElementBase: Element proxy
   ///

@@ -37,7 +37,8 @@ class GridDensityVertexFinder final : public IVertexFinder {
   /// @brief The Config struct
   struct Config {
     ///@param gDensity The grid density
-    Config(GaussianGridTrackDensity gDensity) : gridDensity(gDensity) {}
+    explicit Config(GaussianGridTrackDensity gDensity)
+        : gridDensity(gDensity) {}
 
     // The grid density object
     GaussianGridTrackDensity gridDensity;
@@ -67,7 +68,7 @@ class GridDensityVertexFinder final : public IVertexFinder {
   ///
   /// Only needed if cacheGridStateForTrackRemoval == true
   struct State {
-    State(MainGridVector mainGrid_) : mainGrid(std::move(mainGrid_)) {}
+    explicit State(MainGridVector mainGrid_) : mainGrid(std::move(mainGrid_)) {}
 
     // The main density grid
     MainGridVector mainGrid;
@@ -117,7 +118,7 @@ class GridDensityVertexFinder final : public IVertexFinder {
   /// @brief Constructor for user-defined InputTrack type
   ///
   /// @param cfg Configuration object
-  GridDensityVertexFinder(const Config& cfg) : m_cfg(cfg) {
+  explicit GridDensityVertexFinder(const Config& cfg) : m_cfg(cfg) {
     if (!m_cfg.extractParameters.connected()) {
       throw std::invalid_argument(
           "GridDensityVertexFinder: "

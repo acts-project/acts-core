@@ -34,7 +34,7 @@ class GeometryObject {
   /// Constructor from a value
   ///
   /// @param geometryId the geometry identifier of the object
-  GeometryObject(const GeometryIdentifier& geometryId)
+  explicit GeometryObject(const GeometryIdentifier& geometryId)
       : m_geometryId(geometryId) {}
 
   /// Assignment operator
