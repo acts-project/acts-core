@@ -121,6 +121,9 @@ class MultiComponentBoundTrackParameters {
   MultiComponentBoundTrackParameters& operator=(
       MultiComponentBoundTrackParameters&&) = default;
 
+  /// Comply with bound convertible, in this case return a copy
+  MultiComponentBoundTrackParameters toBound() const { return *this; }
+
   /// Access the parameters
   const auto& components() const { return m_components; }
 

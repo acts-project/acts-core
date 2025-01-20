@@ -210,7 +210,7 @@ ActsExamples::ProcessCode ActsExamples::CsvMeasurementReader::read(
   }
 
   for (const MeasurementData& m : measurementData) {
-    Acts::GeometryIdentifier geoId = m.geometry_id;
+    Acts::GeometryIdentifier geoId{m.geometry_id};
 
     // Create the measurement
     DigitizedParameters dParameters;

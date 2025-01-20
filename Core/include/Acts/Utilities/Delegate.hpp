@@ -348,8 +348,15 @@ class OwningDelegate<R(Args...), H>
     : public Delegate<R(Args...), H, DelegateType::Owning> {
  public:
   OwningDelegate() = default;
-  OwningDelegate(Delegate<R(Args...), H, DelegateType::Owning> &&delegate)
+  explicit OwningDelegate(
+      Delegate<R(Args...), H, DelegateType::Owning> &&delegate)
       : Delegate<R(Args...), H, DelegateType::Owning>(std::move(delegate)) {}
+
+  OwningDelegate &operator=(
+      Delegate<R(Args...), H, DelegateType::Owning> &&delegate) {
+    *this = OwningDelegate{std::move(delegate)};
+    return *this;
+  }
 };
 
 }  // namespace Acts

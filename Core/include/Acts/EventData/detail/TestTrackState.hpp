@@ -49,8 +49,8 @@ struct TestTrackState {
         pathLength(std::uniform_real_distribution<double>(
             1 * Acts::UnitConstants::mm, 10 * Acts::UnitConstants::mm)(rng)) {
     // set a random geometry identifier to uniquely identify each surface
-    auto geoId =
-        std::uniform_int_distribution<GeometryIdentifier::Value>()(rng);
+    Acts::GeometryIdentifier geoId{
+        std::uniform_int_distribution<GeometryIdentifier::Value>()(rng)};
     surface->assignGeometryId(geoId);
 
     // create source link w/ inline 1d or 2d measurement data

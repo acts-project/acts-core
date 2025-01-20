@@ -37,7 +37,7 @@ struct Step {
   Vector3 position = Vector3(0., 0., 0.);
   Vector3 momentum = Vector3(0., 0., 0.);
   std::shared_ptr<const Surface> surface = nullptr;
-  GeometryIdentifier geoID = 0;
+  GeometryIdentifier geoID;
   /// Note that this is the total number of trials including the previous steps
   std::size_t nTotalTrials = 0;
 };

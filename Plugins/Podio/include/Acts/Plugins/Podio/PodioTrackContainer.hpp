@@ -135,7 +135,7 @@ class PodioTrackContainerBase {
     auto track = instance.m_collection->at(itrack);
     const auto& src = track.getParticleHypothesis();
     return ParticleHypothesis{static_cast<PdgParticle>(src.absPdg), src.mass,
-                              src.absQ};
+                              AnyCharge{src.absQ}};
   }
 
   static void populateSurfaceBuffer(

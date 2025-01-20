@@ -30,12 +30,12 @@ BOOST_AUTO_TEST_CASE(DelegateChainBuilderAdd) {
   int x = 0;
 
   // Basic building
-  OwningDelegate<void(int &)> chain = DelegateChainBuilder<void(int &)>{}
-                                          .add<&AddTo::add>(&a1)
-                                          .add<&addFive>()
-                                          .add<&AddTo::add>(&a2)
-                                          .add<&AddTo::add>(&a3)
-                                          .build();
+  OwningDelegate<void(int &)> chain{DelegateChainBuilder<void(int &)>{}
+                                        .add<&AddTo::add>(&a1)
+                                        .add<&addFive>()
+                                        .add<&AddTo::add>(&a2)
+                                        .add<&AddTo::add>(&a3)
+                                        .build()};
   chain(x);
   BOOST_CHECK_EQUAL(x, 11);
 

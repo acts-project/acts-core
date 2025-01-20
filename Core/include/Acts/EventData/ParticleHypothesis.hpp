@@ -27,7 +27,8 @@ class SinglyChargedParticleHypothesis
  public:
   constexpr SinglyChargedParticleHypothesis(PdgParticle absPdg, float mass)
       : GenericParticleHypothesis(absPdg, mass, {}) {}
-  SinglyChargedParticleHypothesis(PdgParticle absPdg)
+
+  explicit SinglyChargedParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -70,7 +71,7 @@ class NeutralParticleHypothesis : public GenericParticleHypothesis<Neutral> {
  public:
   constexpr NeutralParticleHypothesis(PdgParticle absPdg, float mass)
       : GenericParticleHypothesis(absPdg, mass, {}) {}
-  NeutralParticleHypothesis(PdgParticle absPdg)
+  explicit NeutralParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -102,7 +103,7 @@ class NonNeutralChargedParticleHypothesis
   constexpr NonNeutralChargedParticleHypothesis(PdgParticle absPdg, float mass,
                                                 NonNeutralCharge chargeType)
       : GenericParticleHypothesis(absPdg, mass, chargeType) {}
-  NonNeutralChargedParticleHypothesis(PdgParticle absPdg)
+  explicit NonNeutralChargedParticleHypothesis(PdgParticle absPdg)
       : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
@@ -127,8 +128,8 @@ class NonNeutralChargedParticleHypothesis
   }
 
   static NonNeutralChargedParticleHypothesis pionLike(float absQ) {
-    return NonNeutralChargedParticleHypothesis(pion().absolutePdg(),
-                                               pion().mass(), absQ);
+    return NonNeutralChargedParticleHypothesis(
+        pion().absolutePdg(), pion().mass(), NonNeutralCharge{absQ});
   }
 
   static NonNeutralChargedParticleHypothesis chargedGeantino() {
@@ -136,7 +137,8 @@ class NonNeutralChargedParticleHypothesis
     return cache;
   }
   static NonNeutralChargedParticleHypothesis chargedGeantino(float absQ) {
-    return NonNeutralChargedParticleHypothesis(PdgParticle::eInvalid, 0, absQ);
+    return NonNeutralChargedParticleHypothesis(PdgParticle::eInvalid, 0,
+                                               NonNeutralCharge{absQ});
   }
 };
 
@@ -148,7 +150,8 @@ class ParticleHypothesis : public GenericParticleHypothesis<AnyCharge> {
   constexpr ParticleHypothesis(PdgParticle absPdg, float mass,
                                AnyCharge chargeType)
       : GenericParticleHypothesis(absPdg, mass, chargeType) {}
-  ParticleHypothesis(PdgParticle absPdg) : GenericParticleHypothesis(absPdg) {}
+  explicit ParticleHypothesis(PdgParticle absPdg)
+      : GenericParticleHypothesis(absPdg) {}
 
   template <typename other_charge_t>
   constexpr ParticleHypothesis(
@@ -179,7 +182,8 @@ class ParticleHypothesis : public GenericParticleHypothesis<AnyCharge> {
   }
 
   static ParticleHypothesis pionLike(float absQ) {
-    return ParticleHypothesis(pion().absolutePdg(), pion().mass(), absQ);
+    return ParticleHypothesis(pion().absolutePdg(), pion().mass(),
+                              AnyCharge{absQ});
   }
 
   static ParticleHypothesis geantino() {
@@ -190,7 +194,7 @@ class ParticleHypothesis : public GenericParticleHypothesis<AnyCharge> {
     return cache;
   }
   static ParticleHypothesis chargedGeantino(float absQ) {
-    return ParticleHypothesis(PdgParticle::eInvalid, 0, absQ);
+    return ParticleHypothesis(PdgParticle::eInvalid, 0, AnyCharge{absQ});
   }
 };
 

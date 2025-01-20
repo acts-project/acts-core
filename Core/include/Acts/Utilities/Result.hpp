@@ -27,7 +27,7 @@ class Result {
   /// Private constructor which accepts an external variant.
   /// This is used by the factory static methods to set up
   /// the variant unambiguously in all cases.
-  Result(std::variant<T, E>&& var) : m_var(std::move(var)) {}
+  explicit Result(std::variant<T, E>&& var) : m_var(std::move(var)) {}
 
  public:
   using ValueType = T;
@@ -66,7 +66,8 @@ class Result {
   /// @param value The potential value, could be an actual valid value or an
   /// error.
   template <typename T2>
-  Result(T2 value) noexcept
+  Result(T2 value) noexcept  // NOLINT <- suppress clang-tidy warning.
+                             // Conversion here is crucial for ergonomics
     requires(!std::same_as<T, E> && !std::constructible_from<T, E> &&
              !std::convertible_to<T, E> && !std::constructible_from<E, T> &&
              !std::convertible_to<E, T> &&
@@ -371,7 +372,9 @@ class Result<void, E> {
   /// @tparam E2 The type of the actual error
   /// @param error The instance of the actual error
   template <typename E2>
-  Result(E2 error) noexcept : m_opt(std::move(error)) {}
+  Result(E2 error) noexcept  // NOLINT <- suppress clang-tidy warning.
+                             // Conversion here is crucial for ergonomics
+      : m_opt(std::move(error)) {}
 
   /// Assignment operator from an error.
   /// @tparam E2 The type of the actual error

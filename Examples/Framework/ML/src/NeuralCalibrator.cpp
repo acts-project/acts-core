@@ -86,7 +86,8 @@ void ActsExamples::NeuralCalibrator::calibrate(
   assert((idxSourceLink.index() < measurements.size()) and
          "Source link index is outside the container bounds");
 
-  if (!rangeContainsValue(m_volumeIds, idxSourceLink.geometryId())) {
+  if (!Acts::rangeContainsValue(m_volumeIds,
+                                idxSourceLink.geometryId().volume())) {
     m_fallback.calibrate(measurements, clusters, gctx, cctx, sourceLink,
                          trackState);
     return;

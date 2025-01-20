@@ -35,7 +35,7 @@ namespace {
 constexpr BoundIndices boundIndices[] = {
     eBoundLoc0, eBoundLoc1, eBoundTime, eBoundPhi, eBoundTheta, eBoundQOverP,
 };
-constexpr Acts::GeometryIdentifier geoId = 1;
+constexpr Acts::GeometryIdentifier geoId{1};
 // fix seed for reproducible tests
 std::default_random_engine rng(123);
 }  // namespace

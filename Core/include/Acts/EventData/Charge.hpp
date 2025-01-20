@@ -60,7 +60,7 @@ struct Neutral {
   /// Construct and verify the input charge magnitude (in debug builds).
   ///
   /// This constructor is only provided to allow consistent construction.
-  constexpr Neutral(float absQ) noexcept {
+  constexpr explicit Neutral(float absQ) noexcept {
     assert((absQ == 0) && "Input charge must be zero");
     (void)absQ;
   }
@@ -102,7 +102,7 @@ struct SinglyCharged {
   /// Construct and verify the input charge magnitude (in debug builds).
   ///
   /// This constructor is only provided to allow consistent construction.
-  constexpr SinglyCharged(float absQ) noexcept {
+  constexpr explicit SinglyCharged(float absQ) noexcept {
     assert((absQ == UnitConstants::e) && "Input charge magnitude must be e");
     (void)absQ;
   }
@@ -141,10 +141,10 @@ static_assert(ChargeConcept<SinglyCharged>,
 class NonNeutralCharge {
  public:
   /// Construct with the magnitude of the input charge.
-  constexpr NonNeutralCharge(float absQ) noexcept : m_absQ{absQ} {
+  constexpr explicit NonNeutralCharge(float absQ) noexcept : m_absQ{absQ} {
     assert((0 < absQ) && "Input charge magnitude must be positive");
   }
-  constexpr NonNeutralCharge(SinglyCharged /*unused*/) noexcept
+  constexpr explicit NonNeutralCharge(SinglyCharged /*unused*/) noexcept
       : m_absQ{UnitConstants::e} {}
 
   constexpr float absQ() const noexcept { return m_absQ; }
@@ -182,12 +182,12 @@ static_assert(ChargeConcept<NonNeutralCharge>,
 class AnyCharge {
  public:
   /// Construct with the magnitude of the input charge.
-  constexpr AnyCharge(float absQ) noexcept : m_absQ{absQ} {
+  constexpr explicit AnyCharge(float absQ) noexcept : m_absQ{absQ} {
     assert((0 <= absQ) && "Input charge magnitude must be zero or positive");
   }
-  constexpr AnyCharge(SinglyCharged /*unused*/) noexcept
+  constexpr explicit AnyCharge(SinglyCharged /*unused*/) noexcept
       : m_absQ{UnitConstants::e} {}
-  constexpr AnyCharge(Neutral /*unused*/) noexcept {}
+  constexpr explicit AnyCharge(Neutral /*unused*/) noexcept {}
 
   constexpr float absQ() const noexcept { return m_absQ; }
 

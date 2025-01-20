@@ -70,7 +70,7 @@ class GenericCurvilinearTrackParameters
 
   /// Converts a bound track parameter with a different hypothesis.
   template <typename other_particle_hypothesis_t>
-  GenericCurvilinearTrackParameters(
+  explicit GenericCurvilinearTrackParameters(
       const GenericCurvilinearTrackParameters<other_particle_hypothesis_t>&
           other)
       : GenericCurvilinearTrackParameters(other.fourPosition(),

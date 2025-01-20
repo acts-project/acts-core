@@ -230,7 +230,10 @@ template <typename S, typename N>
 template <typename parameters_t, typename propagator_options_t,
           typename path_aborter_t>
 auto Acts::Propagator<S, N>::makeState(
-    const parameters_t& start, const propagator_options_t& options) const {
+    const parameters_t& start, const propagator_options_t& options) const
+  requires Concepts::BasicTrackParameters<parameters_t> &&
+           Concepts::BoundConvertibleTrackParameters<parameters_t>
+{
   static_assert(BoundTrackParametersConcept<parameters_t>,
                 "Parameters do not fulfill bound parameters concept.");
 
@@ -255,7 +258,8 @@ auto Acts::Propagator<S, N>::makeState(
       actor_list_t_state_t<OptionsType,
                            typename propagator_options_t::actor_list_type>;
   // Initialize the internal propagator state
-  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
+  StateType state{eOptions,
+                  m_stepper.makeState(eOptions.stepping, start.toBound()),
                   m_navigator.makeState(eOptions.navigation)};
 
   static_assert(
@@ -273,7 +277,10 @@ template <typename parameters_t, typename propagator_options_t,
           typename target_aborter_t, typename path_aborter_t>
 auto Acts::Propagator<S, N>::makeState(
     const parameters_t& start, const Surface& target,
-    const propagator_options_t& options) const {
+    const propagator_options_t& options) const
+  requires Concepts::BasicTrackParameters<parameters_t> &&
+           Concepts::BoundConvertibleTrackParameters<parameters_t>
+{
   static_assert(BoundTrackParametersConcept<parameters_t>,
                 "Parameters do not fulfill bound parameters concept.");
 

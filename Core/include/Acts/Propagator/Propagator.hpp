@@ -292,7 +292,9 @@ class Propagator final
   template <typename parameters_t, typename propagator_options_t,
             typename path_aborter_t = PathLimitReached>
   auto makeState(const parameters_t& start,
-                 const propagator_options_t& options) const;
+                 const propagator_options_t& options) const
+    requires Concepts::BasicTrackParameters<parameters_t> &&
+             Concepts::BoundConvertibleTrackParameters<parameters_t>;
 
   /// @brief Builds the propagator state object
   ///
@@ -315,7 +317,9 @@ class Propagator final
             typename target_aborter_t = SurfaceReached,
             typename path_aborter_t = PathLimitReached>
   auto makeState(const parameters_t& start, const Surface& target,
-                 const propagator_options_t& options) const;
+                 const propagator_options_t& options) const
+    requires Concepts::BasicTrackParameters<parameters_t> &&
+             Concepts::BoundConvertibleTrackParameters<parameters_t>;
 
   /// @brief Propagate track parameters
   ///

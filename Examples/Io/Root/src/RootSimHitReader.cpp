@@ -146,7 +146,7 @@ ProcessCode RootSimHitReader::read(const AlgorithmContext& context) {
       break;
     }
 
-    const Acts::GeometryIdentifier geoid = m_uint64Columns.at("geometry_id");
+    const Acts::GeometryIdentifier geoid{m_uint64Columns.at("geometry_id")};
     const SimBarcode pid = m_uint64Columns.at("particle_id");
     const auto index = m_int32Columns.at("index");
 

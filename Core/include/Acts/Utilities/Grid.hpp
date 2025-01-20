@@ -98,38 +98,39 @@ class Grid final : public IGrid {
   /// grid object.
   ///
   /// @param axes
-  Grid(const std::tuple<Axes...>& axes) : m_axes(axes) {
+  explicit Grid(const std::tuple<Axes...>& axes) : m_axes(axes) {
     m_values.resize(size());
   }
 
   /// @brief Move constructor from axis tuple
   /// @param axes
-  Grid(std::tuple<Axes...>&& axes) : m_axes(std::move(axes)) {
+  explicit Grid(std::tuple<Axes...>&& axes) : m_axes(std::move(axes)) {
     m_values.resize(size());
   }
 
   /// @brief constructor from parameters pack of axes
   /// @param axes
-  Grid(Axes&&... axes) : m_axes(std::forward_as_tuple(axes...)) {
+  explicit Grid(Axes&&... axes) : m_axes(std::forward_as_tuple(axes...)) {
     m_values.resize(size());
   }
 
   /// @brief constructor from parameters pack of axes
   /// @param axes
-  Grid(const Axes&... axes) : m_axes(std::tuple(axes...)) {
+  explicit Grid(const Axes&... axes) : m_axes(std::tuple(axes...)) {
     m_values.resize(size());
   }
 
   /// @brief constructor from parameters pack of axes and type tag
   /// @param axes
-  Grid(TypeTag<T> /*tag*/, Axes&&... axes)
+  explicit Grid(TypeTag<T> /*tag*/, Axes&&... axes)
       : m_axes(std::forward_as_tuple(axes...)) {
     m_values.resize(size());
   }
 
   /// @brief constructor from parameters pack of axes and type tag
   /// @param axes
-  Grid(TypeTag<T> /*tag*/, const Axes&... axes) : m_axes(std::tuple(axes...)) {
+  explicit Grid(TypeTag<T> /*tag*/, const Axes&... axes)
+      : m_axes(std::tuple(axes...)) {
     m_values.resize(size());
   }
 

@@ -135,9 +135,9 @@ Result<const TrackingVolume*> CompositePortalLink::resolveVolume(
   Vector3 global = m_surface->localToGlobal(gctx, position);
   auto res = resolveVolume(gctx, global, tolerance);
   if (!res.ok()) {
-    return res.error();
+    return Result<const TrackingVolume*>::failure(res.error());
   }
-  return *res;
+  return Result<const TrackingVolume*>::success(*res);
 }
 
 Result<const TrackingVolume*> CompositePortalLink::resolveVolume(
@@ -153,7 +153,8 @@ Result<const TrackingVolume*> CompositePortalLink::resolveVolume(
     }
   }
 
-  return PortalError::PositionNotOnAnyChildPortalLink;
+  return Result<const TrackingVolume*>::failure(
+      PortalError::PositionNotOnAnyChildPortalLink);
 }
 
 std::size_t CompositePortalLink::depth() const {

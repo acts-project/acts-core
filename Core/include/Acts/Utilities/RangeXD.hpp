@@ -67,7 +67,7 @@ class RangeXD {
   /// @brief Construct a range from a pair of minimum and maximum values
   /// @note Only available for one-dimensional ranges
   /// @param p The pair of minimum and maximum values
-  RangeXD(const std::pair<Type, Type>& p)
+  explicit RangeXD(const std::pair<Type, Type>& p)
     requires(Dims == 1)
       : m_minima({p.first}), m_maxima({p.second}) {}
 
