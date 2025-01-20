@@ -16,64 +16,11 @@
 using Acts::VectorHelpers::perp;
 using Acts::VectorHelpers::phi;
 
-namespace Acts {
+namespace Acts::detail {
 
-ProtoLayer::ProtoLayer(const GeometryContext& gctx,
-                       const std::vector<const Surface*>& surfaces,
-                       const Transform3& transformIn)
-    : transform(transformIn), m_surfaces(surfaces) {
-  measure(gctx, surfaces);
-}
-
-ProtoLayer::ProtoLayer(
-    const GeometryContext& gctx,
-    const std::vector<std::shared_ptr<const Surface>>& surfaces,
-    const Transform3& transformIn)
-    : transform(transformIn), m_surfaces(unpack_shared_vector(surfaces)) {
-  measure(gctx, m_surfaces);
-}
-
-ProtoLayer::ProtoLayer(const GeometryContext& gctx,
-                       const std::vector<std::shared_ptr<Surface>>& surfaces,
-                       const Transform3& transformIn)
-    : transform(transformIn) {
-  m_surfaces.reserve(surfaces.size());
-  for (const auto& sf : surfaces) {
-    m_surfaces.push_back(sf.get());
-  }
-  measure(gctx, m_surfaces);
-}
-
-double ProtoLayer::min(AxisDirection aDir, bool addenv) const {
-  if (addenv) {
-    return extent.min(aDir) - envelope[aDir][0u];
-  }
-  return extent.min(aDir);
-}
-
-double ProtoLayer::max(AxisDirection aDir, bool addenv) const {
-  if (addenv) {
-    return extent.max(aDir) + envelope[aDir][1u];
-  }
-  return extent.max(aDir);
-}
-
-double ProtoLayer::medium(AxisDirection aDir, bool addenv) const {
-  return 0.5 * (min(aDir, addenv) + max(aDir, addenv));
-}
-
-double ProtoLayer::range(AxisDirection aDir, bool addenv) const {
-  return std::abs(max(aDir, addenv) - min(aDir, addenv));
-}
-
-std::ostream& ProtoLayer::toStream(std::ostream& sl) const {
-  sl << "ProtoLayer with dimensions (min/max)" << std::endl;
-  sl << extent.toString();
-  return sl;
-}
-
-void ProtoLayer::measure(const GeometryContext& gctx,
-                         const std::vector<const Surface*>& surfaces) {
+void ProtoLayerBase::measureImpl(const GeometryContext& gctx,
+                                 const std::vector<const Surface*>& surfaces,
+                                 Extent& extent, const Transform3& transform) {
   for (const auto& sf : surfaces) {
     // To prevent problematic isInsidePolygon check for straw surfaces with only
     // one lseg
@@ -96,9 +43,32 @@ void ProtoLayer::measure(const GeometryContext& gctx,
   }
 }
 
-void ProtoLayer::add(const GeometryContext& gctx, const Surface& surface) {
-  m_surfaces.push_back(&surface);
-  measure(gctx, m_surfaces);
+double ProtoLayerBase::min(AxisDirection aDir, bool addenv) const {
+  if (addenv) {
+    return extent.min(aDir) - envelope[aDir][0u];
+  }
+  return extent.min(aDir);
 }
 
-}  // namespace Acts
+double ProtoLayerBase::max(AxisDirection aDir, bool addenv) const {
+  if (addenv) {
+    return extent.max(aDir) + envelope[aDir][1u];
+  }
+  return extent.max(aDir);
+}
+
+double ProtoLayerBase::medium(AxisDirection aDir, bool addenv) const {
+  return 0.5 * (min(aDir, addenv) + max(aDir, addenv));
+}
+
+double ProtoLayerBase::range(AxisDirection aDir, bool addenv) const {
+  return std::abs(max(aDir, addenv) - min(aDir, addenv));
+}
+
+std::ostream& ProtoLayerBase::toStream(std::ostream& sl) const {
+  sl << "ProtoLayer with dimensions (min/max)" << std::endl;
+  sl << extent.toString();
+  return sl;
+}
+
+}  // namespace Acts::detail

@@ -35,8 +35,12 @@ GeometryContext tgContext = GeometryContext();
 
 BOOST_AUTO_TEST_SUITE(Geometry)
 
-BOOST_AUTO_TEST_CASE(ProtoLayerTests) {
+// Test both const and non-const versions
+template <bool IsConst>
+void testProtoLayer() {
   using enum AxisDirection;
+  using TestProtoLayer = detail::ProtoLayerT<IsConst>;
+  using SurfacePtr = typename TestProtoLayer::SurfacePtr;
 
   // Create a proto layer with 4 surfaces on the x/y grid
   auto recBounds = std::make_shared<RectangleBounds>(3., 6.);
@@ -51,11 +55,13 @@ BOOST_AUTO_TEST_CASE(ProtoLayerTests) {
       AngleAxis3(-std::numbers::pi / 2., Vector3::UnitZ()) *
       Transform3::Identity();
 
-  std::vector<std::shared_ptr<const Surface>> surfaceStore;
+  std::vector<
+      std::shared_ptr<std::conditional_t<IsConst, const Surface, Surface>>>
+      surfaceStore;
   surfaceStore.reserve(100);
 
   auto createProtoLayer = [&](const Transform3& trf,
-                              bool shared = false) -> ProtoLayer {
+                              bool shared = false) -> TestProtoLayer {
     auto atNegX = Surface::makeShared<PlaneSurface>(
         Transform3(trf * Translation3(Vector3(-3., 0., 0.)) * planeYZ),
         recBounds);
@@ -72,17 +78,18 @@ BOOST_AUTO_TEST_CASE(ProtoLayerTests) {
         Transform3(trf * Translation3(Vector3(0., 3., 0.)) * planeZX),
         recBounds);
 
-    std::vector<std::shared_ptr<const Surface>> sharedSurfaces = {
-        atNegX, atNegY, atPosX, atPosY};
+    std::vector<
+        std::shared_ptr<std::conditional_t<IsConst, const Surface, Surface>>>
+        sharedSurfaces = {atNegX, atNegY, atPosX, atPosY};
     surfaceStore.insert(surfaceStore.begin(), sharedSurfaces.begin(),
                         sharedSurfaces.end());
     if (!shared) {
-      std::vector<const Surface*> surfaces = {atNegX.get(), atNegY.get(),
-                                              atPosX.get(), atPosY.get()};
+      std::vector<SurfacePtr> surfaces = {atNegX.get(), atNegY.get(),
+                                          atPosX.get(), atPosY.get()};
 
-      return ProtoLayer(tgContext, surfaces);
+      return TestProtoLayer(tgContext, surfaces);
     }
-    return ProtoLayer(tgContext, sharedSurfaces);
+    return TestProtoLayer(tgContext, sharedSurfaces);
   };
 
   // Test 0 - check constructor with surfaces and shared surfaces
@@ -126,8 +133,6 @@ BOOST_AUTO_TEST_CASE(ProtoLayerTests) {
   CHECK_CLOSE_ABS(protoLayer.max(AxisR), std::hypot(3, 6), 1e-8);
   CHECK_CLOSE_ABS(protoLayer.min(AxisR), 3., 1e-8);
 
-  // Test 1a
-
   // Test 2 - rotate around Z-Axis, should leave R, Z untouched,
   // only preserves medium values
   auto protoLayerRot = createProtoLayer(AngleAxis3(-0.345, Vector3::UnitZ()) *
@@ -158,6 +163,14 @@ Extent in space :
   - value :   AxisMag | range = [7.34847, 7.34847]
 )";
   BOOST_CHECK_EQUAL(sstream.str(), oString);
+}
+
+BOOST_AUTO_TEST_CASE(ProtoLayerTests) {
+  testProtoLayer<true>();  // Test const version
+}
+
+BOOST_AUTO_TEST_CASE(ProtoLayerTestsNonConst) {
+  testProtoLayer<false>();  // Test non-const version
 }
 
 BOOST_AUTO_TEST_CASE(OrientedLayer) {
