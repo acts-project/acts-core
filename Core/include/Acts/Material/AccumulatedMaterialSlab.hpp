@@ -46,7 +46,7 @@ class AccumulatedMaterialSlab {
   ///
   ///  Vacuum steps with a non-zero thickness can be added to account for holes
   ///  in material structures.
-  void accumulate(MaterialSlab slabAlongTrack, float pathCorrection = 1);
+  void accumulate(MaterialSlab slabAlongTrack, double pathCorrection = 1.);
 
   /// Use the accumulated material to update the material variance
   ///

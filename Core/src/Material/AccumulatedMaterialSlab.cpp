@@ -12,10 +12,10 @@
 #include "Acts/Material/detail/AverageMaterials.hpp"
 
 void Acts::AccumulatedMaterialSlab::accumulate(MaterialSlab slab,
-                                               float pathCorrection) {
+                                               double pathCorrection) {
   // scale the recorded material to the equivalence contribution along the
   // surface normal
-  slab.scaleThickness(1 / pathCorrection);
+  slab.scaleThickness(static_cast<float>(1. / pathCorrection));
   m_trackAverage = detail::combineSlabs(m_trackAverage, slab);
 }
 
