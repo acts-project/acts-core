@@ -186,6 +186,43 @@ test_exatrkx_python:
     - pytest -rFsv -k torch --collect-only
     - pytest -rFsv -k gpu-torch # For now only test torch GPU pipeline
 
+build_gnn_tensorrt:
+  stage: build
+  image: ghcr.io/acts-project/ubuntu2404_tensorrt:74
+  variables:
+    DEPENDENCY_URL: https://acts.web.cern.ch/ACTS/ci/ubuntu-24.04/deps.$DEPENDENCY_TAG.tar.zst
+
+  cache:
+    key: ccache-${CI_JOB_NAME}-${CI_COMMIT_REF_SLUG}-${CCACHE_KEY_SUFFIX}
+    fallback_keys:
+      - ccache-${CI_JOB_NAME}-${CI_DEFAULT_BRANCH}-${CCACHE_KEY_SUFFIX}
+    when: always
+    paths:
+      - ${CCACHE_DIR}
+
+  tags:
+    - docker-gpu-nvidia
+
+  script:
+    - git clone $CLONE_URL src
+    - cd src
+    - git checkout $HEAD_SHA
+    - source CI/dependencies.sh
+    - cd ..
+    - mkdir build
+    - >
+      cmake -B build -S src
+      -DACTS_BUILD_PLUGIN_EXATRKX=ON
+      -DACTS_EXATRKX_ENABLE_TORCH=OFF
+      -DACTS_EXATRKX_ENABLE_CUDA=ON
+      -DACTS_EXATRKX_ENABLE_TENSORRT=ON
+      -DPython_EXECUTABLE=$(which python3)
+      -DCMAKE_CUDA_ARCHITECTURES="75;86"
+    - ccache -z
+    - cmake --build build -- -j6
+    - ccache -s
+
+
 build_linux_ubuntu:
   stage: build
   image: registry.cern.ch/ghcr.io/acts-project/ubuntu2404:63

@@ -435,13 +435,6 @@ if(ACTS_BUILD_PLUGIN_EXATRKX)
     else()
         message(STATUS "Build Exa.TrkX plugin for CPU only")
     endif()
-    if(NOT (ACTS_EXATRKX_ENABLE_ONNX OR ACTS_EXATRKX_ENABLE_TORCH))
-        message(
-            FATAL_ERROR
-            "When building the Exa.TrkX plugin, at least one of ACTS_EXATRKX_ENABLE_ONNX \
-      and ACTS_EXATRKX_ENABLE_TORCHSCRIPT must be enabled."
-        )
-    endif()
     if(ACTS_EXATRKX_ENABLE_TORCH)
         find_package(TorchScatter REQUIRED)
     endif()
