@@ -263,7 +263,7 @@ set(_acts_podio_version 1.0.1) # will try this first
 set(_acts_podio_fallback_version 0.16) # if not found, will try this one
 set(_acts_doxygen_version 1.9.4)
 set(_acts_hepmc3_version 3.2.1)
-set(_acts_nlohmanjson_version 3.10.5)
+set(_acts_nlohmanjson_version 3.11.2)
 set(_acts_onnxruntime_version 1.12.0)
 set(_acts_root_version 6.20)
 set(_acts_tbb_version 2020.1)

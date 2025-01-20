@@ -8,32 +8,26 @@
 
 #pragma once
 
-#include <string>
+#include <string_view>
 
-namespace Acts {
+namespace Acts::JsonKey {
 
-/// @struct jsonKey
-///
-/// @brief store in a single place the different key used for the material
-/// mapping
-struct jsonKey {
-  /// The name identification
-  std::string namekey = "NAME";
-  /// The bin key
-  std::string binkey = "binUtility";
-  /// The material key
-  std::string materialkey = "material";
-  /// The local to global transformation key
-  std::string transfokeys = "transformation";
-  /// The type key -> proto, else
-  std::string typekey = "type";
-  /// The data key
-  std::string datakey = "data";
-  /// The mapping key, add surface to mapping procedure if true
-  std::string mapkey = "mapMaterial";
-  /// The mapping type key, used to select the type od material mapping for the
-  /// surface
-  std::string maptype = "mappingType";
-};
+/// The name identification
+static constexpr std::string_view kName = "NAME";
+/// The bin key
+static constexpr std::string_view kBin = "binUtility";
+/// The material key
+static constexpr std::string_view kMaterial = "material";
+/// The local to global transformation key
+static constexpr std::string_view kTransform = "transformation";
+/// The type key -> proto, else
+static constexpr std::string_view kType = "type";
+/// The data key
+static constexpr std::string_view kData = "data";
+/// The mapping key, add surface to mapping procedure if true
+static constexpr std::string_view kMaterialMap = "mapMaterial";
+/// The mapping type key, used to select the type od material mapping for the
+/// surface
+static constexpr std::string_view kMappingType = "mappingType";
 
-}  // namespace Acts
+}  // namespace Acts::JsonKey

@@ -16,12 +16,12 @@ void Acts::to_json(
     nlohmann::json& j,
     const std::pair<const Acts::TrackingVolume*,
                     std::shared_ptr<const Acts::IVolumeMaterial>>& volume) {
-  j[Acts::jsonKey().namekey] = volume.first->volumeName();
+  j[Acts::JsonKey::kName] = volume.first->volumeName();
   to_json(j, volume.second.get());
 }
 
 void Acts::to_json(nlohmann::json& j, const Acts::TrackingVolume& volume) {
-  j[Acts::jsonKey().namekey] = volume.volumeName();
+  j[Acts::JsonKey::kName] = volume.volumeName();
   if (volume.volumeMaterial() != nullptr) {
     to_json(j, volume.volumeMaterial());
   }

@@ -48,7 +48,7 @@ set(ACTS_FRNN_SOURCE
 mark_as_advanced(ACTS_FRNN_SOURCE)
 
 set(ACTS_NLOHMANNJSON_SOURCE
-    "URL;https://github.com/nlohmann/json/archive/refs/tags/v${_acts_nlohmanjson_version}.tar.gz;URL_HASH;SHA256=5daca6ca216495edf89d167f808d1d03c4a4d929cef7da5e10f135ae1540c7e4"
+    "URL;https://github.com/nlohmann/json/archive/refs/tags/v${_acts_nlohmanjson_version}.tar.gz;URL_HASH;SHA256=d69f9deb6a75e2580465c6c4c5111b89c4dc2fa94e3a85fcd2ffcd9a143d9273"
     CACHE STRING
     "Source to take nlohmann_json from"
 )
