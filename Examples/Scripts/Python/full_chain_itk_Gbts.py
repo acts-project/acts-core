@@ -95,7 +95,7 @@ addSeeding(
     ),
     geoSelectionConfigFile=geo_dir / "itk-hgtd/geoSelection-ITk.json",
     layerMappingConfigFile=geo_dir / "itk-hgtd/ACTS_FTF_mapinput.csv",
-    connector_inputConfigFile=geo_dir / "itk-hgtd/binTables_ITK_RUN4.txt",
+    ConnectorInputConfigFile=geo_dir / "itk-hgtd/binTables_ITK_RUN4.txt",
     outputDirRoot=outputDir,
 )
 

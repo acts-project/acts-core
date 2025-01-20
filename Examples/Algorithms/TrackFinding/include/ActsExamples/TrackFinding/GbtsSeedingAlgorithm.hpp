@@ -10,7 +10,6 @@
 
 #pragma once
 
-#include "Acts/Seeding/SeedFilterConfig.hpp"
 #include "Acts/Seeding/SeedFinderGbts.hpp"
 #include "Acts/Seeding/SeedFinderGbtsConfig.hpp"
 #include "ActsExamples/EventData/Cluster.hpp"
@@ -36,7 +35,6 @@ class GbtsSeedingAlgorithm final : public IAlgorithm {
 
     std::string outputSeeds;
 
-    Acts::SeedFilterConfig seedFilterConfig;
     Acts::SeedFinderGbtsConfig<SimSpacePoint> seedFinderConfig;
     Acts::SeedFinderOptions seedFinderOptions;
 

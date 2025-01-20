@@ -52,7 +52,7 @@ struct GbtsEdgeState {
     //  x' =  x*m_c + y*m_s
     //  y' = -x*m_s + y*m_c
 
-    m_refY = pS->m_n2->m_spGbts.SP->r();
+    m_refY = pS->m_n2->m_spGbts.r();
     m_refX =
         pS->m_n2->m_spGbts.SP->x() * m_c + pS->m_n2->m_spGbts.SP->y() * m_s;
 
@@ -67,7 +67,7 @@ struct GbtsEdgeState {
 
     m_Y[0] = pS->m_n2->m_spGbts.SP->z();
     m_Y[1] = (pS->m_n1->m_spGbts.SP->z() - pS->m_n2->m_spGbts.SP->z()) /
-             (pS->m_n1->m_spGbts.SP->r() - pS->m_n2->m_spGbts.SP->r());
+             (pS->m_n1->m_spGbts.r() - pS->m_n2->m_spGbts.r());
 
     memset(&m_Cx[0][0], 0, sizeof(m_Cx));
     memset(&m_Cy[0][0], 0, sizeof(m_Cy));
@@ -276,7 +276,7 @@ class GbtsTrackingFilter {
     x = pS->m_n1->m_spGbts.SP->x();
     y = pS->m_n1->m_spGbts.SP->y();
     z = pS->m_n1->m_spGbts.SP->z();
-    r = pS->m_n1->m_spGbts.SP->r();
+    r = pS->m_n1->m_spGbts.r();
 
     refX = x * ts.m_c + y * ts.m_s;
     mx = -x * ts.m_s + y * ts.m_c;  // measured X[0]
