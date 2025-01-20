@@ -20,8 +20,8 @@ shopt -s extglob
 
 
 mode=${1:-all}
-if ! [[ $mode = @(all|kf|gsf|gx2f|refit_kf|refit_gsf|fullchains|simulation) ]]; then
-    echo "Usage: $0 <all|kf|gsf|gx2f|refit_kf|refit_gsf|fullchains|simulation> (outdir)"
+if ! [[ $mode = @(all|kf|gsf|gx2f|refit_kf|refit_gsf|fullchains|simulation|gx2f_vs_kf) ]]; then
+    echo "Usage: $0 <all|kf|gsf|gx2f|refit_kf|refit_gsf|fullchains|simulation|gx2f_vs_kf> (outdir)"
     exit 1
 fi
 
@@ -162,6 +162,9 @@ if [[ "$mode" == "all" || "$mode" == "fullchains" ]]; then
     run_physmon_gen "CKF single muon" "trackfinding_1muon"
     run_physmon_gen "CKF muon 50" "trackfinding_4muon_50vertices"
     run_physmon_gen "CKF ttbar 200" "trackfinding_ttbar_pu200"
+fi
+if [[ "$mode" == "all" || "$mode" == "gx2f_vs_kf" ]]; then
+    run_physmon_gen "Comparison - Truth Tracking GX2F vs KF" "trackfitting_gx2f_vs_kf"
 fi
 echo "::endgroup::"
 
@@ -466,6 +469,18 @@ if [[ "$mode" == "all" || "$mode" == "fullchains" ]]; then
 
     trackfinding "trackfinding | ttbar with 200 pileup | default seeding" trackfinding_ttbar_pu200
     vertexing "trackfinding | ttbar with 200 pileup | default seeding" trackfinding_ttbar_pu200 CI/physmon/config/vertexing_ttbar_pu200.yml
+fi
+
+if [[ "$mode" == "all" || "$mode" == "gx2f_vs_kf" ]]; then
+    run_histcmp \
+        $outdir/data/trackfitting_gx2f_vs_kf/performance_trackfitting_gx2f.root \
+        $outdir/data/trackfitting_gx2f_vs_kf/performance_trackfitting_kf.root \
+        "Comparison - Truth tracking (GX2F vs KF)" \
+        trackfitting_gx2f_vs_kf/performance_trackfitting.html \
+        trackfitting_gx2f_vs_kf/performance_trackfitting_plots \
+        --config CI/physmon/config/info_only.yml \
+        --label-reference=KF \
+        --label-monitored=GX2F
 fi
 
 run CI/physmon/summary.py $histcmp_results \

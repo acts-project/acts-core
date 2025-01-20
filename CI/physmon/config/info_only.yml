@@ -1,0 +1,7 @@
+checks:
+  "*":
+    Chi2Test: null
+    KolmogorovTest: null
+    RatioCheck: null
+    ResidualCheck: null
+    IntegralCheck: null
