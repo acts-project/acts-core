@@ -18,6 +18,7 @@ def runTruthTrackingKalman(
     inputHitsPath: Optional[Path] = None,
     decorators=[],
     reverseFilteringMomThreshold=0 * u.GeV,
+    reverseFilteringCovarianceScaling=1,
     s: acts.examples.Sequencer = None,
 ):
     from acts.examples.simulation import (
@@ -122,6 +123,7 @@ def runTruthTrackingKalman(
         trackingGeometry,
         field,
         reverseFilteringMomThreshold,
+        reverseFilteringCovarianceScaling,
     )
 
     s.addAlgorithm(

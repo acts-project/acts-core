@@ -80,9 +80,15 @@ ActsExamples::ProcessCode ActsExamples::RefittingAlgorithm::execute(
         Acts::PropagatorPlainOptions(ctx.geoContext, ctx.magFieldContext)};
     options.doRefit = true;
 
-    const Acts::BoundTrackParameters initialParams(
+    Acts::BoundTrackParameters initialParams(
         track.referenceSurface().getSharedPtr(), track.parameters(),
         track.covariance(), track.particleHypothesis());
+
+    if (initialParams.covariance()) {
+      for (auto i = 0ul; i < m_cfg.initialVarInflation.size(); ++i) {
+        (*initialParams.covariance())(i, i) *= m_cfg.initialVarInflation.at(i);
+      }
+    }
 
     trackSourceLinks.clear();
     surfSequence.clear();

@@ -87,6 +87,7 @@ struct GsfFitterFunctionImpl final : public ActsExamples::TrackFitterFunction {
       MixtureReductionAlgorithm::KLDistance;
   Acts::ComponentMergeMethod mergeMethod =
       Acts::ComponentMergeMethod::eMaxWeight;
+  double reverseFilteringCovarianceScaling = 1.0;
 
   IndexSourceLink::SurfaceAccessor m_slSurfaceAccessor;
 
@@ -115,6 +116,8 @@ struct GsfFitterFunctionImpl final : public ActsExamples::TrackFitterFunction {
     gsfOptions.abortOnError = abortOnError;
     gsfOptions.disableAllMaterialHandling = disableAllMaterialHandling;
     gsfOptions.componentMergeMethod = mergeMethod;
+    gsfOptions.reverseFilteringCovarianceScaling =
+        reverseFilteringCovarianceScaling;
 
     gsfOptions.extensions.calibrator.connect<&calibrator_t::calibrate>(
         &calibrator);
@@ -195,7 +198,7 @@ std::shared_ptr<TrackFitterFunction> ActsExamples::makeGsfFitterFunction(
     BetheHeitlerApprox betheHeitlerApprox, std::size_t maxComponents,
     double weightCutoff, Acts::ComponentMergeMethod componentMergeMethod,
     MixtureReductionAlgorithm mixtureReductionAlgorithm,
-    const Acts::Logger& logger) {
+    double reverseFilteringCovarianceScaling, const Acts::Logger& logger) {
   // Standard fitter
   MultiStepper stepper(magneticField, logger.cloneWithSuffix("Step"));
   const auto& geo = *trackingGeometry;
@@ -229,6 +232,8 @@ std::shared_ptr<TrackFitterFunction> ActsExamples::makeGsfFitterFunction(
   fitterFunction->weightCutoff = weightCutoff;
   fitterFunction->mergeMethod = componentMergeMethod;
   fitterFunction->reductionAlg = mixtureReductionAlgorithm;
+  fitterFunction->reverseFilteringCovarianceScaling =
+      reverseFilteringCovarianceScaling;
 
   return fitterFunction;
 }

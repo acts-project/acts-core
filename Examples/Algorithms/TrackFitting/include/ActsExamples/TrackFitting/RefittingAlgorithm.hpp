@@ -33,6 +33,8 @@ class RefittingAlgorithm final : public IAlgorithm {
     std::shared_ptr<TrackFitterFunction> fit;
     /// Pick a single track for debugging (-1 process all tracks)
     int pickTrack = -1;
+    /// Inflate initial covariance.
+    std::array<double, 6> initialVarInflation = {1., 1., 1., 1., 1., 1.};
   };
 
   /// Constructor of the fitting algorithm

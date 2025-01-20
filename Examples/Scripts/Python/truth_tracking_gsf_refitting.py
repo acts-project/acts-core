@@ -22,6 +22,8 @@ def runRefittingGsf(
         field,
         digiConfigFile=digiConfigFile,
         outputDir=outputDir,
+        reverseFilteringMomThreshold=0.0,
+        reverseFilteringCovarianceScaling=1.0,
         s=s,
     )
 
@@ -36,6 +38,7 @@ def runRefittingGsf(
         "componentMergeMethod": acts.examples.ComponentMergeMethod.maxWeight,
         "mixtureReductionAlgorithm": acts.examples.MixtureReductionAlgorithm.KLDistance,
         "weightCutoff": 1.0e-4,
+        "reverseFilteringCovarianceScaling": 100.0,
         "level": acts.logging.INFO,
     }
 
@@ -44,6 +47,7 @@ def runRefittingGsf(
             acts.logging.INFO,
             inputTracks="kf_tracks",
             outputTracks="gsf_refit_tracks",
+            initialVarInflation=6 * [100.0],
             fit=acts.examples.makeGsfFitterFunction(
                 trackingGeometry, field, **gsfOptions
             ),

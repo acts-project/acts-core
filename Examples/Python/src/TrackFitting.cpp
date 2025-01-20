@@ -41,7 +41,7 @@ void addTrackFitting(Context& ctx) {
 
   ACTS_PYTHON_DECLARE_ALGORITHM(ActsExamples::RefittingAlgorithm, mex,
                                 "RefittingAlgorithm", inputTracks, outputTracks,
-                                fit, pickTrack);
+                                fit, pickTrack, initialVarInflation);
 
   {
     py::class_<TrackFitterFunction, std::shared_ptr<TrackFitterFunction>>(
@@ -53,17 +53,18 @@ void addTrackFitting(Context& ctx) {
            std::shared_ptr<const Acts::MagneticFieldProvider> magneticField,
            bool multipleScattering, bool energyLoss,
            double reverseFilteringMomThreshold,
+           double reverseFilteringCovarianceScaling,
            Acts::FreeToBoundCorrection freeToBoundCorrection,
            Logging::Level level) {
           return ActsExamples::makeKalmanFitterFunction(
               trackingGeometry, magneticField, multipleScattering, energyLoss,
-              reverseFilteringMomThreshold, freeToBoundCorrection,
-              *Acts::getDefaultLogger("Kalman", level));
+              reverseFilteringMomThreshold, reverseFilteringCovarianceScaling,
+              freeToBoundCorrection, *Acts::getDefaultLogger("Kalman", level));
         },
-        py::arg("trackingGeometry"), py::arg("magneticField"),
-        py::arg("multipleScattering"), py::arg("energyLoss"),
-        py::arg("reverseFilteringMomThreshold"),
-        py::arg("freeToBoundCorrection"), py::arg("level"));
+        "trackingGeometry"_a, "magneticField"_a, "multipleScattering"_a,
+        "energyLoss"_a, "reverseFilteringMomThreshold"_a,
+        "reverseFilteringCovarianceScaling"_a, "freeToBoundCorrection"_a,
+        "level"_a);
 
     py::class_<MeasurementCalibrator, std::shared_ptr<MeasurementCalibrator>>(
         mex, "MeasurementCalibrator");
@@ -108,17 +109,17 @@ void addTrackFitting(Context& ctx) {
            BetheHeitlerApprox betheHeitlerApprox, std::size_t maxComponents,
            double weightCutoff, Acts::ComponentMergeMethod componentMergeMethod,
            ActsExamples::MixtureReductionAlgorithm mixtureReductionAlgorithm,
-           Logging::Level level) {
+           double reverseFilteringCovarianceScaling, Logging::Level level) {
           return ActsExamples::makeGsfFitterFunction(
               trackingGeometry, magneticField, betheHeitlerApprox,
               maxComponents, weightCutoff, componentMergeMethod,
-              mixtureReductionAlgorithm,
+              mixtureReductionAlgorithm, reverseFilteringCovarianceScaling,
               *Acts::getDefaultLogger("GSFFunc", level));
         },
-        py::arg("trackingGeometry"), py::arg("magneticField"),
-        py::arg("betheHeitlerApprox"), py::arg("maxComponents"),
-        py::arg("weightCutoff"), py::arg("componentMergeMethod"),
-        py::arg("mixtureReductionAlgorithm"), py::arg("level"));
+        "trackingGeometry"_a, "magneticField"_a, "betheHeitlerApprox"_a,
+        "maxComponents"_a, "weightCutoff"_a, "componentMergeMethod"_a,
+        "mixtureReductionAlgorithm"_a, "reverseFilteringCovarianceScaling"_a,
+        "level"_a);
 
     mex.def(
         "makeGlobalChiSquareFitterFunction",
