@@ -11,8 +11,6 @@
 #include "Acts/Plugins/GeoModel/GeoModelReader.hpp"
 #include "Acts/Plugins/GeoModel/GeoModelTree.hpp"
 
-#include <G4GDMLParser.hh>
-
 namespace ActsExamples {
 
 GeoModelDetector::GeoModelDetector(const Config& cfg)
