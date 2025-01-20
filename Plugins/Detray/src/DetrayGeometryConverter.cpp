@@ -59,7 +59,7 @@ detray::io::surface_payload Acts::DetrayGeometryConverter::convertSurface(
   surfacePayload.barcode = std::nullopt;
   surfacePayload.type = static_cast<detray::surface_id>(
       portal ? surface_id::e_portal
-             : (surface.geometryId().sensitive() > 0
+             : (surface.associatedDetectorElement() != nullptr
                     ? detray::surface_id::e_sensitive
                     : detray::surface_id::e_passive));
   surfacePayload.mask = convertMask(surface.bounds());
