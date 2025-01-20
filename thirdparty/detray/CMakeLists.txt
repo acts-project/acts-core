@@ -6,6 +6,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+cmake_minimum_required(VERSION 3.25)
+
 # CMake include(s).
 include(FetchContent)
 
@@ -15,7 +17,7 @@ message(STATUS "Building Detray as part of the Acts project")
 set(DETRAY_VERSION "v${_acts_detray_version}")
 
 # Declare where to get Detray from.
-FetchContent_Declare(Detray ${ACTS_DETRAY_SOURCE})
+FetchContent_Declare(Detray SYSTEM ${ACTS_DETRAY_SOURCE})
 
 # Options used in the build of Detray.
 set(ACTS_DETRAY_SCALARTYPE "double")
