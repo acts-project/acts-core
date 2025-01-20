@@ -3,6 +3,7 @@
 # independent plugins
 add_component_if(ActSVG PluginActSVG ACTS_BUILD_PLUGIN_ACTSVG)
 add_component_if(Cuda PluginCuda ACTS_BUILD_PLUGIN_CUDA)
+add_component_if(FastJet PluginFastJet ACTS_BUILD_PLUGIN_FASTJET)
 add_component_if(FpeMonitoring PluginFpeMonitoring ACTS_BUILD_PLUGIN_FPEMON)
 add_component_if(Geant4 PluginGeant4 ACTS_BUILD_PLUGIN_GEANT4)
 add_component_if(GeoModel PluginGeoModel ACTS_BUILD_PLUGIN_GEOMODEL)
