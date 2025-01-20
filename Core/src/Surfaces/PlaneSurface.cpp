@@ -8,14 +8,17 @@
 
 #include "Acts/Surfaces/PlaneSurface.hpp"
 
+#include "Acts/Definitions/Algebra.hpp"
 #include "Acts/Geometry/GeometryObject.hpp"
 #include "Acts/Surfaces/BoundaryTolerance.hpp"
 #include "Acts/Surfaces/CurvilinearSurface.hpp"
 #include "Acts/Surfaces/EllipseBounds.hpp"
 #include "Acts/Surfaces/InfiniteBounds.hpp"
 #include "Acts/Surfaces/PlanarBounds.hpp"
+#include "Acts/Surfaces/RectangleBounds.hpp"
 #include "Acts/Surfaces/SurfaceBounds.hpp"
 #include "Acts/Surfaces/SurfaceError.hpp"
+#include "Acts/Surfaces/SurfaceMergingException.hpp"
 #include "Acts/Surfaces/detail/FacesHelper.hpp"
 #include "Acts/Surfaces/detail/PlanarHelper.hpp"
 #include "Acts/Utilities/Intersection.hpp"
@@ -188,6 +191,121 @@ ActsMatrix<2, 3> PlaneSurface::localCartesianToBoundLocalDerivative(
     const GeometryContext& /*gctx*/, const Vector3& /*position*/) const {
   const ActsMatrix<2, 3> loc3DToLocBound = ActsMatrix<2, 3>::Identity();
   return loc3DToLocBound;
+}
+
+std::pair<std::shared_ptr<PlaneSurface>, bool> PlaneSurface::mergedWith(
+    const PlaneSurface& other, AxisDirection direction,
+    const Logger& logger) const {
+  ACTS_VERBOSE("Merging plane surfaces in " << axisDirectionName(direction)
+                                            << " direction");
+
+  if (m_associatedDetElement != nullptr ||
+      other.m_associatedDetElement != nullptr) {
+    throw SurfaceMergingException(getSharedPtr(), other.getSharedPtr(),
+                                  "PlaneSurface::merge: surfaces are "
+                                  "associated with a detector element");
+  }
+
+  assert(m_transform != nullptr && other.m_transform != nullptr);
+
+  Transform3 otherLocal = m_transform->inverse() * *other.m_transform;
+
+  // TODO: Is it a good tolerance?
+  constexpr auto tolerance = s_onSurfaceTolerance;
+
+  // Surface cannot have any relative rotation
+  if ((otherLocal.rotation().matrix() - RotationMatrix3::Identity()).norm() >
+      tolerance) {
+    ACTS_ERROR("PlaneSurface::merge: surfaces have relative rotation");
+    throw SurfaceMergingException(
+        getSharedPtr(), other.getSharedPtr(),
+        "PlaneSurface::merge: surfaces have relative rotation");
+  }
+
+  const RectangleBounds* thisBounds =
+      dynamic_cast<const RectangleBounds*>(&bounds());
+  const RectangleBounds* otherBounds =
+      dynamic_cast<const RectangleBounds*>(&other.bounds());
+
+  if (thisBounds == nullptr || otherBounds == nullptr) {
+    throw SurfaceMergingException(
+        getSharedPtr(), other.getSharedPtr(),
+        "PlaneSurface::merge: only Rectangle Bounds are supported");
+  }
+
+  if (direction != AxisDirection::AxisX && direction != AxisDirection::AxisY) {
+    throw SurfaceMergingException(getSharedPtr(), other.getSharedPtr(),
+                                  "PlaneSurface::merge: invalid direction " +
+                                      axisDirectionName(direction));
+  }
+
+  bool mergeX = direction == AxisDirection::AxisX;
+
+  double thisHalfMerge =
+      mergeX ? thisBounds->halfLengthX() : thisBounds->halfLengthY();
+  double otherHalfMerge =
+      mergeX ? otherBounds->halfLengthX() : otherBounds->halfLengthY();
+
+  double thisHalfNonMerge =
+      mergeX ? thisBounds->halfLengthY() : thisBounds->halfLengthX();
+  double otherHalfNonMerge =
+      mergeX ? otherBounds->halfLengthY() : otherBounds->halfLengthX();
+
+  if (std::abs(thisHalfNonMerge - otherHalfNonMerge) > tolerance) {
+    ACTS_ERROR(
+        "PlaneSurface::merge: surfaces have different non-merging lengths");
+    throw SurfaceMergingException(
+        getSharedPtr(), other.getSharedPtr(),
+        "PlaneSurface::merge: surfaces have different non-merging lengths");
+  }
+  Vector3 otherTranslation = otherLocal.translation();
+
+  // No translation in non-merging direction/z is allowed
+  double nonMergeShift = mergeX ? otherTranslation.y() : otherTranslation.x();
+
+  if (std::abs(nonMergeShift) > tolerance ||
+      std::abs(otherTranslation.z()) > tolerance) {
+    ACTS_ERROR(
+        "PlaneSurface::merge: surfaces have relative translation in y/z");
+    throw SurfaceMergingException(
+        getSharedPtr(), other.getSharedPtr(),
+        "PlaneSurface::merge: surfaces have relative translation in y/z");
+  }
+
+  double mergeShift = mergeX ? otherTranslation.x() : otherTranslation.y();
+
+  double thisMinMerge = -thisHalfMerge;
+  double thisMaxMerge = thisHalfMerge;
+
+  double otherMinMerge = mergeShift - otherHalfMerge;
+  double otherMaxMerge = mergeShift + otherHalfMerge;
+
+  // Surfaces have to "touch" along merging direction
+  if (std::abs(thisMaxMerge - otherMinMerge) > tolerance &&
+      std::abs(thisMinMerge - otherMaxMerge) > tolerance) {
+    ACTS_ERROR(
+        "PlaneSurface::merge: surfaces have incompatible merge bound location");
+    throw SurfaceMergingException(
+        getSharedPtr(), other.getSharedPtr(),
+        "PlaneSurface::merge: surfaces have incompatible merge bound location");
+  }
+
+  double newMaxMerge = std::max(thisMaxMerge, otherMaxMerge);
+  double newMinMerge = std::min(thisMinMerge, otherMinMerge);
+
+  double newHalfMerge = (newMaxMerge - newMinMerge) / 2;
+
+  double newMidMerge = (newMaxMerge + newMinMerge) / 2;
+
+  auto newBounds =
+      mergeX
+          ? std::make_shared<RectangleBounds>(newHalfMerge, thisHalfNonMerge)
+          : std::make_shared<RectangleBounds>(thisHalfNonMerge, newHalfMerge);
+
+  Vector3 unitDir = mergeX ? Vector3::UnitX() : Vector3::UnitY();
+  Transform3 newTransform = *m_transform * Translation3{unitDir * newMidMerge};
+  return {Surface::makeShared<PlaneSurface>(newTransform, newBounds),
+          mergeShift < 0};
 }
 
 }  // namespace Acts

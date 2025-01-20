@@ -102,13 +102,13 @@ class PlaneSurface : public RegularSurface {
   /// @return The normal vector
   Vector3 normal(const GeometryContext& gctx) const;
 
-  /// The binning position is the position calculated
-  /// for a certain binning type
+  /// The axis position is the position calculated
+  /// for a certain axis type
   ///
   /// @param gctx The current geometry context object, e.g. alignment
   /// @param aDir is the axis direction of reference position request
   ///
-  /// @return position that can beused for this binning
+  /// @return position that can be used for this axis
   Vector3 referencePosition(const GeometryContext& gctx,
                             AxisDirection aDir) const final;
 
@@ -215,6 +215,20 @@ class PlaneSurface : public RegularSurface {
   /// cartesian coordinates
   ActsMatrix<2, 3> localCartesianToBoundLocalDerivative(
       const GeometryContext& gctx, const Vector3& position) const final;
+
+  /// Merge two plane surfaces into a single one.
+  /// @note The surfaces need to be *compatible*, i.e. have bounds
+  ///       that align along merging direction, and have the same bound size
+  ///       along the non-merging direction
+  /// @param other The other plane surface to merge with
+  /// @param direction The direction: either @c AxisX or @c AxisY
+  /// @param logger The logger to use
+  /// @return The merged plane surface and a boolean indicating if surfaces are reversed
+  /// @note The returned boolean is `false` if `this` is *left* or
+  ///       *counter-clockwise* of @p other, and `true` if not.
+  std::pair<std::shared_ptr<PlaneSurface>, bool> mergedWith(
+      const PlaneSurface& other, AxisDirection direction,
+      const Logger& logger = getDummyLogger()) const;
 
  protected:
   /// the bounds of this surface
