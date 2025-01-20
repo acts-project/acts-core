@@ -119,12 +119,11 @@ def runTruthTrackingGx2f(
             ),
         )
     )
-    s.addWhiteboardAlias("tracks", "selected-tracks")
 
     s.addWriter(
         acts.examples.RootTrackStatesWriter(
             level=acts.logging.INFO,
-            inputTracks="tracks",
+            inputTracks="selected-tracks",
             inputParticles="particles_selected",
             inputTrackParticleMatching="track_particle_matching",
             inputSimHits="simhits",
@@ -136,7 +135,7 @@ def runTruthTrackingGx2f(
     s.addWriter(
         acts.examples.RootTrackSummaryWriter(
             level=acts.logging.INFO,
-            inputTracks="tracks",
+            inputTracks="selected-tracks",
             inputParticles="particles_selected",
             inputTrackParticleMatching="track_particle_matching",
             filePath=str(outputDir / "tracksummary_gx2f.root"),
@@ -147,7 +146,7 @@ def runTruthTrackingGx2f(
     s.addWriter(
         acts.examples.TrackFitterPerformanceWriter(
             level=acts.logging.INFO,
-            inputTracks="tracks",
+            inputTracks="selected-tracks",
             inputParticles="particles_selected",
             inputTrackParticleMatching="track_particle_matching",
             filePath=str(outputDir / "performance_gx2f.root"),
