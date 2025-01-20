@@ -36,6 +36,8 @@ template <typename propagator_options_t, typename stepper_state_t,
           typename navigator_state_t, typename... extension_state_t>
 struct PropagatorState : private detail::Extendable<extension_state_t...> {
   using options_type = propagator_options_t;
+  using stepper_state_type = stepper_state_t;
+  using navigator_state_type = navigator_state_t;
 
   /// Create the propagator state from the options
   ///

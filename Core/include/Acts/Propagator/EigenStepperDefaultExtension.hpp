@@ -16,6 +16,8 @@
 
 namespace Acts {
 
+class IVolumeMaterial;
+
 /// @brief Default evaluator of the k_i's and elements of the transport matrix
 /// D of the RKN4 stepping. This is a pure implementation by textbook.
 struct EigenStepperDefaultExtension {
@@ -23,12 +25,11 @@ struct EigenStepperDefaultExtension {
   /// step sets up qop, too.
   ///
   /// @tparam i Index of the k_i, i = [0, 3]
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagation
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [out] knew Next k_i that is evaluated
   /// @param [in] bField B-Field at the evaluation position
   /// @param [out] kQoP k_i elements of the momenta
@@ -36,22 +37,22 @@ struct EigenStepperDefaultExtension {
   /// @param [in] kprev Evaluated k_{i - 1}
   ///
   /// @return Boolean flag if the calculation is valid
-  template <int i, typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool k(const propagator_state_t& state, const stepper_t& stepper,
-         const navigator_t& /*navigator*/, Vector3& knew, const Vector3& bField,
-         std::array<double, 4>& kQoP, const double h = 0.,
-         const Vector3& kprev = Vector3::Zero())
+  template <int i, typename stepper_t>
+  bool k(const stepper_t::State& state, const stepper_t& stepper,
+         const IVolumeMaterial* volumeMaterial, Vector3& knew,
+         const Vector3& bField, std::array<double, 4>& kQoP,
+         const double h = 0., const Vector3& kprev = Vector3::Zero())
     requires(i >= 0 && i <= 3)
   {
-    auto qop = stepper.qOverP(state.stepping);
+    (void)volumeMaterial;
+
+    auto qop = stepper.qOverP(state);
     // First step does not rely on previous data
     if constexpr (i == 0) {
-      knew = qop * stepper.direction(state.stepping).cross(bField);
+      knew = qop * stepper.direction(state).cross(bField);
       kQoP = {0., 0., 0., 0.};
     } else {
-      knew =
-          qop * (stepper.direction(state.stepping) + h * kprev).cross(bField);
+      knew = qop * (stepper.direction(state) + h * kprev).cross(bField);
     }
     return true;
   }
@@ -60,19 +61,19 @@ struct EigenStepperDefaultExtension {
   /// error of the step. Since the textbook does not deliver further vetos,
   /// this is a dummy function.
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagation
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [in] h Step size
   ///
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const navigator_t& /*navigator*/, const double h) const {
+  template <typename stepper_t>
+  bool finalize(stepper_t::State& state, const stepper_t& stepper,
+                const IVolumeMaterial* volumeMaterial, const double h) const {
+    (void)volumeMaterial;
+
     propagateTime(state, stepper, h);
     return true;
   }
@@ -81,21 +82,21 @@ struct EigenStepperDefaultExtension {
   /// error of the step. Since the textbook does not deliver further vetos,
   /// this is just for the evaluation of the transport matrix.
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagation
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   ///
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const navigator_t& /*navigator*/, const double h,
+  template <typename stepper_t>
+  bool finalize(stepper_t::State& state, const stepper_t& stepper,
+                const IVolumeMaterial* volumeMaterial, const double h,
                 FreeMatrix& D) const {
+    (void)volumeMaterial;
+
     propagateTime(state, stepper, h);
     return transportMatrix(state, stepper, h, D);
   }
@@ -103,40 +104,38 @@ struct EigenStepperDefaultExtension {
  private:
   /// @brief Propagation function for the time coordinate
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
   ///
-  /// @param [in, out] state State of the propagator
+  /// @param [in, out] state State of the stepper
   /// @param [in] stepper Stepper of the propagation
   /// @param [in] h Step size
-  template <typename propagator_state_t, typename stepper_t>
-  void propagateTime(propagator_state_t& state, const stepper_t& stepper,
+  template <typename stepper_t>
+  void propagateTime(stepper_t::State& state, const stepper_t& stepper,
                      const double h) const {
     /// This evaluation is based on dt/ds = 1/v = 1/(beta * c) with the velocity
     /// v, the speed of light c and beta = v/c. This can be re-written as dt/ds
     /// = sqrt(m^2/p^2 + c^{-2}) with the mass m and the momentum p.
-    auto m = stepper.particleHypothesis(state.stepping).mass();
-    auto p = stepper.absoluteMomentum(state.stepping);
+    auto m = stepper.particleHypothesis(state).mass();
+    auto p = stepper.absoluteMomentum(state);
     auto dtds = std::sqrt(1 + m * m / (p * p));
-    state.stepping.pars[eFreeTime] += h * dtds;
-    if (state.stepping.covTransport) {
-      state.stepping.derivative(3) = dtds;
+    state.pars[eFreeTime] += h * dtds;
+    if (state.covTransport) {
+      state.derivative(3) = dtds;
     }
   }
 
   /// @brief Calculates the transport matrix D for the jacobian
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagation
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   ///
   /// @return Boolean flag if evaluation is valid
-  template <typename propagator_state_t, typename stepper_t>
-  bool transportMatrix(propagator_state_t& state, const stepper_t& stepper,
+  template <typename stepper_t>
+  bool transportMatrix(stepper_t::State& state, const stepper_t& stepper,
                        const double h, FreeMatrix& D) const {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.
@@ -157,11 +156,11 @@ struct EigenStepperDefaultExtension {
     /// constant offset does not exist for rectangular matrix dGdu' (due to the
     /// missing Lambda part) and only exists for dFdu' in dlambda/dlambda.
 
-    auto m = state.stepping.particleHypothesis.mass();
-    auto& sd = state.stepping.stepData;
-    auto dir = stepper.direction(state.stepping);
-    auto qop = stepper.qOverP(state.stepping);
-    auto p = stepper.absoluteMomentum(state.stepping);
+    auto m = state.particleHypothesis.mass();
+    auto& sd = state.stepData;
+    auto dir = stepper.direction(state);
+    auto qop = stepper.qOverP(state);
+    auto p = stepper.absoluteMomentum(state);
     auto dtds = std::sqrt(1 + m * m / (p * p));
 
     D = FreeMatrix::Identity();

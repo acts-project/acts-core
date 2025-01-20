@@ -30,6 +30,8 @@
 
 namespace Acts {
 
+class IVolumeMaterial;
+
 /// @brief the AtlasStepper implementation for the
 ///
 /// This is based original stepper code from the ATLAS RungeKuttaPropagator
@@ -528,13 +530,10 @@ class AtlasStepper {
   /// Compute path length derivatives in case they have not been computed
   /// yet, which is the case if no step has been executed yet.
   ///
-  /// @param [in, out] prop_state State that will be presented as @c BoundState
-  /// @param [in] navigator the navigator of the propagation
+  /// @param [in, out] state The stepping state (thread-local cache)
   /// @return true if nothing is missing after this call, false otherwise.
-  template <typename propagator_state_t, typename navigator_t>
-  bool prepareCurvilinearState(
-      [[maybe_unused]] propagator_state_t& prop_state,
-      [[maybe_unused]] const navigator_t& navigator) const {
+  bool prepareCurvilinearState(State& state) const {
+    (void)state;
     return true;
   }
 
@@ -1154,32 +1153,36 @@ class AtlasStepper {
   /// Perform the actual step on the state
   ///
   /// @param state is the provided stepper state (caller keeps thread locality)
-  template <typename propagator_state_t, typename navigator_t>
-  Result<double> step(propagator_state_t& state,
-                      const navigator_t& /*navigator*/) const {
-    // we use h for keeping the nominclature with the original atlas code
-    auto h = state.stepping.stepSize.value() * state.options.direction;
-    bool Jac = state.stepping.useJacobian;
+  /// @param propDir is the direction of propagation
+  /// @param material is the material properties
+  /// @return the result of the step
+  Result<double> step(State& state, Direction propDir,
+                      const IVolumeMaterial* material) const {
+    (void)material;
 
-    double* R = &(state.stepping.pVector[0]);  // Coordinates
-    double* A = &(state.stepping.pVector[4]);  // Directions
-    double* sA = &(state.stepping.pVector[56]);
+    // we use h for keeping the nominclature with the original atlas code
+    auto h = state.stepSize.value() * propDir;
+    bool Jac = state.useJacobian;
+
+    double* R = &(state.pVector[0]);  // Coordinates
+    double* A = &(state.pVector[4]);  // Directions
+    double* sA = &(state.pVector[56]);
     // Invert mometum/2.
-    double Pi = 0.5 * state.stepping.pVector[7];
+    double Pi = 0.5 * state.pVector[7];
     //    double dltm = 0.0002 * .03;
     Vector3 f0, f;
 
     // if new field is required get it
-    if (state.stepping.newfield) {
+    if (state.newfield) {
       const Vector3 pos(R[0], R[1], R[2]);
       // This is sd.B_first in EigenStepper
-      auto fRes = getField(state.stepping, pos);
+      auto fRes = getField(state, pos);
       if (!fRes.ok()) {
         return fRes.error();
       }
       f0 = *fRes;
     } else {
-      f0 = state.stepping.field;
+      f0 = state.field;
     }
 
     bool Helix = false;
@@ -1215,7 +1218,7 @@ class AtlasStepper {
         // This is pos1 in EigenStepper
         const Vector3 pos(R[0] + A1 * S4, R[1] + B1 * S4, R[2] + C1 * S4);
         // This is sd.B_middle in EigenStepper
-        auto fRes = getField(state.stepping, pos);
+        auto fRes = getField(state, pos);
         if (!fRes.ok()) {
           return fRes.error();
         }
@@ -1245,7 +1248,7 @@ class AtlasStepper {
         // This is pos2 in EigenStepper
         const Vector3 pos(R[0] + h * A4, R[1] + h * B4, R[2] + h * C4);
         // This is sd.B_last in Eigen stepper
-        auto fRes = getField(state.stepping, pos);
+        auto fRes = getField(state, pos);
         if (!fRes.ok()) {
           return fRes.error();
         }
@@ -1269,10 +1272,10 @@ class AtlasStepper {
           2. * h *
           (std::abs((A1 + A6) - (A3 + A4)) + std::abs((B1 + B6) - (B3 + B4)) +
            std::abs((C1 + C6) - (C3 + C4)));
-      if (std::abs(EST) > std::abs(state.options.stepping.stepTolerance)) {
+      if (std::abs(EST) > std::abs(state.options.stepTolerance)) {
         h = h * .5;
         // neutralize the sign of h again
-        state.stepping.stepSize.setAccuracy(h * state.options.direction);
+        state.stepSize.setAccuracy(h * propDir);
         //        dltm = 0.;
         continue;
       }
@@ -1301,25 +1304,25 @@ class AtlasStepper {
       sA[1] = B6 * Sl;
       sA[2] = C6 * Sl;
 
-      double mass = particleHypothesis(state.stepping).mass();
-      double momentum = absoluteMomentum(state.stepping);
+      double mass = particleHypothesis(state).mass();
+      double momentum = absoluteMomentum(state);
 
       // Evaluate the time propagation
       double dtds = std::sqrt(1 + mass * mass / (momentum * momentum));
-      state.stepping.pVector[3] += h * dtds;
-      state.stepping.pVector[59] = dtds;
-      state.stepping.field = f;
-      state.stepping.newfield = false;
+      state.pVector[3] += h * dtds;
+      state.pVector[59] = dtds;
+      state.field = f;
+      state.newfield = false;
 
       if (Jac) {
-        double dtdl = h * mass * mass * qOverP(state.stepping) / dtds;
-        state.stepping.pVector[43] += dtdl;
+        double dtdl = h * mass * mass * qOverP(state) / dtds;
+        state.pVector[43] += dtdl;
 
         // Jacobian calculation
         //
-        double* d2A = &state.stepping.pVector[28];
-        double* d3A = &state.stepping.pVector[36];
-        double* d4A = &state.stepping.pVector[44];
+        double* d2A = &state.pVector[28];
+        double* d3A = &state.pVector[36];
+        double* d4A = &state.pVector[44];
         double d2A0 = H0[2] * d2A[1] - H0[1] * d2A[2];
         double d2B0 = H0[0] * d2A[2] - H0[2] * d2A[0];
         double d2C0 = H0[1] * d2A[0] - H0[0] * d2A[1];
@@ -1378,7 +1381,7 @@ class AtlasStepper {
         double d4B6 = d4C5 * H2[0] - d4A5 * H2[2];
         double d4C6 = d4A5 * H2[1] - d4B5 * H2[0];
 
-        double* dR = &state.stepping.pVector[24];
+        double* dR = &state.pVector[24];
         dR[0] += (d2A2 + d2A3 + d2A4) * S3;
         dR[1] += (d2B2 + d2B3 + d2B4) * S3;
         dR[2] += (d2C2 + d2C3 + d2C4) * S3;
@@ -1386,7 +1389,7 @@ class AtlasStepper {
         d2A[1] = ((d2B0 + 2. * d2B3) + (d2B5 + d2B6)) * (1. / 3.);
         d2A[2] = ((d2C0 + 2. * d2C3) + (d2C5 + d2C6)) * (1. / 3.);
 
-        dR = &state.stepping.pVector[32];
+        dR = &state.pVector[32];
         dR[0] += (d3A2 + d3A3 + d3A4) * S3;
         dR[1] += (d3B2 + d3B3 + d3B4) * S3;
         dR[2] += (d3C2 + d3C3 + d3C4) * S3;
@@ -1394,7 +1397,7 @@ class AtlasStepper {
         d3A[1] = ((d3B0 + 2. * d3B3) + (d3B5 + d3B6)) * (1. / 3.);
         d3A[2] = ((d3C0 + 2. * d3C3) + (d3C5 + d3C6)) * (1. / 3.);
 
-        dR = &state.stepping.pVector[40];
+        dR = &state.pVector[40];
         dR[0] += (d4A2 + d4A3 + d4A4) * S3;
         dR[1] += (d4B2 + d4B3 + d4B4) * S3;
         dR[2] += (d4C2 + d4C3 + d4C4) * S3;
@@ -1406,9 +1409,9 @@ class AtlasStepper {
       break;
     }
 
-    state.stepping.pathAccumulated += h;
-    ++state.stepping.nSteps;
-    state.stepping.nStepTrials += nStepTrials;
+    state.pathAccumulated += h;
+    ++state.nSteps;
+    state.nStepTrials += nStepTrials;
 
     return h;
   }

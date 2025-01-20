@@ -9,11 +9,14 @@
 #pragma once
 
 #include <type_traits>
+
 namespace Acts {
-template <typename stepper_t, typename navigator_t>
+
+template <typename stepper_t>
 struct SupportsBoundParameters : public std::false_type {};
 
-template <typename stepper_t, typename navigator_t>
+template <typename stepper_t>
 constexpr bool SupportsBoundParameters_v =
-    SupportsBoundParameters<stepper_t, navigator_t>::value;
+    SupportsBoundParameters<stepper_t>::value;
+
 }  // namespace Acts

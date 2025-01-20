@@ -90,25 +90,23 @@ auto MultiEigenStepperLoop<E, R>::curvilinearState(
 }
 
 template <typename E, typename R>
-template <typename propagator_state_t, typename navigator_t>
 Result<double> MultiEigenStepperLoop<E, R>::step(
-    propagator_state_t& state, const navigator_t& navigator) const {
+    State& state, Direction propDir, const IVolumeMaterial* material) const {
   using Status = Acts::IntersectionStatus;
 
-  State& stepping = state.stepping;
-  auto& components = stepping.components;
+  auto& components = state.components;
   const Logger& logger = *m_logger;
 
   // Update step count
-  stepping.steps++;
+  state.steps++;
 
   // Check if we abort because of m_stepLimitAfterFirstComponentOnSurface
-  if (stepping.stepCounterAfterFirstComponentOnSurface) {
-    (*stepping.stepCounterAfterFirstComponentOnSurface)++;
+  if (state.stepCounterAfterFirstComponentOnSurface) {
+    (*state.stepCounterAfterFirstComponentOnSurface)++;
 
     // If the limit is reached, remove all components which are not on a
     // surface, reweight the components, perform no step and return 0
-    if (*stepping.stepCounterAfterFirstComponentOnSurface >=
+    if (*state.stepCounterAfterFirstComponentOnSurface >=
         m_stepLimitAfterFirstComponentOnSurface) {
       for (auto& cmp : components) {
         if (cmp.status != Status::onSurface) {
@@ -122,13 +120,13 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
       ACTS_VERBOSE(
           "-> remove all components not on a surface, perform no step");
 
-      removeMissedComponents(stepping);
-      reweightComponents(stepping);
+      removeMissedComponents(state);
+      reweightComponents(state);
 
       ACTS_VERBOSE(components.size()
                    << " components left after removing missed components");
 
-      stepping.stepCounterAfterFirstComponentOnSurface.reset();
+      state.stepCounterAfterFirstComponentOnSurface.reset();
 
       return 0.0;
     }
@@ -145,7 +143,7 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
       [&](auto& cmp) { return cmp.status == IntersectionStatus::onSurface; });
 
   if (cmpsOnSurface > 0) {
-    removeMissedComponents(stepping);
+    removeMissedComponents(state);
     reweightNecessary = true;
   }
 
@@ -155,15 +153,10 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
   double accumulatedPathLength = 0.0;
   std::size_t errorSteps = 0;
 
-  // Type of the proxy single propagation2 state
-  using ThisSinglePropState =
-      detail::SinglePropState<SingleState, decltype(state.navigation),
-                              decltype(state.options),
-                              decltype(state.geoContext)>;
-
   // Lambda that performs the step for a component and returns false if the step
   // went ok and true if there was an error
-  auto errorInStep = [&](auto& component) {
+  auto errorInStep = [this, &results, propDir, material, &accumulatedPathLength,
+                      &errorSteps, &reweightNecessary](auto& component) {
     if (component.status == Status::onSurface) {
       // We need to add these, so the propagation does not fail if we have only
       // components on surfaces and failing states
@@ -171,10 +164,8 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
       return false;
     }
 
-    ThisSinglePropState single_state(component.state, state.navigation,
-                                     state.options, state.geoContext);
-
-    results.emplace_back(SingleStepper::step(single_state, navigator));
+    results.emplace_back(
+        SingleStepper::step(component.state, propDir, material));
 
     if (results.back()->ok()) {
       accumulatedPathLength += component.weight * results.back()->value();
@@ -193,7 +184,7 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
 
   // Reweight if necessary
   if (reweightNecessary) {
-    reweightComponents(stepping);
+    reweightComponents(state);
   }
 
   // Print the result vector to a string so we can log it
@@ -231,7 +222,7 @@ Result<double> MultiEigenStepperLoop<E, R>::step(
   }
 
   // Return the weighted accumulated path length of all successful steps
-  stepping.pathAccumulated += accumulatedPathLength;
+  state.pathAccumulated += accumulatedPathLength;
   return accumulatedPathLength;
 }
 

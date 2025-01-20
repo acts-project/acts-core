@@ -235,9 +235,8 @@ struct GsfActor {
     }
 
     for (auto cmp : stepper.componentIterable(state.stepping)) {
-      auto singleState = cmp.singleState(state);
-      cmp.singleStepper(stepper).transportCovarianceToBound(
-          singleState.stepping, surface);
+      cmp.singleStepper(stepper).transportCovarianceToBound(cmp.state(),
+                                                            surface);
     }
 
     if (haveMaterial) {
@@ -640,9 +639,8 @@ struct GsfActor {
     // components should behave the same
     bool isHole = true;
 
-    auto cmps = stepper.componentIterable(state.stepping);
-    for (auto cmp : cmps) {
-      auto singleState = cmp.singleState(state);
+    for (auto cmp : stepper.componentIterable(state.stepping)) {
+      auto& singleState = cmp.state();
       const auto& singleStepper = cmp.singleStepper(stepper);
 
       // There is some redundant checking inside this function, but do this for

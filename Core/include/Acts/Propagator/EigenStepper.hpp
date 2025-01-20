@@ -30,6 +30,8 @@
 
 namespace Acts {
 
+class IVolumeMaterial;
+
 /// @brief Runge-Kutta-Nystroem stepper based on Eigen implementation
 /// for the following ODE:
 ///
@@ -236,18 +238,18 @@ class EigenStepper {
   /// @param [in,out] state The stepping state (thread-local cache)
   /// @param [in] surface The surface provided
   /// @param [in] index The surface intersection index
-  /// @param [in] navDir The navigation direction
+  /// @param [in] propDir The propagation direction
   /// @param [in] boundaryTolerance The boundary check for this status update
   /// @param [in] surfaceTolerance Surface tolerance used for intersection
   /// @param [in] stype The step size type to be set
   /// @param [in] logger A @c Logger instance
   IntersectionStatus updateSurfaceStatus(
       State& state, const Surface& surface, std::uint8_t index,
-      Direction navDir, const BoundaryTolerance& boundaryTolerance,
+      Direction propDir, const BoundaryTolerance& boundaryTolerance,
       double surfaceTolerance, ConstrainedStep::Type stype,
       const Logger& logger = getDummyLogger()) const {
     return detail::updateSingleSurfaceStatus<EigenStepper>(
-        *this, state, surface, index, navDir, boundaryTolerance,
+        *this, state, surface, index, propDir, boundaryTolerance,
         surfaceTolerance, stype, logger);
   }
 
@@ -330,12 +332,9 @@ class EigenStepper {
   /// Compute path length derivatives in case they have not been computed
   /// yet, which is the case if no step has been executed yet.
   ///
-  /// @param [in, out] prop_state State that will be presented as @c BoundState
-  /// @param [in] navigator the navigator of the propagation
+  /// @param [in, out] state The state of the stepper
   /// @return true if nothing is missing after this call, false otherwise.
-  template <typename propagator_state_t, typename navigator_t>
-  bool prepareCurvilinearState(propagator_state_t& prop_state,
-                               const navigator_t& navigator) const;
+  bool prepareCurvilinearState(State& state) const;
 
   /// Create and return a curvilinear state at the current position
   ///
@@ -397,15 +396,16 @@ class EigenStepper {
 
   /// Perform a Runge-Kutta track parameter propagation step
   ///
-  /// @param [in,out] state the propagation state
-  /// @param [in] navigator the navigator of the propagation
-  /// @note The state contains the desired step size.  It can be negative during
+  /// @param [in,out] state The state of the stepper
+  /// @param propDir is the direction of propagation
+  /// @param material is the material properties
+  /// @return the result of the step
+  /// @note The state contains the desired step size. It can be negative during
   ///       backwards track propagation, and since we're using an adaptive
   ///       algorithm, it can be modified by the stepper class during
   ///       propagation.
-  template <typename propagator_state_t, typename navigator_t>
-  Result<double> step(propagator_state_t& state,
-                      const navigator_t& navigator) const;
+  Result<double> step(State& state, Direction propDir,
+                      const IVolumeMaterial* material) const;
 
   /// Method that reset the Jacobian to the Identity for when no bound state are
   /// available
@@ -418,9 +418,8 @@ class EigenStepper {
   std::shared_ptr<const MagneticFieldProvider> m_bField;
 };
 
-template <typename navigator_t>
-struct SupportsBoundParameters<EigenStepper<>, navigator_t>
-    : public std::true_type {};
+template <>
+struct SupportsBoundParameters<EigenStepper<>> : public std::true_type {};
 
 }  // namespace Acts
 

@@ -8,6 +8,7 @@
 
 #include "Acts/Propagator/SympyStepper.hpp"
 
+#include "Acts/Propagator/EigenStepperError.hpp"
 #include "Acts/Propagator/detail/SympyCovarianceEngine.hpp"
 #include "Acts/Propagator/detail/SympyJacobianEngine.hpp"
 
@@ -37,7 +38,6 @@ SympyStepper::State SympyStepper::makeState(
 
   // Init the jacobian matrix if needed
   if (par.covariance()) {
-    // Get the reference surface for navigation
     const auto& surface = par.referenceSurface();
     // set the covariance transport flag to true and copy
     state.covTransport = true;
@@ -84,6 +84,12 @@ SympyStepper::boundState(
       state.pathAccumulated, freeToBoundCorrection);
 }
 
+bool SympyStepper::prepareCurvilinearState(State& state) const {
+  // TODO implement like in EigenStepper
+  (void)state;
+  return true;
+}
+
 std::tuple<CurvilinearTrackParameters, BoundMatrix, double>
 SympyStepper::curvilinearState(State& state, bool transportCov) const {
   return detail::sympy::curvilinearState(
@@ -127,8 +133,16 @@ void SympyStepper::transportCovarianceToBound(
       freeToBoundCorrection);
 }
 
+Result<double> SympyStepper::step(State& state, Direction propDir,
+                                  const IVolumeMaterial* material) const {
+  (void)material;
+  return stepImpl(state, propDir, state.options.stepTolerance,
+                  state.options.stepSizeCutOff,
+                  state.options.maxRungeKuttaStepTrials);
+}
+
 Result<double> SympyStepper::stepImpl(
-    State& state, Direction stepDirection, double stepTolerance,
+    State& state, Direction propDir, double stepTolerance,
     double stepSizeCutOff, std::size_t maxRungeKuttaStepTrials) const {
   auto pos = position(state);
   auto dir = direction(state);
@@ -160,7 +174,7 @@ Result<double> SympyStepper::stepImpl(
     return std::clamp(x, lower, upper);
   };
 
-  double h = state.stepSize.value() * stepDirection;
+  double h = state.stepSize.value() * propDir;
   double initialH = h;
   std::size_t nStepTrials = 0;
   double errorEstimate = 0.;
@@ -212,7 +226,7 @@ Result<double> SympyStepper::stepImpl(
   state.nStepTrials += nStepTrials;
 
   ++state.statistics.nSuccessfulSteps;
-  if (stepDirection != Direction::fromScalarZeroAsPositive(initialH)) {
+  if (propDir != Direction::fromScalarZeroAsPositive(initialH)) {
     ++state.statistics.nReverseSteps;
   }
   state.statistics.pathLength += h;

@@ -10,7 +10,6 @@
 
 #include "Acts/EventData/MultiTrajectory.hpp"
 #include "Acts/EventData/SourceLink.hpp"
-#include "Acts/EventData/TrackParameters.hpp"
 #include "Acts/EventData/detail/CorrectedTransformationFreeToBound.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/CalibrationContext.hpp"
@@ -121,7 +120,6 @@ auto kalmanHandleMeasurement(
 /// If there are no source links on surface, add either a hole or passive
 /// material TrackState entry multi trajectory. No storage allocation for
 /// uncalibrated/calibrated measurement and filtered parameter
-/// @tparam propagator_state_t The propagator state type
 /// @tparam stepper_t The stepper type
 /// @param state The propagator state
 /// @param stepper The stepper
@@ -131,11 +129,12 @@ auto kalmanHandleMeasurement(
 /// @param doCovTransport Whether to perform a covariance transport when
 /// computing the bound state or not
 /// @param freeToBoundCorrection Correction for non-linearity effect during transform from free to bound (only corrected when performing CovTransport)
-template <typename propagator_state_t, typename stepper_t, typename traj_t>
+template <typename stepper_t, typename traj_t>
 auto kalmanHandleNoMeasurement(
-    propagator_state_t &state, const stepper_t &stepper, const Surface &surface,
-    traj_t &fittedStates, const std::size_t lastTrackIndex, bool doCovTransport,
-    const Logger &logger, const bool precedingMeasurementExists,
+    typename stepper_t::State &state, const stepper_t &stepper,
+    const Surface &surface, traj_t &fittedStates,
+    const std::size_t lastTrackIndex, bool doCovTransport, const Logger &logger,
+    const bool precedingMeasurementExists,
     const FreeToBoundCorrection &freeToBoundCorrection = FreeToBoundCorrection(
         false)) -> Result<typename traj_t::TrackStateProxy> {
   // Add a <mask> TrackState entry multi trajectory. This allocates storage for
@@ -151,7 +150,7 @@ auto kalmanHandleNoMeasurement(
   {
     trackStateProxy.setReferenceSurface(surface.getSharedPtr());
     // Bind the transported state to the current surface
-    auto res = stepper.boundState(state.stepping, surface, doCovTransport,
+    auto res = stepper.boundState(state, surface, doCovTransport,
                                   freeToBoundCorrection);
     if (!res.ok()) {
       return res.error();
@@ -160,7 +159,7 @@ auto kalmanHandleNoMeasurement(
 
     // Fill the track state
     trackStateProxy.predicted() = boundParams.parameters();
-    trackStateProxy.predictedCovariance() = state.stepping.cov;
+    trackStateProxy.predictedCovariance() = state.cov;
 
     trackStateProxy.jacobian() = jacobian;
     trackStateProxy.pathLength() = pathLength;

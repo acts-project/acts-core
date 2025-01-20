@@ -657,7 +657,7 @@ class KalmanFitter {
         // detected or if the surface has material (no holes before the first
         // measurement)
         auto trackStateProxyRes = detail::kalmanHandleNoMeasurement(
-            state, stepper, *surface, *result.fittedStates,
+            state.stepping, stepper, *surface, *result.fittedStates,
             result.lastTrackIndex, true, logger(), precedingMeasurementExists,
             freeToBoundCorrection);
 

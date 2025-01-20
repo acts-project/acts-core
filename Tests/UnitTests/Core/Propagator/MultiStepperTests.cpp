@@ -30,7 +30,6 @@
 #include "Acts/Surfaces/PlaneSurface.hpp"
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Intersection.hpp"
-#include "Acts/Utilities/Logger.hpp"
 
 #include <algorithm>
 #include <array>
@@ -74,40 +73,6 @@ const auto defaultBField =
 const auto defaultNullBField = std::make_shared<NullBField>();
 
 const auto particleHypothesis = ParticleHypothesis::pion();
-
-struct Options {
-  Direction direction = defaultNDir;
-
-  const Acts::Logger &logger = Acts::getDummyLogger();
-
-  struct {
-    double stepTolerance = 1e-4;
-    double stepSizeCutOff = 0.0;
-    std::size_t maxRungeKuttaStepTrials = 10;
-  } stepping;
-};
-
-struct MockNavigator {};
-
-static constexpr MockNavigator mockNavigator;
-
-struct Navigation {};
-
-template <typename stepper_state_t>
-struct DummyPropState {
-  stepper_state_t &stepping;
-  Options options;
-  Navigation navigation;
-  GeometryContext geoContext;
-
-  DummyPropState(Direction direction, stepper_state_t &ss)
-      : stepping(ss),
-        options(Options{}),
-        navigation(Navigation{}),
-        geoContext(geoCtx) {
-    options.direction = direction;
-  }
-};
 
 // Makes random bound parameters and covariance and a plane surface at {0,0,0}
 // with normal {1,0,0}. Optionally some external fixed bound parameters can be
@@ -336,13 +301,12 @@ void test_multi_stepper_vs_eigen_stepper() {
   // Do some steps and check that the results match
   for (int i = 0; i < 10; ++i) {
     // Single stepper
-    auto single_prop_state = DummyPropState(defaultNDir, single_state);
-    auto single_result = single_stepper.step(single_prop_state, mockNavigator);
+    auto single_result =
+        single_stepper.step(single_state, defaultNDir, nullptr);
     single_stepper.transportCovarianceToCurvilinear(single_state);
 
     // Multi stepper;
-    auto multi_prop_state = DummyPropState(defaultNDir, multi_state);
-    auto multi_result = multi_stepper.step(multi_prop_state, mockNavigator);
+    auto multi_result = multi_stepper.step(multi_state, defaultNDir, nullptr);
     multi_stepper.transportCovarianceToCurvilinear(multi_state);
 
     // Check equality
@@ -526,12 +490,10 @@ void test_multi_stepper_surface_status_update() {
 
   // Step forward now
   {
-    auto multi_prop_state = DummyPropState(Direction::Forward(), multi_state);
-    multi_stepper.step(multi_prop_state, mockNavigator);
+    multi_stepper.step(multi_state, Direction::Forward(), nullptr);
 
     // Single stepper
-    auto single_prop_state = DummyPropState(Direction::Forward(), single_state);
-    single_stepper.step(single_prop_state, mockNavigator);
+    single_stepper.step(single_state, Direction::Forward(), nullptr);
   }
 
   // Update surface status and check again
@@ -627,16 +589,14 @@ void test_component_bound_state() {
         multi_state, *right_surface, 0, Direction::Forward(),
         BoundaryTolerance::Infinite(), s_onSurfaceTolerance,
         ConstrainedStep::Type::Navigator);
-    auto multi_prop_state = DummyPropState(Direction::Forward(), multi_state);
-    multi_stepper.step(multi_prop_state, mockNavigator);
+    multi_stepper.step(multi_state, Direction::Forward(), nullptr);
 
     // Single stepper
     single_stepper.updateSurfaceStatus(
         single_state, *right_surface, 0, Direction::Forward(),
         BoundaryTolerance::Infinite(), s_onSurfaceTolerance,
         ConstrainedStep::Type::Navigator);
-    auto single_prop_state = DummyPropState(Direction::Forward(), single_state);
-    single_stepper.step(single_prop_state, mockNavigator);
+    single_stepper.step(single_state, Direction::Forward(), nullptr);
   }
 
   // Check component-wise bound-state
@@ -779,12 +739,10 @@ void test_single_component_interface_function() {
 
   MultiState multi_state = multi_stepper.makeState(options, multi_pars);
 
-  DummyPropState multi_prop_state(defaultNDir, multi_state);
-
   // Check at least some properties at the moment
   auto check = [&](auto cmp) {
     auto sstepper = cmp.singleStepper(multi_stepper);
-    auto &sstepping = cmp.singleState(multi_prop_state).stepping;
+    auto &sstepping = cmp.state();
 
     BOOST_CHECK_EQUAL(sstepper.position(sstepping),
                       cmp.pars().template segment<3>(eFreePos0));

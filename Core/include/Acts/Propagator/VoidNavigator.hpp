@@ -16,6 +16,8 @@
 
 namespace Acts {
 
+class TrackingVolume;
+class IVolumeMaterial;
 class Surface;
 
 /// @brief A navigator that does nothing
@@ -53,6 +55,14 @@ class VoidNavigator {
   }
 
   const Surface* currentSurface(const State& /*state*/) const {
+    return nullptr;
+  }
+
+  const TrackingVolume* currentVolume(const State& /*state*/) const {
+    return nullptr;
+  }
+
+  const IVolumeMaterial* currentVolumeMaterial(const State& /*state*/) const {
     return nullptr;
   }
 

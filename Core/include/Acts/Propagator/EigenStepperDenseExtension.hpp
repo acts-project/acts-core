@@ -12,11 +12,11 @@
 #include "Acts/Utilities/detail/ReferenceWrapperAnyCompat.hpp"
 
 #include "Acts/Definitions/Algebra.hpp"
+#include "Acts/Material/IVolumeMaterial.hpp"
 #include "Acts/Material/Interactions.hpp"
 #include "Acts/Material/Material.hpp"
 #include "Acts/Material/MaterialSlab.hpp"
 #include "Acts/Propagator/EigenStepperDefaultExtension.hpp"
-#include "Acts/Propagator/Propagator.hpp"
 #include "Acts/Utilities/MathHelpers.hpp"
 
 namespace Acts {
@@ -58,13 +58,11 @@ struct EigenStepperDenseExtension {
   /// step sets up member parameters, too.
   ///
   /// @tparam i Index of the k_i, i = [0, 3]
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagator
-  /// @param [in] navigator Navigator of the propagator
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [out] knew Next k_i that is evaluated
   /// @param [out] kQoP k_i elements of the momenta
   /// @param [in] bField B-Field at the evaluation position
@@ -72,36 +70,33 @@ struct EigenStepperDenseExtension {
   /// @param [in] kprev Evaluated k_{i - 1}
   ///
   /// @return Boolean flag if the calculation is valid
-  template <int i, typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool k(const propagator_state_t& state, const stepper_t& stepper,
-         const navigator_t& navigator, Vector3& knew, const Vector3& bField,
-         std::array<double, 4>& kQoP, const double h = 0.,
-         const Vector3& kprev = Vector3::Zero())
+  template <int i, typename stepper_t>
+  bool k(const stepper_t::State& state, const stepper_t& stepper,
+         const IVolumeMaterial* volumeMaterial, Vector3& knew,
+         const Vector3& bField, std::array<double, 4>& kQoP,
+         const double h = 0., const Vector3& kprev = Vector3::Zero())
     requires(i >= 0 && i <= 3)
   {
-    const auto* volumeMaterial =
-        navigator.currentVolumeMaterial(state.navigation);
     if (volumeMaterial == nullptr) {
-      return defaultExtension.template k<i>(state, stepper, navigator, knew,
-                                            bField, kQoP, h, kprev);
+      return defaultExtension.template k<i>(state, stepper, volumeMaterial,
+                                            knew, bField, kQoP, h, kprev);
     }
 
-    double q = stepper.charge(state.stepping);
-    const auto& particleHypothesis = stepper.particleHypothesis(state.stepping);
+    double q = stepper.charge(state);
+    const auto& particleHypothesis = stepper.particleHypothesis(state);
     float mass = particleHypothesis.mass();
 
     // i = 0 is used for setup and evaluation of k
     if constexpr (i == 0) {
       // Set up for energy loss
-      Vector3 position = stepper.position(state.stepping);
+      Vector3 position = stepper.position(state);
       material = volumeMaterial->material(position.template cast<double>());
-      initialMomentum = stepper.absoluteMomentum(state.stepping);
+      initialMomentum = stepper.absoluteMomentum(state);
       currentMomentum = initialMomentum;
-      qop[0] = stepper.qOverP(state.stepping);
+      qop[0] = stepper.qOverP(state);
       initializeEnergyLoss(state, stepper);
       // Evaluate k
-      knew = qop[0] * stepper.direction(state.stepping).cross(bField);
+      knew = qop[0] * stepper.direction(state).cross(bField);
       // Evaluate k for the time propagation
       Lambdappi[0] = -qop[0] * qop[0] * qop[0] * g * energy[0] / (q * q);
       //~ tKi[0] = std::hypot(1, mass / initialMomentum);
@@ -110,12 +105,11 @@ struct EigenStepperDenseExtension {
     } else {
       // Update parameters and check for momentum condition
       updateEnergyLoss(mass, h, state, stepper, i);
-      if (currentMomentum < state.options.stepping.dense.momentumCutOff) {
+      if (currentMomentum < state.options.dense.momentumCutOff) {
         return false;
       }
       // Evaluate k
-      knew = qop[i] *
-             (stepper.direction(state.stepping) + h * kprev).cross(bField);
+      knew = qop[i] * (stepper.direction(state) + h * kprev).cross(bField);
       // Evaluate k_i for the time propagation
       auto qopNew = qop[0] + h * Lambdappi[i - 1];
       Lambdappi[i] = -qopNew * qopNew * qopNew * g * energy[i] / (q * q);
@@ -130,50 +124,44 @@ struct EigenStepperDenseExtension {
   /// of the energy loss and the therewith constrained to keep the momentum
   /// after the step in reasonable values.
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagator
-  /// @param [in] navigator Navigator of the propagator
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [in] h Step size
   ///
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const navigator_t& navigator, const double h) const {
-    const auto* volumeMaterial =
-        navigator.currentVolumeMaterial(state.navigation);
+  template <typename stepper_t>
+  bool finalize(stepper_t::State& state, const stepper_t& stepper,
+                const IVolumeMaterial* volumeMaterial, const double h) const {
     if (volumeMaterial == nullptr) {
-      return defaultExtension.finalize(state, stepper, navigator, h);
+      return defaultExtension.finalize(state, stepper, volumeMaterial, h);
     }
 
-    const auto& particleHypothesis = stepper.particleHypothesis(state.stepping);
+    const auto& particleHypothesis = stepper.particleHypothesis(state);
     float mass = particleHypothesis.mass();
 
     // Evaluate the new momentum
     auto newMomentum =
-        stepper.absoluteMomentum(state.stepping) +
+        stepper.absoluteMomentum(state) +
         (h / 6.) * (dPds[0] + 2. * (dPds[1] + dPds[2]) + dPds[3]);
 
     // Break propagation if momentum becomes below cut-off
-    if (newMomentum < state.options.stepping.dense.momentumCutOff) {
+    if (newMomentum < state.options.dense.momentumCutOff) {
       return false;
     }
 
     // Add derivative dlambda/ds = Lambda''
-    state.stepping.derivative(7) = -fastHypot(mass, newMomentum) * g /
-                                   (newMomentum * newMomentum * newMomentum);
+    state.derivative(7) = -fastHypot(mass, newMomentum) * g /
+                          (newMomentum * newMomentum * newMomentum);
 
     // Update momentum
-    state.stepping.pars[eFreeQOverP] =
-        stepper.charge(state.stepping) / newMomentum;
+    state.pars[eFreeQOverP] = stepper.charge(state) / newMomentum;
     // Add derivative dt/ds = 1/(beta * c) = sqrt(m^2 * p^{-2} + c^{-2})
-    state.stepping.derivative(3) = fastHypot(1, mass / newMomentum);
+    state.derivative(3) = fastHypot(1, mass / newMomentum);
     // Update time
-    state.stepping.pars[eFreeTime] +=
+    state.pars[eFreeTime] +=
         (h / 6.) * (tKi[0] + 2. * (tKi[1] + tKi[2]) + tKi[3]);
 
     return true;
@@ -186,29 +174,24 @@ struct EigenStepperDenseExtension {
   /// after the step in reasonable values and the evaluation of the transport
   /// matrix.
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
-  /// @tparam navigator_t Type of the navigator
   ///
-  /// @param [in] state State of the propagator
+  /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagator
-  /// @param [in] navigator Navigator of the propagator
+  /// @param [in] volumeMaterial Material of the volume
   /// @param [in] h Step size
   /// @param [out] D Transport matrix
   ///
   /// @return Boolean flag if the calculation is valid
-  template <typename propagator_state_t, typename stepper_t,
-            typename navigator_t>
-  bool finalize(propagator_state_t& state, const stepper_t& stepper,
-                const navigator_t& navigator, const double h,
+  template <typename stepper_t>
+  bool finalize(stepper_t::State& state, const stepper_t& stepper,
+                const IVolumeMaterial* volumeMaterial, const double h,
                 FreeMatrix& D) const {
-    const auto* volumeMaterial =
-        navigator.currentVolumeMaterial(state.navigation);
     if (volumeMaterial == nullptr) {
-      return defaultExtension.finalize(state, stepper, navigator, h, D);
+      return defaultExtension.finalize(state, stepper, volumeMaterial, h, D);
     }
 
-    return finalize(state, stepper, navigator, h) &&
+    return finalize(state, stepper, volumeMaterial, h) &&
            transportMatrix(state, stepper, h, D);
   }
 
@@ -224,8 +207,8 @@ struct EigenStepperDenseExtension {
   /// @param [out] D Transport matrix
   ///
   /// @return Boolean flag if evaluation is valid
-  template <typename propagator_state_t, typename stepper_t>
-  bool transportMatrix(propagator_state_t& state, const stepper_t& stepper,
+  template <typename stepper_t>
+  bool transportMatrix(stepper_t::State& state, const stepper_t& stepper,
                        const double h, FreeMatrix& D) const {
     /// The calculations are based on ATL-SOFT-PUB-2009-002. The update of the
     /// Jacobian matrix is requires only the calculation of eq. 17 and 18.
@@ -247,9 +230,9 @@ struct EigenStepperDenseExtension {
     /// constant offset does not exist for rectangular matrix dFdu' (due to the
     /// missing Lambda part) and only exists for dGdu' in dlambda/dlambda.
 
-    auto& sd = state.stepping.stepData;
-    auto dir = stepper.direction(state.stepping);
-    const auto& particleHypothesis = stepper.particleHypothesis(state.stepping);
+    auto& sd = state.stepData;
+    auto dir = stepper.direction(state);
+    const auto& particleHypothesis = stepper.particleHypothesis(state);
     float mass = particleHypothesis.mass();
 
     D = FreeMatrix::Identity();
@@ -360,15 +343,14 @@ struct EigenStepperDenseExtension {
   /// @brief Initializer of all parameters related to a RKN4 step with energy
   /// loss of a particle in material
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
   ///
   /// @param [in] state Deliverer of configurations
   /// @param [in] stepper Stepper of the propagator
-  template <typename propagator_state_t, typename stepper_t>
-  void initializeEnergyLoss(const propagator_state_t& state,
+  template <typename stepper_t>
+  void initializeEnergyLoss(const stepper_t::State& state,
                             const stepper_t& stepper) {
-    const auto& particleHypothesis = stepper.particleHypothesis(state.stepping);
+    const auto& particleHypothesis = stepper.particleHypothesis(state);
     float mass = particleHypothesis.mass();
     PdgParticle absPdg = particleHypothesis.absolutePdg();
     float absQ = particleHypothesis.absoluteCharge();
@@ -377,7 +359,7 @@ struct EigenStepperDenseExtension {
     // use unit length as thickness to compute the energy loss per unit length
     MaterialSlab slab(material, 1);
     // Use the same energy loss throughout the step.
-    if (state.options.stepping.dense.meanEnergyLoss) {
+    if (state.options.dense.meanEnergyLoss) {
       g = -computeEnergyLossMean(slab, absPdg, mass, static_cast<float>(qop[0]),
                                  absQ);
     } else {
@@ -389,11 +371,11 @@ struct EigenStepperDenseExtension {
     // Change of the momentum per path length
     // dPds = dPdE * dEds
     dPds[0] = g * energy[0] / initialMomentum;
-    if (state.stepping.covTransport) {
+    if (state.covTransport) {
       // Calculate the change of the energy loss per path length and
       // inverse momentum
-      if (state.options.stepping.dense.includeGradient) {
-        if (state.options.stepping.dense.meanEnergyLoss) {
+      if (state.options.dense.includeGradient) {
+        if (state.options.dense.meanEnergyLoss) {
           dgdqopValue = deriveEnergyLossMeanQOverP(
               slab, absPdg, mass, static_cast<float>(qop[0]), absQ);
         } else {
@@ -413,7 +395,6 @@ struct EigenStepperDenseExtension {
   /// @brief Update of the kinematic parameters of the RKN4 sub-steps after
   /// initialization with energy loss of a particle in material
   ///
-  /// @tparam propagator_state_t Type of the state of the propagator
   /// @tparam stepper_t Type of the stepper
   ///
   /// @param [in] h Stepped distance of the sub-step (1-3)
@@ -421,17 +402,17 @@ struct EigenStepperDenseExtension {
   /// @param [in] state State of the stepper
   /// @param [in] stepper Stepper of the propagator
   /// @param [in] i Index of the sub-step (1-3)
-  template <typename propagator_state_t, typename stepper_t>
+  template <typename stepper_t>
   void updateEnergyLoss(const double mass, const double h,
-                        const propagator_state_t& state,
-                        const stepper_t& stepper, const int i) {
+                        const stepper_t::State& state, const stepper_t& stepper,
+                        const int i) {
     // Update parameters related to a changed momentum
     currentMomentum = initialMomentum + h * dPds[i - 1];
     energy[i] = fastHypot(currentMomentum, mass);
     dPds[i] = g * energy[i] / currentMomentum;
-    qop[i] = stepper.charge(state.stepping) / currentMomentum;
+    qop[i] = stepper.charge(state) / currentMomentum;
     // Calculate term for later error propagation
-    if (state.stepping.covTransport) {
+    if (state.covTransport) {
       dLdl[i] = (-qop[i] * qop[i] * g * energy[i] *
                      (3. - (currentMomentum * currentMomentum) /
                                (energy[i] * energy[i])) -

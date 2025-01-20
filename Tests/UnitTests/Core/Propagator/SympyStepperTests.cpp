@@ -30,7 +30,6 @@
 #include "Acts/Utilities/Logger.hpp"
 #include "Acts/Utilities/Result.hpp"
 
-#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <memory>
@@ -52,31 +51,6 @@ static constexpr auto eps = 3 * std::numeric_limits<double>::epsilon();
 // Create a test context
 GeometryContext tgContext = GeometryContext();
 MagneticFieldContext mfContext = MagneticFieldContext();
-
-/// @brief Simplified propagator state
-template <typename stepper_state_t>
-struct PropState {
-  /// @brief Constructor
-  PropState(Direction direction, stepper_state_t sState)
-      : stepping(std::move(sState)) {
-    options.direction = direction;
-  }
-  /// State of the sympy stepper
-  stepper_state_t stepping;
-  /// Propagator options which only carry the relevant components
-  struct {
-    Direction direction = Direction::Forward();
-    struct {
-      double stepTolerance = 1e-4;
-      double stepSizeCutOff = 0.;
-      unsigned int maxRungeKuttaStepTrials = 10000;
-    } stepping;
-  } options;
-};
-
-struct MockNavigator {};
-
-static constexpr MockNavigator mockNavigator;
 
 /// @brief Aborter for the case that a particle leaves the detector or reaches
 /// a custom made threshold.
@@ -277,27 +251,26 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
 
   // Perform a step without and with covariance transport
   esState.cov = cov;
-  PropState ps(navDir, std::move(esState));
 
-  ps.stepping.covTransport = false;
-  es.step(ps, mockNavigator).value();
-  CHECK_CLOSE_COVARIANCE(ps.stepping.cov, cov, eps);
-  BOOST_CHECK_NE(es.position(ps.stepping).norm(), newPos.norm());
-  BOOST_CHECK_NE(es.direction(ps.stepping), newMom.normalized());
-  BOOST_CHECK_EQUAL(es.charge(ps.stepping), charge);
-  BOOST_CHECK_LT(es.time(ps.stepping), newTime);
-  BOOST_CHECK_EQUAL(ps.stepping.derivative, FreeVector::Zero());
-  BOOST_CHECK_EQUAL(ps.stepping.jacTransport, FreeMatrix::Identity());
+  esState.covTransport = false;
+  es.step(esState, navDir, nullptr).value();
+  CHECK_CLOSE_COVARIANCE(esState.cov, cov, eps);
+  BOOST_CHECK_NE(es.position(esState).norm(), newPos.norm());
+  BOOST_CHECK_NE(es.direction(esState), newMom.normalized());
+  BOOST_CHECK_EQUAL(es.charge(esState), charge);
+  BOOST_CHECK_LT(es.time(esState), newTime);
+  BOOST_CHECK_EQUAL(esState.derivative, FreeVector::Zero());
+  BOOST_CHECK_EQUAL(esState.jacTransport, FreeMatrix::Identity());
 
-  ps.stepping.covTransport = true;
-  es.step(ps, mockNavigator).value();
-  CHECK_CLOSE_COVARIANCE(ps.stepping.cov, cov, eps);
-  BOOST_CHECK_NE(es.position(ps.stepping).norm(), newPos.norm());
-  BOOST_CHECK_NE(es.direction(ps.stepping), newMom.normalized());
-  BOOST_CHECK_EQUAL(es.charge(ps.stepping), charge);
-  BOOST_CHECK_LT(es.time(ps.stepping), newTime);
-  BOOST_CHECK_NE(ps.stepping.derivative, FreeVector::Zero());
-  BOOST_CHECK_NE(ps.stepping.jacTransport, FreeMatrix::Identity());
+  esState.covTransport = true;
+  es.step(esState, navDir, nullptr).value();
+  CHECK_CLOSE_COVARIANCE(esState.cov, cov, eps);
+  BOOST_CHECK_NE(es.position(esState).norm(), newPos.norm());
+  BOOST_CHECK_NE(es.direction(esState), newMom.normalized());
+  BOOST_CHECK_EQUAL(es.charge(esState), charge);
+  BOOST_CHECK_LT(es.time(esState), newTime);
+  BOOST_CHECK_NE(esState.derivative, FreeVector::Zero());
+  BOOST_CHECK_NE(esState.jacTransport, FreeMatrix::Identity());
 
   /// Test the state reset
   // Construct the parameters
@@ -337,13 +310,13 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
   };
 
   // Reset all possible parameters
-  SympyStepper::State esStateCopy = copyState(*bField, ps.stepping);
+  SympyStepper::State esStateCopy = copyState(*bField, esState);
   BOOST_CHECK(cp2.covariance().has_value());
   es.resetState(esStateCopy, cp2.parameters(), *cp2.covariance(),
                 cp2.referenceSurface(), stepSize2);
   // Test all components
   BOOST_CHECK_NE(esStateCopy.jacToGlobal, BoundToFreeMatrix::Zero());
-  BOOST_CHECK_NE(esStateCopy.jacToGlobal, ps.stepping.jacToGlobal);
+  BOOST_CHECK_NE(esStateCopy.jacToGlobal, esState.jacToGlobal);
   BOOST_CHECK_EQUAL(esStateCopy.jacTransport, FreeMatrix::Identity());
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
@@ -354,19 +327,19 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
                     freeParams.template segment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(es.absoluteMomentum(esStateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
-  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(ps.stepping));
+  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(esState));
   BOOST_CHECK_EQUAL(es.time(esStateCopy), freeParams[eFreeTime]);
   BOOST_CHECK_EQUAL(esStateCopy.pathAccumulated, 0.);
   BOOST_CHECK_EQUAL(esStateCopy.stepSize.value(), navDir * stepSize2);
-  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, ps.stepping.previousStepSize);
+  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, esState.previousStepSize);
 
   // Reset all possible parameters except the step size
-  esStateCopy = copyState(*bField, ps.stepping);
+  esStateCopy = copyState(*bField, esState);
   es.resetState(esStateCopy, cp2.parameters(), *cp2.covariance(),
                 cp2.referenceSurface());
   // Test all components
   BOOST_CHECK_NE(esStateCopy.jacToGlobal, BoundToFreeMatrix::Zero());
-  BOOST_CHECK_NE(esStateCopy.jacToGlobal, ps.stepping.jacToGlobal);
+  BOOST_CHECK_NE(esStateCopy.jacToGlobal, esState.jacToGlobal);
   BOOST_CHECK_EQUAL(esStateCopy.jacTransport, FreeMatrix::Identity());
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
@@ -377,20 +350,20 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
                     freeParams.template segment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(es.absoluteMomentum(esStateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
-  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(ps.stepping));
+  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(esState));
   BOOST_CHECK_EQUAL(es.time(esStateCopy), freeParams[eFreeTime]);
   BOOST_CHECK_EQUAL(esStateCopy.pathAccumulated, 0.);
   BOOST_CHECK_EQUAL(esStateCopy.stepSize.value(),
                     std::numeric_limits<double>::max());
-  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, ps.stepping.previousStepSize);
+  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, esState.previousStepSize);
 
   // Reset the least amount of parameters
-  esStateCopy = copyState(*bField, ps.stepping);
+  esStateCopy = copyState(*bField, esState);
   es.resetState(esStateCopy, cp2.parameters(), *cp2.covariance(),
                 cp2.referenceSurface());
   // Test all components
   BOOST_CHECK_NE(esStateCopy.jacToGlobal, BoundToFreeMatrix::Zero());
-  BOOST_CHECK_NE(esStateCopy.jacToGlobal, ps.stepping.jacToGlobal);
+  BOOST_CHECK_NE(esStateCopy.jacToGlobal, esState.jacToGlobal);
   BOOST_CHECK_EQUAL(esStateCopy.jacTransport, FreeMatrix::Identity());
   BOOST_CHECK_EQUAL(esStateCopy.derivative, FreeVector::Zero());
   BOOST_CHECK(esStateCopy.covTransport);
@@ -401,12 +374,12 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
                     freeParams.template segment<3>(eFreeDir0).normalized());
   BOOST_CHECK_EQUAL(es.absoluteMomentum(esStateCopy),
                     std::abs(1. / freeParams[eFreeQOverP]));
-  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(ps.stepping));
+  BOOST_CHECK_EQUAL(es.charge(esStateCopy), -es.charge(esState));
   BOOST_CHECK_EQUAL(es.time(esStateCopy), freeParams[eFreeTime]);
   BOOST_CHECK_EQUAL(esStateCopy.pathAccumulated, 0.);
   BOOST_CHECK_EQUAL(esStateCopy.stepSize.value(),
                     std::numeric_limits<double>::max());
-  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, ps.stepping.previousStepSize);
+  BOOST_CHECK_EQUAL(esStateCopy.previousStepSize, esState.previousStepSize);
 
   /// Repeat with surface related methods
   auto plane = CurvilinearSurface(pos, dir.normalized()).planeSurface();
@@ -480,9 +453,9 @@ BOOST_AUTO_TEST_CASE(sympy_stepper_test) {
   CHECK_CLOSE_COVARIANCE(esState.cov, Covariance(2. * cov), eps);
 
   // Test a case where no step size adjustment is required
-  ps.options.stepping.stepTolerance = 2. * 4.4258e+09;
+  esState.options.stepTolerance = 2. * 4.4258e+09;
   double h0 = esState.stepSize.value();
-  es.step(ps, mockNavigator);
+  es.step(esState, Direction::Forward(), nullptr);
   CHECK_CLOSE_ABS(h0, esState.stepSize.value(), eps);
 }
 
