@@ -314,6 +314,7 @@ linux_physmon:
 .linux_ubuntu_extra:
   variables:
     INSTALL_DIR: ${CI_PROJECT_DIR}/install
+    CXX: g++
 
   stage: build
 
@@ -336,6 +337,7 @@ linux_physmon:
       --preset=gitlab-ci
       -DPython_EXECUTABLE=$(which python3)
       -DCMAKE_CXX_STANDARD=${CXXSTD}
+      -DCMAKE_CXX_COMPILER=${CXX}
 
     - ccache -z
     - cmake --build build -- -j6
@@ -367,14 +369,15 @@ linux_ubuntu_2204:
   variables:
     CXXSTD: 20
     DEPENDENCY_URL: https://acts.web.cern.ch/ACTS/ci/ubuntu-22.04/deps.$DEPENDENCY_TAG.tar.zst
-  image: registry.cern.ch/ghcr.io/acts-project/ubuntu2204:63
+  image: registry.cern.ch/ghcr.io/acts-project/ubuntu2204:71
 
 linux_ubuntu_2204_clang:
   extends: .linux_ubuntu_extra
   variables:
+    CXX: clang++
     CXXSTD: 20
     DEPENDENCY_URL: https://acts.web.cern.ch/ACTS/ci/ubuntu-22.04/deps.$DEPENDENCY_TAG.tar.zst
-  image: registry.cern.ch/ghcr.io/acts-project/ubuntu2204_clang:63
+  image: registry.cern.ch/ghcr.io/acts-project/ubuntu2204:71
 
 
 ######################

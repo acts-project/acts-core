@@ -6,6 +6,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
+cmake_minimum_required(VERSION 3.25)
+
 # CMake include(s).
 include(FetchContent)
 
@@ -18,6 +20,7 @@ set(ANNOY_VERSION "v${_acts_annoy_version}")
 # Declare the fetching of the Annoy library.
 FetchContent_Declare(
     Annoy
+    SYSTEM
     ${ACTS_ANNOY_SOURCE}
     PATCH_COMMAND
         patch -p1 < ${CMAKE_CURRENT_SOURCE_DIR}/0001-Modify-annoy.patch
@@ -26,8 +29,3 @@ FetchContent_Declare(
 # Make the fetched content available.
 # Annoy contains a CMakeLists.txt file, so it will be added as a subdirectory.
 FetchContent_MakeAvailable(Annoy)
-
-target_compile_options(
-    Annoy
-    INTERFACE "-Wno-old-style-cast" "-Wno-zero-as-null-pointer-constant"
-)
