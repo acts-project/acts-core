@@ -57,9 +57,9 @@ ActsExamples::ProcessCode ActsExamples::AlignmentAlgorithm::execute(
   }
 
   std::size_t numTracksUsed = protoTracks.size();
-  if (m_cfg.maxNumTracks > 0 &&
-      m_cfg.maxNumTracks < static_cast<int>(protoTracks.size())) {
-    numTracksUsed = m_cfg.maxNumTracks;
+  if (m_cfg.maxNumTracks > 0) {
+    numTracksUsed =
+        std::min(static_cast<std::size_t>(m_cfg.maxNumTracks), numTracksUsed);
   }
 
   // Prepare the input track collection
