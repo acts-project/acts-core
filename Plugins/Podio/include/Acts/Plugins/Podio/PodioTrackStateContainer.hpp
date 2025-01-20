@@ -619,13 +619,11 @@ class MutablePodioTrackStateContainer final
   void allocateCalibrated_impl(IndexType istate,
                                const Eigen::DenseBase<val_t>& val,
                                const Eigen::DenseBase<cov_t>& cov)
-
-    requires(Eigen::PlainObjectBase<val_t>::RowsAtCompileTime > 0 &&
-             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <= eBoundSize &&
-             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime ==
-                 Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime &&
-             Eigen::PlainObjectBase<cov_t>::RowsAtCompileTime ==
-                 Eigen::PlainObjectBase<cov_t>::ColsAtCompileTime)
+    requires(Concepts::eigen_base_is_fixed_size<val_t> &&
+             Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <=
+                 toUnderlying(eBoundSize) &&
+             Concepts::eigen_bases_have_same_num_rows<val_t, cov_t> &&
+             Concepts::eigen_base_is_square<cov_t>)
   {
     constexpr std::size_t measdim = val_t::RowsAtCompileTime;
 
