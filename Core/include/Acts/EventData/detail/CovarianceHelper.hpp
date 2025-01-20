@@ -66,7 +66,7 @@ struct CovarianceHelper {
       return false;
     }
     Eigen::LLT<CovMatrix_t> lltCov(covariance);
-    return lltCov.info() == Eigen::Success ? true : false;
+    return lltCov.info() == Eigen::Success;
   }
 };
 
