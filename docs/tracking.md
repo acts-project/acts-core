@@ -1029,5 +1029,5 @@ tracks.
 [^Fruhwirth:1987fm]: R. Frühwirth, 1987, Application of Kalman filtering to track and vertex fitting, , [11.1016/0168-9002(87)90887-4](https://doi.org/10.1016/0168-9002(87)90887-4)
 [^phd:piacquadio:2010]: G. Piacquadio, 2010, Identification of b-jets and investigation of the discovery potential of a Higgs boson in the $W H \rightarrow l \nu \bar{b} b$ channel with the ATLAS experiment.
 [^phd:schlag:2022]: B. Schlag, 2022, Advanced Algorithms and Software for Primary Vertex Reconstruction and Search for Flavor-Violating Supersymmetry with the ATLAS Experiment.
-[^billoirfitting:1992]: P. Billoir et al., 2022, Fast vertex fitting with a local parametrization of tracks.
+[^billoirfitting:1992]: P. Billoir et al., 1992, Fast vertex fitting with a local parametrization of tracks.
 [^fruwirth:amvfitting:2004]: R. Frühwirth et al., 2004, Adaptive Multi-Vertex fitting.
