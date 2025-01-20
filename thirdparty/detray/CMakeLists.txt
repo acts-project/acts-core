@@ -32,6 +32,12 @@ set(DETRAY_BUILD_TEST_UTILS
     "Turn on the build of the Detray test utilities"
 )
 
+set(DETRAY_BUILD_VALIDATION_TOOLS
+    ON
+    CACHE BOOL
+    "Turn on the build of the Detray validation tools"
+)
+
 set(DETRAY_BUILD_UNITTESTS
     OFF
     CACHE BOOL

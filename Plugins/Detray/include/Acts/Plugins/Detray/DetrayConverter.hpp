@@ -69,7 +69,7 @@ class DetrayConverter {
                                                      detectorPayload);
 
     // (2a) homogeneous material
-    if constexpr (detray::detail::has_homogeneous_material_v<detector_t>) {
+    if constexpr (detray::concepts::has_homogeneous_material<detector_t>) {
       if (options.convertMaterial) {
         detray::io::detector_homogeneous_material_payload materialSlabsPayload =
             DetrayMaterialConverter::convertHomogeneousSurfaceMaterial(
@@ -80,7 +80,7 @@ class DetrayConverter {
     }
 
     // (2b) material grids
-    if constexpr (detray::detail::has_material_grids_v<detector_t>) {
+    if constexpr (detray::concepts::has_material_rods<detector_t>) {
       if (options.convertMaterial) {
         detray::io::detector_grids_payload<detray::io::material_slab_payload,
                                            detray::io::material_id>
