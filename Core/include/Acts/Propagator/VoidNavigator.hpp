@@ -13,6 +13,7 @@
 #include "Acts/Propagator/NavigationTarget.hpp"
 #include "Acts/Propagator/NavigatorOptions.hpp"
 #include "Acts/Propagator/NavigatorStatistics.hpp"
+#include "Acts/Utilities/Result.hpp"
 
 namespace Acts {
 
@@ -62,10 +63,10 @@ class VoidNavigator {
 
   bool navigationBreak(const State& /*state*/) const { return true; }
 
-  void initialize(State& /*state*/, const Vector3& /*position*/,
-                  const Vector3& /*direction*/,
-                  Direction /*propagationDirection*/) const {
-    return;
+  Result<void> initialize(State& /*state*/, const Vector3& /*position*/,
+                          const Vector3& /*direction*/,
+                          Direction /*propagationDirection*/) const {
+    return Result<void>::success();
   }
 
   NavigationTarget nextTarget(State& /*state*/, const Vector3& /*position*/,

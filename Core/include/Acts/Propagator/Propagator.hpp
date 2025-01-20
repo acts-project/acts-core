@@ -279,8 +279,6 @@ class Propagator final
   /// This function creates the propagator state object from the initial track
   /// parameters and the propagation options.
   ///
-  /// @note This will also initialize the state
-  ///
   /// @tparam parameters_t Type of initial track parameters to propagate
   /// @tparam propagator_options_t Type of the propagator options
   /// @tparam path_aborter_t The path aborter type to be added
@@ -299,8 +297,6 @@ class Propagator final
   /// This function creates the propagator state object from the initial track
   /// parameters, the target surface, and the propagation options.
   ///
-  /// @note This will also initialize the state
-  ///
   /// @tparam parameters_t Type of initial track parameters to propagate
   /// @tparam propagator_options_t Type of the propagator options
   /// @tparam target_aborter_t The target aborter type to be added
@@ -316,6 +312,20 @@ class Propagator final
             typename path_aborter_t = PathLimitReached>
   auto makeState(const parameters_t& start, const Surface& target,
                  const propagator_options_t& options) const;
+
+  /// @brief Initialize the propagator state
+  ///
+  /// This function initializes the propagator state for a new propagation.
+  ///
+  /// @tparam propagator_state_t Type of the propagator state object
+  /// @tparam path_aborter_t The path aborter type to be added
+  ///
+  /// @param [in,out] state The propagator state object
+  ///
+  /// @return Indication if the initialization was successful
+  template <typename propagator_state_t,
+            typename path_aborter_t = PathLimitReached>
+  Result<void> initialize(propagator_state_t& state) const;
 
   /// @brief Propagate track parameters
   ///
@@ -385,9 +395,6 @@ class Propagator final
 
  private:
   const Logger& logger() const { return *m_logger; }
-
-  template <typename propagator_state_t, typename path_aborter_t>
-  void initialize(propagator_state_t& state) const;
 
   template <typename propagator_state_t, typename result_t>
   void moveStateToResult(propagator_state_t& state, result_t& result) const;

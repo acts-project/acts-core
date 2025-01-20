@@ -1239,6 +1239,13 @@ class KalmanFitter {
     auto propagatorState =
         m_propagator.makeState(sParameters, propagatorOptions);
 
+    auto propagatorInitResult = m_propagator.initialize(propagatorState);
+    if (!propagatorInitResult.ok()) {
+      ACTS_ERROR("Propagation initialization failed: "
+                 << propagatorInitResult.error());
+      return propagatorInitResult.error();
+    }
+
     auto& kalmanResult =
         propagatorState.template get<KalmanFitterResult<traj_t>>();
     kalmanResult.fittedStates = &trackContainer.trackStateContainer();

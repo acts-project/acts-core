@@ -20,6 +20,7 @@
 #include "Acts/Surfaces/Surface.hpp"
 #include "Acts/Utilities/Intersection.hpp"
 #include "Acts/Utilities/Logger.hpp"
+#include "Acts/Utilities/Result.hpp"
 
 #include <limits>
 #include <memory>
@@ -171,9 +172,9 @@ class DirectNavigator {
   /// @param position The start position
   /// @param direction The start direction
   /// @param propagationDirection The propagation direction
-  void initialize(State& state, const Vector3& position,
-                  const Vector3& direction,
-                  Direction propagationDirection) const {
+  Result<void> initialize(State& state, const Vector3& position,
+                          const Vector3& direction,
+                          Direction propagationDirection) const {
     (void)position;
     (void)direction;
 
@@ -215,6 +216,8 @@ class DirectNavigator {
     }
 
     state.navigationBreak = false;
+
+    return Result<void>::success();
   }
 
   /// @brief Get the next target surface

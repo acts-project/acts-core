@@ -3,6 +3,7 @@ target_sources(
     PRIVATE
         EigenStepperError.cpp
         MultiStepperError.cpp
+        NavigatorError.cpp
         SympyStepper.cpp
         PropagatorError.cpp
         StraightLineStepper.cpp

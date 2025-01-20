@@ -28,8 +28,8 @@ concept propagator_stepper_compatible_with =
 
 template <typename S, typename N>
 template <typename propagator_state_t>
-auto Acts::Propagator<S, N>::propagate(propagator_state_t& state) const
-    -> Result<void> {
+Acts::Result<void> Acts::Propagator<S, N>::propagate(
+    propagator_state_t& state) const {
   ACTS_VERBOSE("Entering propagation.");
 
   state.stage = PropagatorStage::prePropagation;
@@ -196,7 +196,13 @@ auto Acts::Propagator<S, N>::propagate(const parameters_t& start,
   static_assert(std::copy_constructible<StepperCurvilinearTrackParameters>,
                 "return track parameter type must be copy-constructible");
 
-  auto state = makeState(start, options);
+  auto state = makeState<parameters_t, propagator_options_t, path_aborter_t>(
+      start, options);
+
+  auto initRes = initialize<decltype(state), path_aborter_t>(state);
+  if (!initRes.ok()) {
+    return initRes.error();
+  }
 
   // Perform the actual propagation
   auto propagationResult = propagate(state);
@@ -220,6 +226,11 @@ auto Acts::Propagator<S, N>::propagate(
   auto state = makeState<parameters_t, propagator_options_t, target_aborter_t,
                          path_aborter_t>(start, target, options);
 
+  auto initRes = initialize<decltype(state), path_aborter_t>(state);
+  if (!initRes.ok()) {
+    return initRes.error();
+  }
+
   // Perform the actual propagation
   auto propagationResult = propagate(state);
 
@@ -240,30 +251,30 @@ auto Acts::Propagator<S, N>::makeState(
   static_assert(std::copy_constructible<ReturnParameterType>,
                 "return track parameter type must be copy-constructible");
 
-  // Expand the abort list with a path aborter
+  // Expand the actor list with a path aborter
   path_aborter_t pathAborter;
   pathAborter.internalLimit = options.pathLimit;
 
   auto actorList = options.actorList.append(pathAborter);
 
-  // The expanded options (including path limit)
+  // Create the extended options and declare their type
   auto eOptions = options.extend(actorList);
   eOptions.navigation.startSurface = &start.referenceSurface();
   eOptions.navigation.targetSurface = nullptr;
+
   using OptionsType = decltype(eOptions);
   using StateType =
       actor_list_t_state_t<OptionsType,
                            typename propagator_options_t::actor_list_type>;
-  // Initialize the internal propagator state
-  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
-                  m_navigator.makeState(eOptions.navigation)};
 
   static_assert(
       detail::propagator_stepper_compatible_with<S, StateType, N>,
       "Step method of the Stepper is not compatible with the propagator "
       "state");
 
-  initialize<StateType, path_aborter_t>(state);
+  // Initialize the internal propagator state
+  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
+                  m_navigator.makeState(eOptions.navigation)};
 
   return state;
 }
@@ -272,37 +283,37 @@ template <typename S, typename N>
 template <typename parameters_t, typename propagator_options_t,
           typename target_aborter_t, typename path_aborter_t>
 auto Acts::Propagator<S, N>::makeState(
-    const parameters_t& start, const Surface& target,
+    const parameters_t& start, const Acts::Surface& target,
     const propagator_options_t& options) const {
   static_assert(BoundTrackParametersConcept<parameters_t>,
                 "Parameters do not fulfill bound parameters concept.");
 
-  // Type of provided options
+  // Expand the actor list with a target and path aborter
   target_aborter_t targetAborter;
   targetAborter.surface = &target;
   path_aborter_t pathAborter;
   pathAborter.internalLimit = options.pathLimit;
+
   auto actorList = options.actorList.append(targetAborter, pathAborter);
 
   // Create the extended options and declare their type
   auto eOptions = options.extend(actorList);
   eOptions.navigation.startSurface = &start.referenceSurface();
   eOptions.navigation.targetSurface = &target;
-  using OptionsType = decltype(eOptions);
 
-  // Initialize the internal propagator state
+  using OptionsType = decltype(eOptions);
   using StateType =
       actor_list_t_state_t<OptionsType,
                            typename propagator_options_t::actor_list_type>;
-  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
-                  m_navigator.makeState(eOptions.navigation)};
 
   static_assert(
       detail::propagator_stepper_compatible_with<S, StateType, N>,
       "Step method of the Stepper is not compatible with the propagator "
       "state");
 
-  initialize<StateType, path_aborter_t>(state);
+  // Initialize the internal propagator state
+  StateType state{eOptions, m_stepper.makeState(eOptions.stepping, start),
+                  m_navigator.makeState(eOptions.navigation)};
 
   return state;
 }
@@ -310,7 +321,7 @@ auto Acts::Propagator<S, N>::makeState(
 template <typename S, typename N>
 template <typename propagator_state_t, typename propagator_options_t>
 auto Acts::Propagator<S, N>::makeResult(propagator_state_t state,
-                                        Result<void> propagationResult,
+                                        Acts::Result<void> propagationResult,
                                         const propagator_options_t& /*options*/,
                                         bool makeCurvilinear) const
     -> Result<
@@ -356,8 +367,8 @@ auto Acts::Propagator<S, N>::makeResult(propagator_state_t state,
 template <typename S, typename N>
 template <typename propagator_state_t, typename propagator_options_t>
 auto Acts::Propagator<S, N>::makeResult(
-    propagator_state_t state, Result<void> propagationResult,
-    const Surface& target, const propagator_options_t& /*options*/) const
+    propagator_state_t state, Acts::Result<void> propagationResult,
+    const Acts::Surface& target, const propagator_options_t& /*options*/) const
     -> Result<
         actor_list_t_result_t<StepperBoundTrackParameters,
                               typename propagator_options_t::actor_list_type>> {
@@ -397,19 +408,26 @@ auto Acts::Propagator<S, N>::makeResult(
 
 template <typename S, typename N>
 template <typename propagator_state_t, typename path_aborter_t>
-void Acts::Propagator<S, N>::initialize(propagator_state_t& state) const {
+Acts::Result<void> Acts::Propagator<S, N>::initialize(
+    propagator_state_t& state) const {
   state.position = m_stepper.position(state.stepping);
   state.direction =
       state.options.direction * m_stepper.direction(state.stepping);
 
   // Navigator initialize state call
-  m_navigator.initialize(state.navigation, state.position, state.direction,
-                         state.options.direction);
+  auto navInitRes =
+      m_navigator.initialize(state.navigation, state.position, state.direction,
+                             state.options.direction);
+  if (!navInitRes.ok()) {
+    return navInitRes.error();
+  }
 
   // Apply the loop protection - it resets the internal path limit
   detail::setupLoopProtection(
       state, m_stepper, state.options.actorList.template get<path_aborter_t>(),
       false, logger());
+
+  return Result<void>::success();
 }
 
 template <typename S, typename N>
@@ -453,12 +471,12 @@ Acts::detail::BasePropagatorHelper<derived_t>::propagateToSurface(
                   start, target, derivedOptions);
   }
 
-  if (res.ok()) {
-    // Without errors we can expect a valid endParameters when propagating to a
-    // target surface
-    assert((*res).endParameters);
-    return std::move((*res).endParameters.value());
-  } else {
+  if (!res.ok()) {
     return res.error();
   }
+
+  // Without errors we can expect a valid endParameters when propagating to a
+  // target surface
+  assert((*res).endParameters);
+  return std::move((*res).endParameters.value());
 }

@@ -116,9 +116,9 @@ class DetectorNavigator {
     return state.navigationBreak;
   }
 
-  void initialize(State& state, const Vector3& position,
-                  const Vector3& direction,
-                  Direction propagationDirection) const {
+  Result<void> initialize(State& state, const Vector3& position,
+                          const Vector3& direction,
+                          Direction propagationDirection) const {
     (void)propagationDirection;
 
     ACTS_VERBOSE(volInfo(state) << posInfo(state, position) << "initialize");
@@ -140,6 +140,8 @@ class DetectorNavigator {
       throw std::invalid_argument("DetectorNavigator: no current volume found");
     }
     updateCandidateSurfaces(state, position);
+
+    return Result<void>::success();
   }
 
   NavigationTarget nextTarget(State& state, const Vector3& position,

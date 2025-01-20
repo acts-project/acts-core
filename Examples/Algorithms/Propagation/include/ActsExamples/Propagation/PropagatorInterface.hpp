@@ -92,6 +92,11 @@ class ConcretePropagator : public PropagatorInterface {
 
     auto state = m_propagator.makeState(startParameters, options);
 
+    auto resultInit = m_propagator.initialize(state);
+    if (!resultInit.ok()) {
+      return resultInit.error();
+    }
+
     // Propagate using the propagator
     auto resultTmp = m_propagator.propagate(state);
     if (!resultTmp.ok()) {

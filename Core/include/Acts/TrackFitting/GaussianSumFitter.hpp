@@ -266,6 +266,20 @@ struct GaussianSumFitter {
 
       auto state = m_propagator.makeState(*params, fwdPropOptions);
 
+      // Type deduction for propagation result to pass on errors
+      using OptionsType = decltype(fwdPropOptions);
+      using StateType = decltype(state);
+      using PropagationResultType =
+          decltype(m_propagator.propagate(std::declval<StateType&>()));
+      using ResultType = decltype(m_propagator.makeResult(
+          std::declval<StateType&&>(), std::declval<PropagationResultType>(),
+          std::declval<const OptionsType&>(), false));
+
+      auto initRes = m_propagator.initialize(state);
+      if (!initRes.ok()) {
+        return ResultType::failure(initRes.error());
+      }
+
       auto& r = state.template get<typename GsfActor::result_type>();
       r.fittedStates = &trackContainer.trackStateContainer();
 
@@ -326,6 +340,20 @@ struct GaussianSumFitter {
                                           decltype(bwdPropOptions),
                                           MultiStepperSurfaceReached>(
               params, target, bwdPropOptions);
+
+      // Type deduction for propagation result to pass on errors
+      using OptionsType = decltype(bwdPropOptions);
+      using StateType = decltype(state);
+      using PropagationResultType =
+          decltype(m_propagator.propagate(std::declval<StateType&>()));
+      using ResultType = decltype(m_propagator.makeResult(
+          std::declval<StateType&&>(), std::declval<PropagationResultType>(),
+          target, std::declval<const OptionsType&>()));
+
+      auto initRes = m_propagator.initialize(state);
+      if (!initRes.ok()) {
+        return ResultType::failure(initRes.error());
+      }
 
       assert(
           (fwdGsfResult.lastMeasurementTip != MultiTrajectoryTraits::kInvalid &&

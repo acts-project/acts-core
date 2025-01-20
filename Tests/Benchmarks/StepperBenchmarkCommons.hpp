@@ -118,6 +118,7 @@ struct BenchmarkStepper {
     const auto propagationBenchResult = Acts::Test::microBenchmark(
         [&] {
           auto state = propagator.makeState(pars, options);
+          propagator.initialize(state);
           auto tmp = propagator.propagate(state);
           auto r = propagator.makeResult(state, tmp, options, true).value();
           if (totalPathLength == 0.) {

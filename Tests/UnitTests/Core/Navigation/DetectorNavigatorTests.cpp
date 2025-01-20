@@ -97,8 +97,9 @@ BOOST_AUTO_TEST_CASE(DetectorNavigatorTestsInitialization) {
 
     Propagator propagator(stepper, navigator);
 
-    BOOST_CHECK_THROW(propagator.makeState(start, options),
-                      std::invalid_argument);
+    auto state = propagator.makeState(start, options);
+
+    BOOST_CHECK_THROW(propagator.initialize(state), std::invalid_argument);
   }
 
   // Run with geometry but without resolving
@@ -147,8 +148,9 @@ BOOST_AUTO_TEST_CASE(DetectorNavigatorTestsInitialization) {
                      Acts::Experimental::DetectorNavigator>
         propagator(stepper, navigator);
 
-    BOOST_CHECK_THROW(propagator.makeState(startEoW, options),
-                      std::invalid_argument);
+    auto state = propagator.makeState(startEoW, options);
+
+    BOOST_CHECK_THROW(propagator.initialize(state), std::invalid_argument);
   }
 
   // Initialize properly
@@ -175,7 +177,7 @@ BOOST_AUTO_TEST_CASE(DetectorNavigatorTestsInitialization) {
         detector->findDetectorVolume(geoContext, start.position()));
     BOOST_CHECK_EQUAL(initState.currentSurface, nullptr);
     BOOST_CHECK_EQUAL(initState.currentPortal, nullptr);
-    BOOST_CHECK_EQUAL(initState.surfaceCandidates.size(), 2u);
+    BOOST_CHECK_EQUAL(initState.surfaceCandidates.size(), 1u);
   }
 }
 

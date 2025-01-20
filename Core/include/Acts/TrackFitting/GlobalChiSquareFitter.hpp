@@ -1258,6 +1258,13 @@ class Gx2Fitter {
 
       auto propagatorState = m_propagator.makeState(params, propagatorOptions);
 
+      auto propagatorInitResult = m_propagator.initialize(propagatorState);
+      if (!propagatorInitResult.ok()) {
+        ACTS_ERROR("Propagation initialization failed: "
+                   << propagatorInitResult.error());
+        return propagatorInitResult.error();
+      }
+
       auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
       r.fittedStates = &trajectoryTempBackend;
 
@@ -1423,6 +1430,13 @@ class Gx2Fitter {
 
       auto propagatorState = m_propagator.makeState(params, propagatorOptions);
 
+      auto propagatorInitResult = m_propagator.initialize(propagatorState);
+      if (!propagatorInitResult.ok()) {
+        ACTS_ERROR("Propagation initialization failed: "
+                   << propagatorInitResult.error());
+        return propagatorInitResult.error();
+      }
+
       auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
       r.fittedStates = &trajectoryTempBackend;
 
@@ -1570,6 +1584,13 @@ class Gx2Fitter {
       gx2fActor.parametersWithHypothesis = &params;
 
       auto propagatorState = m_propagator.makeState(params, propagatorOptions);
+
+      auto propagatorInitResult = m_propagator.initialize(propagatorState);
+      if (!propagatorInitResult.ok()) {
+        ACTS_ERROR("Propagation initialization failed: "
+                   << propagatorInitResult.error());
+        return propagatorInitResult.error();
+      }
 
       auto& r = propagatorState.template get<Gx2FitterResult<traj_t>>();
       r.fittedStates = &trackContainer.trackStateContainer();

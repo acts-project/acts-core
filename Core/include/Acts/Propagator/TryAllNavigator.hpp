@@ -154,9 +154,9 @@ class TryAllNavigatorBase {
   /// @param position The starting position
   /// @param direction The starting direction
   /// @param propagationDirection The propagation direction
-  void initialize(State& state, const Vector3& position,
-                  const Vector3& direction,
-                  Direction propagationDirection) const {
+  Result<void> initialize(State& state, const Vector3& position,
+                          const Vector3& direction,
+                          Direction propagationDirection) const {
     (void)propagationDirection;
 
     ACTS_VERBOSE("initialize");
@@ -195,6 +195,8 @@ class TryAllNavigatorBase {
         ACTS_VERBOSE(volInfo(state) << "No start surface set.");
       }
     }
+
+    return Result<void>::success();
   }
 
  protected:
@@ -284,14 +286,19 @@ class TryAllNavigator : public TryAllNavigatorBase {
   /// @param position The starting position
   /// @param direction The starting direction
   /// @param propagationDirection The propagation direction
-  void initialize(State& state, const Vector3& position,
-                  const Vector3& direction,
-                  Direction propagationDirection) const {
-    TryAllNavigatorBase::initialize(state, position, direction,
-                                    propagationDirection);
+  Result<void> initialize(State& state, const Vector3& position,
+                          const Vector3& direction,
+                          Direction propagationDirection) const {
+    auto baseRes = TryAllNavigatorBase::initialize(state, position, direction,
+                                                   propagationDirection);
+    if (!baseRes.ok()) {
+      return baseRes.error();
+    }
 
     // Initialize navigation candidates for the start volume
     reinitializeCandidates(state);
+
+    return Result<void>::success();
   }
 
   /// @brief Get the next target surface
@@ -607,16 +614,21 @@ class TryAllOverstepNavigator : public TryAllNavigatorBase {
   /// @param position The starting position
   /// @param direction The starting direction
   /// @param propagationDirection The propagation direction
-  void initialize(State& state, const Vector3& position,
-                  const Vector3& direction,
-                  Direction propagationDirection) const {
-    TryAllNavigatorBase::initialize(state, position, direction,
-                                    propagationDirection);
+  Result<void> initialize(State& state, const Vector3& position,
+                          const Vector3& direction,
+                          Direction propagationDirection) const {
+    auto baseRes = TryAllNavigatorBase::initialize(state, position, direction,
+                                                   propagationDirection);
+    if (!baseRes.ok()) {
+      return baseRes.error();
+    }
 
     // Initialize navigation candidates for the start volume
     reinitializeCandidates(state);
 
     state.lastPosition.reset();
+
+    return Result<void>::success();
   }
 
   /// @brief Get the next target surface
