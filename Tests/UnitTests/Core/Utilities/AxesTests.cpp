@@ -592,6 +592,49 @@ BOOST_AUTO_TEST_CASE(AxisVisit) {
   BOOST_CHECK_EQUAL(nBins, 4u);
 }
 
+BOOST_AUTO_TEST_CASE(IAxis_Factories) {
+  using enum AxisType;
+  using enum AxisBoundaryType;
+
+  // Equidistan: Bound, Open, Closed
+  auto eb = IAxis::create(Bound, 0.0, 10., 10);
+  BOOST_CHECK_EQUAL(eb->getType(), Equidistant);
+  BOOST_CHECK_EQUAL(eb->getBoundaryType(), Bound);
+
+  auto eo = IAxis::create(Open, 0.0, 10., 10);
+  BOOST_CHECK_EQUAL(eo->getType(), Equidistant);
+  BOOST_CHECK_EQUAL(eo->getBoundaryType(), Open);
+
+  auto ec = IAxis::create(Closed, 0.0, 10., 10);
+  BOOST_CHECK_EQUAL(ec->getType(), Equidistant);
+  BOOST_CHECK_EQUAL(ec->getBoundaryType(), Closed);
+
+  // Variable: Bound, Open, Closed
+  auto vb = IAxis::create(Bound, {0, 1, 2., 3, 4});
+  BOOST_CHECK_EQUAL(vb->getType(), Variable);
+  BOOST_CHECK_EQUAL(vb->getBoundaryType(), Bound);
+
+  auto vo = IAxis::create(Open, {0, 1, 2., 3, 4});
+  BOOST_CHECK_EQUAL(vo->getType(), Variable);
+  BOOST_CHECK_EQUAL(vo->getBoundaryType(), Open);
+
+  auto vc = IAxis::create(Closed, {0, 1, 2., 3, 4});
+  BOOST_CHECK_EQUAL(vc->getType(), Variable);
+  BOOST_CHECK_EQUAL(vc->getBoundaryType(), Closed);
+
+  // Invalid constructors
+  // min > max
+  BOOST_CHECK_THROW(IAxis::create(Bound, 10., 0., 3.), std::invalid_argument);
+  // nBins = 0
+  BOOST_CHECK_THROW(IAxis::create(Bound, 0., 10., 0.), std::invalid_argument);
+  // #edges < 2
+  BOOST_CHECK_THROW(IAxis::create(Bound, std::vector<double>{2.}),
+                    std::invalid_argument);
+  // edges not ordered
+  BOOST_CHECK_THROW(IAxis::create(Bound, std::vector<double>{2., 1.5, 1.}),
+                    std::invalid_argument);
+}
+
 BOOST_AUTO_TEST_CASE(Output) {
   std::stringstream ss;
 

@@ -7,5 +7,7 @@ target_sources(
         SpacePointUtility.cpp
         TrackHelpers.cpp
         Intersection.cpp
+        IAxis.cpp
         GraphViz.cpp
+        ProtoAxis.cpp
 )

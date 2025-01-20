@@ -15,6 +15,7 @@ add_library(
     src/MaterialJsonConverter.cpp
     src/PortalJsonConverter.cpp
     src/ProtoDetectorJsonConverter.cpp
+    src/ProtoAxisJsonConverter.cpp
     src/SurfaceBoundsJsonConverter.cpp
     src/SurfaceJsonConverter.cpp
     src/UtilitiesJsonConverter.cpp
