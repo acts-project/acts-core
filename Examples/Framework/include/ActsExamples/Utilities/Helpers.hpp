@@ -135,6 +135,17 @@ void fillEff(TEfficiency* efficiency, float xValue, float yValue, bool status);
 TProfile* bookProf(const char* profName, const char* profTitle,
                    const Binning& varXBinning, const Binning& varYBinning);
 
+/// @brief book a TProfile2D plot
+/// @param profName the name of plot
+/// @param profTitle the title of plot
+/// @param varXBinning the binning info of variable at x axis
+/// @param varYBinning the binning info of variable at y axis
+/// @param varZBinning the binning info of variable at z axis
+/// @return TProfile2D pointer
+TProfile2D* bookProf2D(const char* profName, const char* profTitle,
+                       const Binning& varXBinning, const Binning& varYBinning,
+                       const Binning& varZBinning);
+
 /// @brief fill a TProfile plot
 /// @param profile plot to fill
 /// @param xValue  xvalue to fill
@@ -142,5 +153,14 @@ TProfile* bookProf(const char* profName, const char* profTitle,
 /// @param weight weight to fill
 void fillProf(TProfile* profile, float xValue, float yValue,
               float weight = 1.0);
+
+/// @brief fill a TProfile plot
+/// @param profile plot to fill
+/// @param xValue  xvalue to fill
+/// @param yValue  yvalue to fill
+/// @param zValue  zvalue to fill
+/// @param weight weight to fill
+void fillProf2D(TProfile* profile, float xValue, float yValue, float zValue,
+                float weight = 1.0);
 
 }  // namespace ActsExamples::PlotHelpers

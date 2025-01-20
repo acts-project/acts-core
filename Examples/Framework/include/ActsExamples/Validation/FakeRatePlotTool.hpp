@@ -37,7 +37,7 @@ class FakeRatePlotTool {
     std::map<std::string, PlotHelpers::Binning> varBinning = {
         {"Eta", PlotHelpers::Binning("#eta", 40, -4, 4)},
         {"Phi", PlotHelpers::Binning("#phi", 100, -3.15, 3.15)},
-        {"Pt", PlotHelpers::Binning("pT [GeV/c]", 40, 0, 100)},
+        {"Pt", PlotHelpers::Binning("p_{T} [GeV/c]", 40, 0, 100)},
         {"Num", PlotHelpers::Binning("N", 30, -0.5, 29.5)}};
   };
 
@@ -53,9 +53,10 @@ class FakeRatePlotTool {
                                  ///< scatter plot
     TH2F* nFake_vs_eta;  ///< Number of fake (truth-unmatched) tracks vs eta
                          ///< scatter plot
-    TEfficiency* fakeRate_vs_pT;   ///< Tracking fake rate vs pT
-    TEfficiency* fakeRate_vs_eta;  ///< Tracking fake rate vs eta
-    TEfficiency* fakeRate_vs_phi;  ///< Tracking fake rate vs phi
+    TEfficiency* fakeRate_vs_pT;      ///< Tracking fake rate vs pT
+    TEfficiency* fakeRate_vs_eta;     ///< Tracking fake rate vs eta
+    TEfficiency* fakeRate_vs_phi;     ///< Tracking fake rate vs phi
+    TEfficiency* fakeRate_vs_pT_eta;  ///< 2d tracking fake rate vs pT and eta
   };
 
   /// Constructor

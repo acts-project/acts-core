@@ -34,15 +34,20 @@ void ActsExamples::DuplicationPlotTool::book(
   ACTS_DEBUG("Initialize the histograms for duplication rate plots");
 
   // duplication rate vs pT
-  duplicationPlotCache.duplicationRate_vs_pT =
-      PlotHelpers::bookEff("duplicationRate_vs_pT",
-                           "Duplication rate;pT [GeV/c];Duplication rate", bPt);
+  duplicationPlotCache.duplicationRate_vs_pT = PlotHelpers::bookEff(
+      "duplicationRate_vs_pT",
+      "Duplication rate;p_{T} [GeV/c];Duplication rate", bPt);
   // duplication rate vs eta
   duplicationPlotCache.duplicationRate_vs_eta = PlotHelpers::bookEff(
       "duplicationRate_vs_eta", "Duplication rate;#eta;Duplication rate", bEta);
   // duplication rate vs phi
   duplicationPlotCache.duplicationRate_vs_phi = PlotHelpers::bookEff(
       "duplicationRate_vs_phi", "Duplication rate;#phi;Duplication rate", bPhi);
+
+  // duplication rate vs pT and eta
+  duplicationPlotCache.duplicationRate_vs_pT_eta = PlotHelpers::bookEff(
+      "duplicationRate_vs_pT_eta",
+      "Duplication rate;p_{T} [GeV/c];#eta;Duplication rate", bPt, bEta);
 
   // duplication number vs pT
   duplicationPlotCache.nDuplicated_vs_pT = PlotHelpers::bookProf(
@@ -55,6 +60,11 @@ void ActsExamples::DuplicationPlotTool::book(
   duplicationPlotCache.nDuplicated_vs_phi = PlotHelpers::bookProf(
       "nDuplicated_vs_phi", "Number of duplicated track candidates", bPhi,
       bNum);
+
+  // duplication number vs pT and eta
+  duplicationPlotCache.nDuplicated_vs_pT_eta = PlotHelpers::bookProf2D(
+      "nDuplicated_vs_pT_eta", "Number of duplicated track candidates", bPt,
+      bEta, bNum);
 }
 
 void ActsExamples::DuplicationPlotTool::clear(
@@ -62,9 +72,11 @@ void ActsExamples::DuplicationPlotTool::clear(
   delete duplicationPlotCache.duplicationRate_vs_pT;
   delete duplicationPlotCache.duplicationRate_vs_eta;
   delete duplicationPlotCache.duplicationRate_vs_phi;
+  delete duplicationPlotCache.duplicationRate_vs_pT_eta;
   delete duplicationPlotCache.nDuplicated_vs_pT;
   delete duplicationPlotCache.nDuplicated_vs_eta;
   delete duplicationPlotCache.nDuplicated_vs_phi;
+  delete duplicationPlotCache.nDuplicated_vs_pT_eta;
 }
 
 void ActsExamples::DuplicationPlotTool::write(
@@ -74,9 +86,11 @@ void ActsExamples::DuplicationPlotTool::write(
   duplicationPlotCache.duplicationRate_vs_pT->Write();
   duplicationPlotCache.duplicationRate_vs_eta->Write();
   duplicationPlotCache.duplicationRate_vs_phi->Write();
+  duplicationPlotCache.duplicationRate_vs_pT_eta->Write();
   duplicationPlotCache.nDuplicated_vs_pT->Write();
   duplicationPlotCache.nDuplicated_vs_eta->Write();
   duplicationPlotCache.nDuplicated_vs_phi->Write();
+  duplicationPlotCache.nDuplicated_vs_pT_eta->Write();
 }
 
 void ActsExamples::DuplicationPlotTool::fill(
@@ -93,6 +107,8 @@ void ActsExamples::DuplicationPlotTool::fill(
                        status);
   PlotHelpers::fillEff(duplicationPlotCache.duplicationRate_vs_phi, fit_phi,
                        status);
+  PlotHelpers::fillEff(duplicationPlotCache.duplicationRate_vs_pT_eta, fit_pT,
+                       fit_eta, status);
 }
 
 void ActsExamples::DuplicationPlotTool::fill(
@@ -109,4 +125,6 @@ void ActsExamples::DuplicationPlotTool::fill(
                         nDuplicatedTracks);
   PlotHelpers::fillProf(duplicationPlotCache.nDuplicated_vs_phi, t_phi,
                         nDuplicatedTracks);
+  PlotHelpers::fillProf2D(duplicationPlotCache.nDuplicated_vs_pT_eta, t_pT,
+                          t_eta, nDuplicatedTracks);
 }

@@ -57,13 +57,17 @@ void ActsExamples::FakeRatePlotTool::book(
 
   // fake rate vs pT
   fakeRatePlotCache.fakeRate_vs_pT = PlotHelpers::bookEff(
-      "fakerate_vs_pT", "Tracking fake rate;pT [GeV/c];Fake rate", bPt);
+      "fakerate_vs_pT", "Tracking fake rate;p_{T} [GeV/c];Fake rate", bPt);
   // fake rate vs eta
   fakeRatePlotCache.fakeRate_vs_eta = PlotHelpers::bookEff(
       "fakerate_vs_eta", "Tracking fake rate;#eta;Fake rate", bEta);
   // fake rate vs phi
   fakeRatePlotCache.fakeRate_vs_phi = PlotHelpers::bookEff(
       "fakerate_vs_phi", "Tracking fake rate;#phi;Fake rate", bPhi);
+  // fake rate vs pT and eta
+  fakeRatePlotCache.fakeRate_vs_pT_eta = PlotHelpers::bookEff(
+      "fakerate_vs_pT_eta", "Tracking fake rate;p_{T] [GeV/c];#eta;Fake rate",
+      bPt);
 }
 
 void ActsExamples::FakeRatePlotTool::clear(
@@ -77,6 +81,7 @@ void ActsExamples::FakeRatePlotTool::clear(
   delete fakeRatePlotCache.fakeRate_vs_pT;
   delete fakeRatePlotCache.fakeRate_vs_eta;
   delete fakeRatePlotCache.fakeRate_vs_phi;
+  delete fakeRatePlotCache.fakeRate_vs_pT_eta;
 }
 
 void ActsExamples::FakeRatePlotTool::write(
@@ -91,6 +96,7 @@ void ActsExamples::FakeRatePlotTool::write(
   fakeRatePlotCache.fakeRate_vs_pT->Write();
   fakeRatePlotCache.fakeRate_vs_eta->Write();
   fakeRatePlotCache.fakeRate_vs_phi->Write();
+  fakeRatePlotCache.fakeRate_vs_pT_eta->Write();
 }
 
 void ActsExamples::FakeRatePlotTool::fill(
@@ -104,6 +110,8 @@ void ActsExamples::FakeRatePlotTool::fill(
   PlotHelpers::fillEff(fakeRatePlotCache.fakeRate_vs_pT, fit_pT, status);
   PlotHelpers::fillEff(fakeRatePlotCache.fakeRate_vs_eta, fit_eta, status);
   PlotHelpers::fillEff(fakeRatePlotCache.fakeRate_vs_phi, fit_phi, status);
+  PlotHelpers::fillEff(fakeRatePlotCache.fakeRate_vs_pT_eta, fit_pT, fit_eta,
+                       status);
 }
 
 void ActsExamples::FakeRatePlotTool::fill(

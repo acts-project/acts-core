@@ -40,18 +40,22 @@ class DuplicationPlotTool {
     std::map<std::string, PlotHelpers::Binning> varBinning = {
         {"Eta", PlotHelpers::Binning("#eta", 40, -4, 4)},
         {"Phi", PlotHelpers::Binning("#phi", 100, -3.15, 3.15)},
-        {"Pt", PlotHelpers::Binning("pT [GeV/c]", 40, 0, 100)},
+        {"Pt", PlotHelpers::Binning("p_{T} [GeV/c]", 40, 0, 100)},
         {"Num", PlotHelpers::Binning("N", 30, -0.5, 29.5)}};
   };
 
   /// @brief Nested Cache struct
   struct DuplicationPlotCache {
-    TProfile* nDuplicated_vs_pT;         ///< Number of duplicated tracks vs pT
-    TProfile* nDuplicated_vs_eta;        ///< Number of duplicated tracks vs eta
-    TProfile* nDuplicated_vs_phi;        ///< Number of duplicated tracks vs phi
-    TEfficiency* duplicationRate_vs_pT;  ///< Tracking duplication rate vs pT
+    TProfile* nDuplicated_vs_pT;   ///< Number of duplicated tracks vs pT
+    TProfile* nDuplicated_vs_eta;  ///< Number of duplicated tracks vs eta
+    TProfile* nDuplicated_vs_phi;  ///< Number of duplicated tracks vs phi
+    TProfile2D*
+        nDuplicated_vs_pT_eta;  ///< Number of duplicated tracks vs pT and eta
+    TEfficiency* duplicationRate_vs_pT;   ///< Tracking duplication rate vs pT
     TEfficiency* duplicationRate_vs_eta;  ///< Tracking duplication rate vs eta
     TEfficiency* duplicationRate_vs_phi;  ///< Tracking duplication rate vs phi
+    TEfficiency*
+        duplicationRate_vs_pT_eta;  ///< 2d tracking duplication rate vs pT
   };
 
   /// Constructor

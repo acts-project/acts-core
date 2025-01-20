@@ -31,7 +31,8 @@ void ActsExamples::EffPlotTool::book(
   ACTS_DEBUG("Initialize the histograms for efficiency plots");
   // efficiency vs pT
   effPlotCache.trackEff_vs_pT = PlotHelpers::bookEff(
-      "trackeff_vs_pT", "Tracking efficiency;Truth pT [GeV/c];Efficiency", bPt);
+      "trackeff_vs_pT", "Tracking efficiency;Truth p_{T} [GeV/c];Efficiency",
+      bPt);
   // efficiency vs eta
   effPlotCache.trackEff_vs_eta = PlotHelpers::bookEff(
       "trackeff_vs_eta", "Tracking efficiency;Truth #eta;Efficiency", bEta);
@@ -40,11 +41,16 @@ void ActsExamples::EffPlotTool::book(
       "trackeff_vs_phi", "Tracking efficiency;Truth #phi;Efficiency", bPhi);
   // efficiency vs z0
   effPlotCache.trackEff_vs_z0 = PlotHelpers::bookEff(
-      "trackeff_vs_z0", "Tracking efficiency;Truth z_0 [mm];Efficiency", bZ0);
+      "trackeff_vs_z0", "Tracking efficiency;Truth z_{0} [mm];Efficiency", bZ0);
   // efficiancy vs distance to the closest truth particle
   effPlotCache.trackEff_vs_DeltaR = PlotHelpers::bookEff(
       "trackeff_vs_DeltaR",
       "Tracking efficiency;Closest track #Delta R;Efficiency", bDeltaR);
+  // efficiency vs pT and eta
+  effPlotCache.track2dEff_vs_pT_eta = PlotHelpers::bookEff(
+      "trackeff_vs_pT_eta",
+      "Tracking efficiency;Truth p_{T} [GeV/c];Truth #eta;Efficiency", bPt,
+      bEta);
 }
 
 void ActsExamples::EffPlotTool::clear(EffPlotCache& effPlotCache) const {
@@ -53,6 +59,7 @@ void ActsExamples::EffPlotTool::clear(EffPlotCache& effPlotCache) const {
   delete effPlotCache.trackEff_vs_phi;
   delete effPlotCache.trackEff_vs_z0;
   delete effPlotCache.trackEff_vs_DeltaR;
+  delete effPlotCache.track2dEff_vs_pT_eta;
 }
 
 void ActsExamples::EffPlotTool::write(
@@ -63,6 +70,7 @@ void ActsExamples::EffPlotTool::write(
   effPlotCache.trackEff_vs_phi->Write();
   effPlotCache.trackEff_vs_z0->Write();
   effPlotCache.trackEff_vs_DeltaR->Write();
+  effPlotCache.track2dEff_vs_pT_eta->Write();
 }
 
 void ActsExamples::EffPlotTool::fill(EffPlotTool::EffPlotCache& effPlotCache,
@@ -79,4 +87,5 @@ void ActsExamples::EffPlotTool::fill(EffPlotTool::EffPlotCache& effPlotCache,
   PlotHelpers::fillEff(effPlotCache.trackEff_vs_phi, t_phi, status);
   PlotHelpers::fillEff(effPlotCache.trackEff_vs_z0, t_z0, status);
   PlotHelpers::fillEff(effPlotCache.trackEff_vs_DeltaR, t_deltaR, status);
+  PlotHelpers::fillEff(effPlotCache.track2dEff_vs_pT_eta, t_pT, t_eta, status);
 }

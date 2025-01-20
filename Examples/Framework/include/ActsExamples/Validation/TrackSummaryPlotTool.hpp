@@ -48,6 +48,12 @@ class TrackSummaryPlotTool {
     TProfile* nHoles_vs_pt;       ///< Number of holes vs pt
     TProfile* nOutliers_vs_pt;    ///< Number of outliers vs pt
     TProfile* nSharedHits_vs_pt;  ///< Number of Shared Hits vs pt
+    TProfile2D* nStates_vs_eta_pt;  ///< Number of total states vs eta and pt
+    TProfile2D* nMeasurements_vs_eta_pt;  ///< Number of non-outlier
+                                          ///< measurements vs eta and pt
+    TProfile2D* nHoles_vs_eta_pt;         ///< Number of holes vs eta and pt
+    TProfile2D* nOutliers_vs_eta_pt;      ///< Number of outliers vs eta and pt
+    TProfile2D* nSharedHits_vs_eta_pt;  ///< Number of Shared Hits vs eta and pt
   };
 
   /// Constructor

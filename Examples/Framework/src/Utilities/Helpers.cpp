@@ -101,9 +101,28 @@ TProfile* bookProf(const char* profName, const char* profTitle,
   return prof;
 }
 
+TProfile2D* bookProf2D(const char* profName, const char* profTitle,
+                       const Binning& varXBinning, const Binning& varYBinning,
+                       const Binning& varZBinning) {
+  TProfile2D* prof =
+      new TProfile2D(profName, profTitle, varXBinning.nBins, varXBinning.min,
+                     varXBinning.max, varYBinning.nBins, varYBinning.min,
+                     varYBinning.max, varZBinning.min, varZBinning.max);
+  prof->GetXaxis()->SetTitle(varXBinning.title.c_str());
+  prof->GetYaxis()->SetTitle(varYBinning.title.c_str());
+  prof->GetZaxis()->SetTitle(varZBinning.title.c_str());
+  return prof;
+}
+
 void fillProf(TProfile* profile, float xValue, float yValue, float weight) {
   assert(profile != nullptr);
   profile->Fill(xValue, yValue, weight);
+}
+
+void fillProf2D(TProfile2D* profile, float xValue, float yValue, float zValue,
+                float weight) {
+  assert(profile != nullptr);
+  profile->Fill(xValue, yValue, zValue, weight);
 }
 
 }  // namespace ActsExamples::PlotHelpers
