@@ -22,7 +22,7 @@ env:
   CCACHE_MAXSIZE: 1.25G
   CCACHE_KEY_SUFFIX: r2
   ACTS_LOG_FAILURE_THRESHOLD: WARNING
-  DEPENDENCY_URL: https://acts.web.cern.ch/ACTS/ci/ubuntu-24.04/deps.v5.tar.zst
+  DEPENDENCY_TAG: v7_b7
 
 # NOTE this only builds core unittests to reduce the output size. if we
 #      found a way to have Github actions not fail regularly with this job
@@ -36,7 +36,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: CI/dependencies.sh
+        uses: ./.github/actions/dependencies
+        with:
+          compiler: g++
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache build
         uses: actions/cache@v4
@@ -53,7 +56,6 @@ jobs:
           --preset=github-ci
           -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_CXX_FLAGS="-Werror --coverage -g -gz -g1"
-          -DPython_EXECUTABLE=$(which python3)
           -DACTS_BUILD_ODD=OFF
       - name: Build
         run: cmake --build build
@@ -97,7 +99,10 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Install dependencies
-        run: CI/dependencies.sh
+        uses: ./.github/actions/dependencies
+        with:
+          compiler: g++
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Install dependencies
         run: pip3 install git+https://github.com/paulgessinger/cmakeperf.git@2a409b5

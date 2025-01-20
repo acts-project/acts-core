@@ -1,0 +1,73 @@
+name: 'Dependencies'
+description: 'Install dependencies from lockfile'
+
+inputs:
+  compiler:
+    description: 'Compiler to use'
+    required: false
+    default: ''
+  GITHUB_TOKEN:
+    description: 'Secrets to pass to the action'
+    required: false
+    default: ''
+  spack_version:
+    description: 'Version of Spack to use'
+    required: false
+    default: 'develop-acts'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Prerequisites
+      if: startsWith(runner.os, 'macos')
+      shell: bash
+      run: |
+        brew install ninja ccache
+
+    - name: Restore cache
+      id: cache-restore
+      uses: actions/cache/restore@v4
+      with:
+        path: spack_cache
+        key: spack-r2-${{ inputs.spack_version }}-${{ hashFiles('CI/dependencies/setup_spack.sh') }}
+
+    - name: Extract cached Spack
+      if: steps.cache-restore.outputs.cache-hit == 'true'
+      shell: bash
+      run: |
+        mv spack_cache/spack .
+        mv spack_cache/.spack ~
+
+    - name: Setup Spack from scratch
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        SPACK_VERSION: ${{ inputs.spack_version }}
+      run: |
+        CI/dependencies/setup_spack.sh ${PWD}/spack
+        spack/bin/spack list > /dev/null
+        rm -rf spack/.git
+        mkdir spack_cache
+        cp -r spack spack_cache/
+        cp -r ~/.spack spack_cache/
+
+    - name: Save cache
+      if: steps.cache-restore.outputs.cache-hit != 'true'
+      uses: actions/cache/save@v4
+      with:
+        path: |
+          spack_cache
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
+    - name: Install dependencies
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.GITHUB_TOKEN }}
+      run: |
+        if [ -n "${{ inputs.compiler }}" ]; then
+          echo "With compiler"
+          CI/dependencies/setup.sh -c "${{ inputs.compiler }}"
+        else
+          echo "Without compiler"
+          CI/dependencies/setup.sh
+        fi

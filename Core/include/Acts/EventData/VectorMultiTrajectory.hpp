@@ -500,7 +500,7 @@ class VectorMultiTrajectory final
              Concepts::eigen_bases_have_same_num_rows<val_t, cov_t> &&
              Concepts::eigen_base_is_square<cov_t> &&
              Eigen::PlainObjectBase<val_t>::RowsAtCompileTime <=
-                 static_cast<std::underlying_type_t<BoundIndices>>(eBoundSize))
+                 toUnderlying(eBoundSize))
   {
     constexpr std::size_t measdim = val_t::RowsAtCompileTime;
 

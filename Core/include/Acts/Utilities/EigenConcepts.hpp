@@ -37,16 +37,16 @@ concept eigen_base_is_square = eigen_base_is_fixed_size<T> &&
 template <typename T1, typename T2>
 concept eigen_bases_have_same_num_rows =
     eigen_base_is_fixed_size<T1> && eigen_base_is_fixed_size<T2> &&
-    static_cast<std::size_t>(Eigen::PlainObjectBase<T1>::RowsAtCompileTime) ==
-        static_cast<std::size_t>(Eigen::PlainObjectBase<T2>::RowsAtCompileTime);
+    toUnderlying(Eigen::PlainObjectBase<T1>::RowsAtCompileTime) ==
+        toUnderlying(Eigen::PlainObjectBase<T2>::RowsAtCompileTime);
 
 /// @brief Concept that is true iff T1 and T2 have the same, known at compile
 /// time, number of columns.
 template <typename T1, typename T2>
 concept eigen_bases_have_same_num_cols =
     eigen_base_is_fixed_size<T1> && eigen_base_is_fixed_size<T2> &&
-    static_cast<std::size_t>(Eigen::PlainObjectBase<T1>::ColsAtCompileTime) ==
-        static_cast<std::size_t>(Eigen::PlainObjectBase<T2>::ColsAtCompileTime);
+    toUnderlying(Eigen::PlainObjectBase<T1>::ColsAtCompileTime) ==
+        toUnderlying(Eigen::PlainObjectBase<T2>::ColsAtCompileTime);
 
 /// @brief Concept that is true iff T1 and T2 have the same, known at compile
 /// time, size.

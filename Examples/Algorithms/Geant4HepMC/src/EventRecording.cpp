@@ -81,12 +81,16 @@ ProcessCode EventRecording::execute(const AlgorithmContext& context) const {
         part);
 
     // Begin with the simulation
-    m_runManager->BeamOn(1);
+    // MARK: fpeMaskBegin(FLTINV, 1, #4021)
+    m_runManager->BeamOn(1);  // this is where the actual FPE occurs
 
     // Test if the event was aborted
-    if (Geant4::HepMC3::SteppingAction::instance()->eventAborted()) {
+    if (Geant4::HepMC3::SteppingAction::instance()
+            ->eventAborted()) {  // this is where the FPE is attributed to due
+                                 // to inlining
       continue;
     }
+    // MARK: fpeMaskEnd(FLTINV)
 
     // Set event start time
     HepMC3::GenEvent event = Geant4::HepMC3::EventAction::instance()->event();

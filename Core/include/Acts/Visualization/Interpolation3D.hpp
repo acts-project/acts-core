@@ -59,8 +59,13 @@ trajectory_type spline(const trajectory_type& inputsRaw, std::size_t nPoints,
     for (std::size_t i = 0; i < inputs.size(); ++i) {
       points.col(i) = inputs[i].transpose();
     }
+
+    // MARK: fpeMaskBegin(FLTDIV, 1, #4024)
+    // MARK: fpeMaskBegin(FLTINV, 1, #4024)
     Eigen::Spline<double, 3> spline3D =
         Eigen::SplineFitting<Eigen::Spline<double, 3>>::Interpolate(points, 2);
+    // MARK: fpeMaskEnd(FLTDIV)
+    // MARK: fpeMaskEnd(FLTINV)
 
     double step = 1. / (nPoints - 1);
     for (std::size_t i = 0; i < nPoints; ++i) {
