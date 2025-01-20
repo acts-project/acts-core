@@ -45,7 +45,7 @@ class RootAthenaDumpReader : public IReader {
     // Name of tree
     std::string treename;
     // Name of inputfile
-    std::string inputfile;
+    std::vector<std::string> inputfiles;
     // name of the output measurements
     std::string outputMeasurements = "athena_measurements";
     // name of the output pixel space points
@@ -58,13 +58,18 @@ class RootAthenaDumpReader : public IReader {
     std::string outputClusters = "athena_clusters";
     // name of the output particles
     std::string outputParticles = "athena_particles";
-    // name of the simhit map
+    // name of the measurements -> particles map
     std::string outputMeasurementParticlesMap = "athena_meas_parts_map";
+    // name of the particles -> measurements map
+    std::string outputParticleMeasurementsMap = "athena_parts_meas_map";
     // name of the track parameters (fitted by athena?)
     std::string outputTrackParameters = "athena_track_parameters";
 
     /// Only extract spacepoints
     bool onlySpacepoints = false;
+
+    /// Skip truth data
+    bool noTruth = false;
 
     /// Only extract particles that passed the tracking requirements, for
     /// details see:
@@ -165,6 +170,8 @@ class RootAthenaDumpReader : public IReader {
       this, "output_measurements"};
   WriteDataHandle<IndexMultimap<ActsFatras::Barcode>> m_outputMeasParticleMap{
       this, "output_meas_part_map"};
+  WriteDataHandle<InverseMultimap<ActsFatras::Barcode>> m_outputParticleMeasMap{
+      this, "output_part_meas_map"};
 
   std::unique_ptr<const Acts::Logger> m_logger;
   std::mutex m_read_mutex;
@@ -269,6 +276,9 @@ class RootAthenaDumpReader : public IReader {
   std::vector<std::vector<float>> *SPstripCenterDistance{};
   std::vector<std::vector<float>> *SPtopStripCenterPosition{};
 
+  // Those fields are not used currently
+  // Keep the code though, since it is annoying to write
+  /*
   // Tracks
   Int_t nTRK = 0;
   Int_t TRKindex[maxTRK] = {};                //[nTRK]
@@ -299,5 +309,6 @@ class RootAthenaDumpReader : public IReader {
   std::vector<std::vector<int>> *DTTstTruth_subDetType{};
   std::vector<std::vector<int>> *DTTstTrack_subDetType{};
   std::vector<std::vector<int>> *DTTstCommon_subDetType{};
+  */
 };
 }  // namespace ActsExamples
